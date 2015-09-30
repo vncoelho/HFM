@@ -1,0 +1,7 @@
+*~
+.svn
+.cproject
+.project
+.settings
+*.log
+mainHFMVRP

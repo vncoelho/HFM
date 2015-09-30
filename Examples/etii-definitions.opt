@@ -1,0 +1,25 @@
+%==================================
+% OptFrame example EtII definitions
+%==================================
+
+if system.defined( _etiidefinitions_opt )
+{
+   echo File etii-definitions.opt already included!;
+   error;
+}
+
+_etiidefinitions_opt=true
+
+if operator.logic(not system.defined( _definitions_opt ) )   { system.read ../definitions.opt }
+
+command.exists problem.general bCommandExists
+
+if $bCommandExists
+{
+   error module problem.general already exists!;
+} else
+{
+   command.rename problem.EtII problem.general;
+   default_file=./Examples/EternityII/pieces_set_2/pieces_10x10.txt;
+}
+
