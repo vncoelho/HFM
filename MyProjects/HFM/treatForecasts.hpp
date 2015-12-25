@@ -71,7 +71,6 @@ public:
 			delete scannerFiles[exVar];
 		}
 
-
 	}
 
 	int getForecastsDataSize()
@@ -83,7 +82,6 @@ public:
 	{
 		return forecastings[file].size();
 	}
-
 
 	vector<vector<double> > readQuantilesFromFile(string quantilFile, int fileStepsAhead)
 	{
@@ -134,6 +132,16 @@ public:
 
 	vector<double> getPartsForecastsEndToBegin(int file, int e, int nPoints)
 	{
+		int numberSamples = forecastings[file].size();
+		if ((numberSamples - nPoints - e) < 0)
+		{
+			cout << "ERROR on function getPartsForecastEndToBegin!" << endl;
+			cout << "sizeData:" << numberSamples << endl;
+			cout << "nPoints:" << nPoints << endl;
+			cout << "e:" << e << endl;
+			getchar();
+		}
+
 		vector<double> partsOfForecasts(forecastings[file].end() - nPoints - e, forecastings[file].end() - e);
 
 		return partsOfForecasts;

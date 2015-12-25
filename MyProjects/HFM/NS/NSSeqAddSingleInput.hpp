@@ -47,7 +47,7 @@ public:
 //		if (K > rep.earliestInput)
 //			rep.earliestInput = K;
 
-		int nEXV = rg.rand(pEFP.getNumberExplanatoryVariables());
+		int nEXV = file;
 		int mean = pEFP.getMean(nEXV);
 		int stdDesv = pEFP.getStdDesv(nEXV);
 		double meanWeight = pEFP.getMean(0); //File 0 is the target file
@@ -80,7 +80,7 @@ public:
 
 	void print() const
 	{
-		cout << "MoveNEIGHAddSingleInput( vector:  file " << file << " <=>  k " << K << " )";
+		cout << "MoveNEIGHAddSingleInput( vector:  explatonary variable " << file << " <=>  k " << K << " )";
 		cout << endl;
 	}
 }
@@ -117,7 +117,6 @@ public:
 		for (int lag = 1; lag < maxLag; lag++)
 		{
 			moves.push_back(new MoveNEIGHAddSingleInput(0, lag, false, pEFP, rg));
-
 		}
 
 		if (moves.size() > 0)
@@ -182,8 +181,9 @@ public:
 	{
 
 		int K = rg.rand(maxLag) + 1;
+		int file = rg.rand(pEFP.getNumberExplanatoryVariables());
 
-		return *new MoveNEIGHAddSingleInput(0, K, false, pEFP, rg); // return a random move
+		return *new MoveNEIGHAddSingleInput(file, K, false, pEFP, rg); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)

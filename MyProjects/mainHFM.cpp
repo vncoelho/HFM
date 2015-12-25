@@ -12,6 +12,7 @@
 #include "./HFM/mainForecastingCodes/priceMain.cpp"
 #include "./HFM/mainForecastingCodes/loadMain.cpp"
 #include "./HFM/mainForecastingCodes/microGrid.cpp"
+#include "./HFM/mainForecastingCodes/microGridOnline.cpp"
 #include "./HFM/mainForecastingCodes/selfUseMode.cpp"
 #include "./HFM/mainForecastingCodes/jamesTaylor.cpp"
 #include "./HFM/mainForecastingCodes/rainMain.cpp"
@@ -95,6 +96,12 @@ int main(int argc, char **argv)
 	case 2: //Liu Mode Applied Energy, 2014
 		r = microGridLiuAppliedEnergy(argc, argv);
 		cout << "Program ended successfully in MG Mode" << endl;
+		return r;
+		break;
+
+	case 21: //Liu Mode Applied Energy, 2014
+		r = microGridLiuAppliedEnergyOnline(argc, argv);
+		cout << "Program ended successfully in ONLINE MG Mode" << endl;
 		return r;
 		break;
 

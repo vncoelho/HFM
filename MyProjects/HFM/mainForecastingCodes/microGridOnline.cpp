@@ -14,13 +14,13 @@ using namespace std;
 using namespace optframe;
 using namespace EFP;
 
-int microGridLiuAppliedEnergy(int argc, char **argv)
+int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 {
-	cout << "Welcome to Micro Grid Liu Applied Energy Dataset Calibration Mode..." << endl;
+	cout << "Welcome to Micro Grid Liu Applied Energy Dataset Calibration Mode ONLINE..." << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	seed = 9;
+	//seed = 9;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
@@ -35,8 +35,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 	const char* caminhoOutput = argv[1];
 	int argvTargetTimeSeries = atoi(argv[2]);
 	int argvNumberOfRules = atoi(argv[3]);
-	int argvTimeES = atoi(argv[4]);
-	argvTimeES = 100;
+	int argvNTR = atoi(argv[4]);
 
 	//double argvAlphaACF = atof(argv[4]);
 
@@ -168,7 +167,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 		ProblemParameters problemParam;
 		//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
 		int nVR = 168;
-		int nSA = 1;
+		int nSA = 24;
 		problemParam.setStepsAhead(nSA);
 		int stepsAhead = problemParam.getStepsAhead();
 		//========SET PROBLEM MAXIMUM LAG ===============
@@ -180,105 +179,48 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 		int maxUpperLag = problemParam.getMaxUpperLag();
 		//=================================================
 
-		int maxTrainningRounds = 20;
-		int nTrainningRounds = rg.rand(maxTrainningRounds) + 1;
-		nTrainningRounds = 672;
+		int nTrainningRounds = argvNTR;
 		int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
+		int timeES = 10; // online training time
 
-		int beginTrainingSet = 672;
-
-		cout << "BeginTrainninningSet: " << beginTrainingSet;
-		cout << "\t #SamplesTrainningSet: " << nTotalForecastingsTrainningSet << endl;
-		cout << "#sizeTrainingSet: " << rF.getForecastsSize(0) << endl;
-		cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
-		cout << "#StepsAhead: " << stepsAhead << endl << endl;
-
-		//else
-		//beginTrainingSet = nTotalForecastingsValidationSet + n * (nTotalForecastingsTrainningSet / 10);
-
-		/*
-		 while (beginTrainingSet + nTotalForecastingsTrainningSet > rF.getForecastsDataSize())
-		 {
-		 beginTrainingSet = 744;
-		 nTrainningRounds = rg.rand(maxTrainningRounds) + 1;
-		 nTotalForecastingsTrainningSet = maxNotUsedForTest + nTrainningRounds * stepsAhead;
-		 }*/
-
-		vector<vector<double> > trainningSet; // trainningSetVector
-		trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet, nTotalForecastingsTrainningSet));
-
-		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
-
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
-
-		int timeES = argvTimeES;
-		int timeVND = 0;
-		int timeILS = 0;
-		int timeGRASP = 0;
-		int nIterGRASP = 1000;
-		int optMethod = 0;
-		if (optMethod == 0)
-			sol = forecastObject.run(timeES, timeVND, timeILS);
-		if (optMethod == 1)
-			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
-		if (optMethod == 2)
-			sol = forecastObject.runGRASP(timeGRASP, nIterGRASP); // GRASP
-
-		vector<double> foIndicatorCalibration;
-		int nValidationSamples = maxLag + nVR * stepsAhead;
-//		vector<vector<double> > validationSet; //validation set for calibration
-//		validationSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet + stepsAhead, nValidationSamples));
-//		vector<double> foIndicatorsWeeks;
-//		foIndicatorsWeeks = forecastObject.returnErrors(sol, validationSet);
-//		foIndicatorCalibration.push_back(foIndicatorsWeeks[MAPE_INDEX]);
-//		foIndicatorCalibration.push_back(foIndicatorsWeeks[RMSE_INDEX]);
-
-		cout << "maxLag:" << maxLag << endl;
-		cout << "nValidationSamples:" << nValidationSamples << endl;
-		//int beginValidationSet = 0;
-		for (int w = 3; w >= 0; w--)
+		vector<double> foIndicators;
+		for (int beginTrainingSet = 168; beginTrainingSet >= stepsAhead; beginTrainingSet -= stepsAhead)
 		{
-			vector<vector<double> > validationSet; //validation set for calibration
-			validationSet.push_back(rF.getPartsForecastsEndToBegin(0, w * 168, nValidationSamples));
-			vector<double> foIndicatorsWeeks;
-			foIndicatorsWeeks = forecastObject.returnErrors(sol, validationSet);
-			foIndicatorCalibration.push_back(foIndicatorsWeeks[MAPE_INDEX]);
-			//foIndicatorCalibration.push_back(foIndicatorsWeeks[RMSE_INDEX]);
-		}
-		int finalNRules = sol->first.getR().singleIndex.size();
-//		cout<<"nRules:"<<finalNRules<<"/"<<contructiveNumberOfRules<<endl;
-//		getchar();
-		double intervalOfBeginTrainningSet = double(beginTrainingSet) / double(rF.getForecastsDataSize());
-		foIndicatorCalibration.push_back(sol->second.evaluation());
-		foIndicatorCalibration.push_back(construtive);
-		foIndicatorCalibration.push_back(alphaACF);
-		foIndicatorCalibration.push_back(contructiveNumberOfRules);
-		foIndicatorCalibration.push_back(finalNRules);
-		foIndicatorCalibration.push_back(mu);
-		foIndicatorCalibration.push_back(lambda);
-		foIndicatorCalibration.push_back(evalAprox);
-		foIndicatorCalibration.push_back(timeES);
-		foIndicatorCalibration.push_back(evalFOMinimizer);
-		foIndicatorCalibration.push_back(nTrainningRounds);
-		foIndicatorCalibration.push_back(beginTrainingSet);
-		foIndicatorCalibration.push_back(intervalOfBeginTrainningSet);
-		foIndicatorCalibration.push_back(nTotalForecastingsTrainningSet);
-//		foIndicatorCalibration.push_back(initialDesv);
-//		foIndicatorCalibration.push_back(mutationDesv);
-		foIndicatorCalibration.push_back(timeVND);
-		foIndicatorCalibration.push_back(timeILS);
-		foIndicatorCalibration.push_back(timeGRASP);
-		foIndicatorCalibration.push_back(optMethod);
-		foIndicatorCalibration.push_back(argvTargetTimeSeries);
-		foIndicatorCalibration.push_back(nIterGRASP);
-		foIndicatorCalibration.push_back(seed);
-		//getchar();
-		//cout << foIndicatorCalibration << endl;
-		vfoIndicatorCalibration.push_back(foIndicatorCalibration);
-		vSolutionsBatches.push_back(sol->first);
+			cout << "BeginTrainninningSet: " << beginTrainingSet;
+			cout << "\t #SamplesTrainningSet: " << nTotalForecastingsTrainningSet << endl;
+			cout << "#sizeTrainingSet: " << rF.getForecastsSize(0) << endl;
+			cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
+			cout << "#StepsAhead: " << stepsAhead << endl << endl;
 
+			vector<vector<double> > trainningSet; // trainningSetVector
+			trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet, nTotalForecastingsTrainningSet));
+			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
+
+			pair<Solution<RepEFP>&, Evaluation&>* sol;
+			sol = forecastObject.run(timeES, 0, 0);
+
+			vector<double> foIndicatorCalibration;
+			vector<vector<double> > validationSet;
+			validationSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet - stepsAhead, maxLag + stepsAhead));
+			vector<double> errors = forecastObject.returnErrors(sol, validationSet);
+			foIndicators.push_back(errors[MAPE_INDEX]);
+		}
+
+		foIndicators.push_back(argvNTR);
+		foIndicators.push_back(argvTargetTimeSeries);
+		foIndicators.push_back(seed);
+		vfoIndicatorCalibration.push_back(foIndicators);
 	}
 
+
+	double averageError = 0;
+	for (int t = 0; t < (vfoIndicatorCalibration[0].size() - 1); t++)
+	{
+		averageError += vfoIndicatorCalibration[0][t];
+	}
+
+	averageError /= (vfoIndicatorCalibration[0].size() - 1);
+	vfoIndicatorCalibration[0].push_back(averageError);
 	// =================== PRINTING RESULTS ========================
 	for (int n = 0; n < nBatches; n++)
 	{
@@ -291,7 +233,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 	// =======================================================
 
 	// =================== PRINTING RESULTS ON FILE ========================
-	string calibrationFile = "./microGridCalibration";
+	string calibrationFile = "./microGridCalibrationOnline";
 
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 	for (int n = 0; n < nBatches; n++)

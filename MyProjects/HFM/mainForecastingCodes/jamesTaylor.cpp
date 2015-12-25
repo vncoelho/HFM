@@ -18,68 +18,75 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 	cout << "Welcome to James Taylor European Dataset Analysis" << endl;
 	RandGenMersenneTwister rg;
-	//long
+	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	seed = 1;
+	//seed = 9;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
 
-	if (argc != 10)
+	if (argc != 5)
 	{
 		cout << "Parametros incorretos!" << endl;
-		cout << "Os parametros esperados sao: nome nomeValidationSet saida parameters options precision" << endl;
+		cout << "Os parametros esperados sao: nomeOutput targetTS construtiveNRulesACF timeES" << endl;
 		exit(1);
 	}
 
-	const char* caminho = argv[1];
-	const char* caminhoValidation = argv[2];
-	const char* caminhoOutput = argv[3];
-	const char* caminhoParameters = argv[4];
-	int instN = atoi(argv[5]);
-	int stepsAhead = atoi(argv[6]);
-	int mu = atoi(argv[9]);
+	const char* caminhoOutput = argv[1];
+	int argvTargetTimeSeries = atoi(argv[2]);
+	int argvNumberOfRules = atoi(argv[3]);
+	int argvTimeES = atoi(argv[4]);
 
-	string nome = caminho;
-	string nomeValidationSet = caminhoValidation;
+	//double argvAlphaACF = atof(argv[4]);
+
+	//
+	//	const char* caminho = argv[1];
+	//	const char* caminhoValidation = argv[2];
+	//	const char* caminhoOutput = argv[3];
+	//	const char* caminhoParameters = argv[4];
+	//	int instN = atoi(argv[5]);
+	//	int stepsAhead = atoi(argv[6]);
+	//	int mu = atoi(argv[7]);
+
 	string nomeOutput = caminhoOutput;
-	string parametersFile = caminhoParameters;
 
 	//===================================
 	cout << "Parametros:" << endl;
-	cout << "nome=" << nome << endl;
-	cout << "nomeValidationSet=" << nomeValidationSet << endl;
 	cout << "nomeOutput=" << nomeOutput << endl;
-	cout << "nomeParameters=" << parametersFile << endl;
-	cout << "instN=" << instN << endl;
-	cout << "stepsAhead=" << stepsAhead << endl;
-	cout << "mu=" << mu << endl;
-	//======================================
+	cout << "argvTargetTimeSeries=" << argvTargetTimeSeries << endl;
+	cout << "argvNumberOfRules=" << argvNumberOfRules << endl;
+	//cout << "argvAlphaACF=" << argvAlphaACF << endl;
+	//	getchar();
+	//	cout << "instN=" << instN << endl;
+	//	cout << "stepsAhead=" << stepsAhead << endl;
+	//	cout << "mu=" << mu << endl;
+	//===================================
 
-	vector<string> vParametersFiles;
-	vParametersFiles.push_back("./MyProjects/ConfigParameters/JTEuropean/1Column_124Points");
-	vParametersFiles.push_back("./MyProjects/ConfigParameters/JTEuropean/1Column_7Points");
-	vParametersFiles.push_back("./MyProjects/ConfigParameters/JTEuropean/1Column_2Points");
-	vParametersFiles.push_back("./MyProjects/ConfigParameters/JTEuropean/1Column_BasedOnAutoCor");
-	vParametersFiles.push_back("./MyProjects/ConfigParameters/JTEuropean/1Column_BasedOnAutoCor2");
-
-	//parametersFile = "./MyProjects/configParametersBestPrice3ColunaseForward";
+	//CONFIG FILES FOR CONSTRUTIVE 0 AND 1
 
 	vector<string> explanatoryVariables;
 
-	string fileJamesTaylorTrainning = "./MyProjects/EFP/Instance/EDS/Hourly/SpainTrainningDemands";
-	string fileJamesTaylorValidation = "./MyProjects/EFP/Instance/EDS/Validation/Hourly/SpainValidationDemands";
+	string fileJamesTaylorTrainning = "./MyProjects/HFM/Instance/EDS/Hourly/SpainTrainningDemands";
+	string fileJamesTaylorValidation = "./MyProjects/HFM/Instance/EDS/Validation/Hourly/SpainValidationDemands";
 	//explanatoryVariables.push_back(fileJamesTaylorTrainning);
 	//explanatoryVariables.push_back(fileJamesTaylorValidation);
 
-	string fileJamesTaylorTrainningSweden = "./MyProjects/EFP/Instance/EDS/Hourly/SwedenTrainningDemands";
-	string fileJamesTaylorValidationSweden = "./MyProjects/EFP/Instance/EDS/Validation/Hourly/SwedenValidationDemands";
+	string fileJamesTaylorTrainningSweden = "./MyProjects/HFM/Instance/EDS/Hourly/SwedenTrainningDemands";
+	string fileJamesTaylorValidationSweden = "./MyProjects/HFM/Instance/EDS/Validation/Hourly/SwedenValidationDemands";
 
-	string fileJamesTaylorHHBelgium = "./MyProjects/EFP/Instance/EDS/HalfHourly/BelgiumTrainningDemands";
-	string fileJamesTaylorHHBelgiumV = "./MyProjects/EFP/Instance/EDS/Validation/HalfHourly/BelgiumValidationDemands";
+	string fileJamesTaylorHHBelgium = "./MyProjects/HFM/Instance/EDS/HalfHourly/BelgiumTrainningDemands";
+	string fileJamesTaylorHHBelgiumV = "./MyProjects/HFM/Instance/EDS/Validation/HalfHourly/BelgiumValidationDemands";
 
-	explanatoryVariables.push_back(fileJamesTaylorTrainning);
-	explanatoryVariables.push_back(fileJamesTaylorValidation);
+	string fileJamesTaylorHHPortugal = "./MyProjects/HFM/Instance/EDS/HalfHourly/PortugalTrainningDemands";
+	string fileJamesTaylorHHPortugalV = "./MyProjects/HFM/Instance/EDS/Validation/HalfHourly/PortugalValidationDemands";
+
+
+	string fileEirGrid = "./MyProjects/HFM/Instance/EirGrid/trainingSetEirGrid";
+	string fileEirGridV = "./MyProjects/HFM/Instance/EirGrid/validationSetEirGrid";
+
+
+	explanatoryVariables.push_back(fileJamesTaylorHHPortugal);
+	explanatoryVariables.push_back(fileJamesTaylorHHPortugalV);
 
 	treatForecasts rF(explanatoryVariables);
 
@@ -97,20 +104,14 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 	 validationSet.push_back(rF.getPartsForecastsEndToBegin(2, beginValidationSet, nTotalForecastingsValidationSet + stepsAhead));
 	 */
 
-	int maxPrecision = 20;
-	int maxTrainningRounds = 1000;
-
+	int mu = 100;
 	int lambda = mu * 6;
 	double initialDesv;
 	double mutationDesv;
 
-	int maxMu = 100;
-	int maxInitialDesv = 10;
-	int maxMutationDesv = 30;
-
 	int nBatches = 1;
 
-	int timeES = 10;
+	int timeES = 180;
 	int timeVND = 0;
 	int timeILS = 0;
 	int timeGRASP = 0;
@@ -121,75 +122,50 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 	for (int n = 0; n < nBatches; n++)
 	{
-		int randomPrecision = rg.rand(maxPrecision) + 10;
-		int randomParametersFiles = rg.rand(vParametersFiles.size());
-		int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
-		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
-		int construtive = rg.rand(2);
-		initialDesv = rg.rand(maxInitialDesv) + 1;
-		mutationDesv = rg.rand(maxMutationDesv) + 1;
-		mu = rg.rand(maxMu) + 1;
-		lambda = mu * 6;
-		double alphaACF = rg.rand01(); //limit ACF for construtive ACF
-		int alphaSign = rg.rand(2);
-		if (alphaSign == 0)
-			alphaACF = alphaACF * -1;
-
-		// ============ FORCES ======================
-		mu = 100;
-		lambda = mu * 6;
-		initialDesv = 10;
-		mutationDesv = 20;
-		randomPrecision = 100;
-		randomParametersFiles = 1;
-		evalFOMinimizer = MAPE_INDEX;
-		evalAprox = 5;
-		construtive = 2;
-		//alphaACF = 0.2;
-		cout<<"randomPrecision = "<<randomPrecision<<endl;
+		int mu = 100;
+		int lambda = mu * 6;
+		int evalFOMinimizer = MAPE_INDEX;
+		int contructiveNumberOfRules = 500;
+		int evalAprox = 5;
+		double alphaACF = 1;
+		int construtive = 2;
 		// ============ END FORCES ======================
 
 		// ============= METHOD PARAMETERS=================
 		methodParameters methodParam;
+		//seting up Continous ES params
+		methodParam.setESInitialDesv(10);
+		methodParam.setESMutationDesv(20);
+		methodParam.setESMaxG(100000);
+
 		//seting up ES params
 		methodParam.setESMU(mu);
 		methodParam.setESLambda(lambda);
-		methodParam.setESInitialDesv(initialDesv);
-		methodParam.setESMutationDesv(mutationDesv);
-		methodParam.setESMaxG(100000);
-		//seting up Construtive params
+
+		//seting up ACF construtive params
 		methodParam.setConstrutiveMethod(construtive);
-		methodParam.setConstrutivePrecision(randomPrecision);
+		methodParam.setConstrutivePrecision(contructiveNumberOfRules);
 		vector<double> vAlphaACFlimits;
 		vAlphaACFlimits.push_back(alphaACF);
 		methodParam.setConstrutiveLimitAlphaACF(vAlphaACFlimits);
+
 		//seting up Eval params
 		methodParam.setEvalAprox(evalAprox);
 		methodParam.setEvalFOMinimizer(evalFOMinimizer);
 		// ==========================================
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
-		stepsAhead = problemParam.getStepsAhead();
-		// =========================================== CONSTRUTIVE 0 AND 1
-		//========ADAPTATION FOR CONSTRUTIVE 2 ===============
-		if (construtive == 2) //ACF construtive
-			problemParam.setMaxLag(672);
+		ProblemParameters problemParam;
+		//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+		int nSA = 24;
+		problemParam.setStepsAhead(nSA);
+		int stepsAhead = problemParam.getStepsAhead();
+		//========SET PROBLEM MAXIMUM LAG ===============
+		problemParam.setMaxLag(672);
+		int maxLag = problemParam.getMaxLag();
 
-		int maxNotUsedForTest = problemParam.getMaxLag();
-
-		cout << "maxNotUsedForTest: " << maxNotUsedForTest << endl;
-
-		//getchar();
-		//int randomObjFunc = rg.rand(2);
-		//cout<<"randomObjFunc = "<<randomObjFunc<<endl;
-		//problemParam.setFunction(randomObjFunc);
-
-		//validationBlindForecastings.clear();
-
-		int nTrainningRounds = rg.rand(maxTrainningRounds) + 1;
-		nTrainningRounds = 100;
-		int nTotalForecastingsTrainningSet = maxNotUsedForTest + nTrainningRounds * stepsAhead;
+		int nTrainningRounds = 100;
+		int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
 		cout << "nTrainningRounds: " << nTrainningRounds << endl;
 		cout << "nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
 
@@ -200,7 +176,6 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
 		pair<Solution<RepEFP>&, Evaluation&>* sol;
-
 
 //		cout<<"Teste Linear Regression"<<endl;
 //		sol = forecastObject.runOLR();
@@ -215,7 +190,6 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
 
 		vector<double> validationNotUsed;
-		int maxLag = problemParam.getMaxLag();
 		validationNotUsed = rF.getLastForecasts(0, maxLag);
 		vector<double> validationSetPure;
 		validationSetPure = rF.getLastForecasts(1, rF.getForecastsSize(1));
@@ -227,10 +201,13 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 		double intervalOfBeginTrainningSet = double(beginTrainingSet) / double(rF.getForecastsDataSize());
 
+		vector<double> vForecasts = forecastObject.returnForecasts(sol, validationSet);
+		cout<<vForecasts<<endl;
+		cout<<vForecasts.size()<<endl;
+
+
 		vector<double> foIndicatorCalibration;
 		foIndicatorCalibration = forecastObject.returnErrors(sol, validationSet);
-		foIndicatorCalibration.push_back(randomPrecision);
-		foIndicatorCalibration.push_back(randomParametersFiles);
 		foIndicatorCalibration.push_back(nTrainningRounds);
 		foIndicatorCalibration.push_back(beginTrainingSet);
 		foIndicatorCalibration.push_back(intervalOfBeginTrainningSet);

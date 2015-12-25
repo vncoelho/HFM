@@ -132,7 +132,7 @@ public:
 //		vNSeq.push_back(nsAddMeanM2);
 //		vNSeq.push_back(nsAddMeanM5);
 //		vNSeq.push_back(nsAddMeanBigM);
-//		vNSeq.push_back(nsVAlpha);
+		vNSeq.push_back(nsVAlpha);
 		vNSeq.push_back(nsModifyFuzzyRules);
 
 		//TODO check why ES goes more generations some time when we do not have improvements.
