@@ -20,6 +20,7 @@
 #include "./HFM/mainForecastingCodes/AETwoVariables.cpp"
 #include "./HFM/mainForecastingCodes/smartStorage.cpp"
 #include "./HFM/mainForecastingCodes/HFModel.cpp"
+#include "./HFM/mainForecastingCodes/CIF_WCCI.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 	type = 4; // rain forecast
 	type = 69; // mokoko forecast
 
-	type = 2; // colocar o numero desejado
+	type = 9999; // colocar o numero desejado
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
@@ -134,6 +135,13 @@ int main(int argc, char **argv)
 		cout << "Program ended successfully in Smart Storage" << endl;
 		return r;
 		break;
+
+	case 9999: //James Taylor 2007
+		r = CIFWCCICalibration(argc, argv);
+		cout << "Program ended successfully in CIF calibration WCCI Conference!" << endl;
+		return r;
+		break;
+
 
 	default:
 		int r = HFModel(argc, argv);

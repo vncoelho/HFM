@@ -84,7 +84,6 @@ public:
 		int cMethod = methodParam.getConstrutiveMethod();
 		int cPre = methodParam.getConstrutivePrecision();
 
-
 		if (cMethod == 0)
 			c = new ConstructiveRandom(*p, problemParam, rg, cPre);
 		if (cMethod == 2)
@@ -214,7 +213,6 @@ public:
 
 	pair<Solution<RepEFP>&, Evaluation&>* runDiscreteES(int timeES)
 	{
-
 		pair<Solution<RepEFP>&, Evaluation&>* finalSol;
 		return finalSol;
 	}
@@ -247,19 +245,44 @@ public:
 
 	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-		vector<double> foIndicator(NMETRICS + 1, 0); //+1 is for the PinballError TODO
 
-		foIndicator = eval->returnForecastingsFO(sol->first.getR(), vForecastingsValidation, true, false);
+		//OLD CALCULUSS -- TODO CHECK IF THE NEW IS RIGHT
+		//vector<double> foIndicator(NMETRICS + 1, 0); //+1 is for the PinballError TODO
+//		vector<double> foIndicator(NMETRICS, 0); //+1 is for the PinballError TODO
+//		foIndicator = eval->returnForecastingsFO(sol->first.getR(), vForecastingsValidation, true, false);
+//		cout << "insideForecastClass" << endl;
+//		cout << foIndicator << endl;
+//		getchar();
 
-		return foIndicator;
+		//TODO CHECK IF THE NEW IS RIGHT
+		vector<double> foIndicatorNew(NMETRICS, 0);
+		vector<double> estimatedValues = eval->returnTrainingSetForecasts(sol->first.getR(), vForecastingsValidation);
+
+		int maxLag = problemParam.getMaxLag();
+		vector<double> validationSetValues;
+		for (int i = (vForecastingsValidation[0].size() - problemParam.getStepsAhead()); i < vForecastingsValidation[0].size(); i++)
+			validationSetValues.push_back(vForecastingsValidation[0][i]);
+
+		foIndicatorNew = eval->getAccuracy(validationSetValues, estimatedValues, true);
+		cout << "insideForecastClassNew" << endl;
+		cout << foIndicatorNew << endl;
+
+		return foIndicatorNew;
 	}
 
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-		vector<double> forecasts = eval->returnForecastingsFO(sol->first.getR(), vForecastingsValidation, true, true);
+		vector<double> estimatedValues = eval->returnTrainingSetForecasts(sol->first.getR(), vForecastingsValidation);
 
-		return forecasts;
+		return estimatedValues;
 	}
+
+//	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
+//	{
+//		vector<double> forecasts = eval->returnForecastingsFO(sol->first.getR(), vForecastingsValidation, true, true);
+//
+//		return forecasts;
+//	}
 
 	/*
 	 vector<double> getFoIndicator(vector<double> vRealValues, vector<double> vForecastings)

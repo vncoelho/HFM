@@ -3,5 +3,7 @@
 .cproject
 .project
 .settings
+WCCI_CFI_Calibration
+microGridCalibrationOnline
 *.log
 mainHFMVRP

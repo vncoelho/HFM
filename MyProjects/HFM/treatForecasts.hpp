@@ -18,6 +18,11 @@ private:
 
 public:
 
+	treatForecasts(vector<vector<double> > _forecastings)
+	{
+		forecastings = _forecastings;
+	}
+
 	treatForecasts(vector<string> explanatoryVariables)
 	{
 		vector<Scanner*> scannerFiles;
@@ -135,9 +140,9 @@ public:
 		int numberSamples = forecastings[file].size();
 		if ((numberSamples - nPoints - e) < 0)
 		{
-			cout << "ERROR on function getPartsForecastEndToBegin!" << endl;
+			cout << "TreatingForecasting ERROR! function getPartsForecastEndToBegin!" << endl;
 			cout << "sizeData:" << numberSamples << endl;
-			cout << "nPoints:" << nPoints << endl;
+			cout << "required Points:" << nPoints << endl;
 			cout << "e:" << e << endl;
 			getchar();
 		}

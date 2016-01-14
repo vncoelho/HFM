@@ -584,6 +584,325 @@ public:
 		return foIndicator;
 	}
 
+	vector<double> returnForecastingsFO(const RepEFP& rep, const vector<vector<double> >& vForecastings, bool validationMode, bool returnForecasts)
+	{
+
+		//cout<<"number of rules"<<rep.singleIndex.size()<<endl;
+		//cout << vForecastings << endl;
+		//Fo vector with different metrics calculations
+		vector<double> foIndicator(NMETRICS + 1, 0);
+		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
+
+		/*vector<vector<double> > foIndicatorStepsAhead(NMETRICS + 1);
+		 for (int i = 0; i < foIndicatorStepsAhead.size(); i++)
+		 foIndicatorStepsAhead[i].resize(stepsAhead);*/
+
+		//cout<<"availableForecasting = "<<availableForecasting<<endl;
+		int sizeSP = rep.singleIndex.size();
+		int sizeMP = rep.averageIndex.size();
+		int sizeDP = rep.derivativeIndex.size();
+
+		int nForTargetFile = vForecastings[0].size();
+		int maxLag = problemParam.getMaxLag();
+		int nSamples = nForTargetFile - maxLag;
+
+		/*
+		 cout<<earliestInput<<endl;
+		 cout << rep.singleIndex << endl;
+		 cout << rep.singleFuzzyRS << endl;
+		 cout << rep.averageIndex << endl;
+		 cout << rep.averageFuzzyRS << endl;
+		 cout << rep.derivativeIndex << endl;
+		 cout << rep.derivativeFuzzyRS << endl;
+		 //getchar();*/
+
+		vector<double> allForecasts;
+		vector<double> allTrue;
+		for (int i = maxLag; i < nForTargetFile; i += stepsAhead) // main loop that varries all the time series
+		{
+			vector<double> predicteds;
+
+			for (int pa = 0; ((pa < stepsAhead) && (pa + i < nForTargetFile)); pa++) //auxiliar loop for steps ahead
+			{
+				//vector<double> fuzzyWeights;
+				//forecasting estimation
+				double estimation = 0;
+				double greaterAccepeted = 0;
+				double lowerAccepted = 0;
+
+				for (int nSP = 0; nSP < sizeSP; nSP++)
+				{
+					int file = rep.singleIndex[nSP].first;
+					int K = rep.singleIndex[nSP].second;
+
+					double singleValue = getKValue(K, file, i, pa, vForecastings, predicteds);
+
+					double ruleGreater = rep.singleFuzzyRS[nSP][GREATER];
+					double greaterWeight = rep.singleFuzzyRS[nSP][GREATER_WEIGHT];
+					double ruleLower = rep.singleFuzzyRS[nSP][LOWER];
+					double lowerWeight = rep.singleFuzzyRS[nSP][LOWER_WEIGHT];
+					double ruleEpsilon = rep.singleFuzzyRS[nSP][EPSILON];
+					FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
+
+					defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, greaterAccepeted, lowerAccepted);
+
+					//fuzzyWeights.push_back(value);
+				}
+
+				for (int nMP = 0; nMP < sizeMP; nMP++)
+				{
+					vector<pair<int, int> > meansK = rep.averageIndex[nMP];
+					int nAveragePoints = meansK.size();
+
+					double mean = 0;
+					for (int mK = 0; mK < nAveragePoints; mK++)
+					{
+						int file = meansK[mK].first;
+						int K = meansK[mK].second;
+
+						mean += getKValue(K, file, i, pa, vForecastings, predicteds);
+					}
+
+					mean = mean / nAveragePoints;
+
+					double ruleGreater = rep.averageFuzzyRS[nMP][GREATER];
+					double greaterWeight = rep.averageFuzzyRS[nMP][GREATER_WEIGHT];
+					double ruleLower = rep.averageFuzzyRS[nMP][LOWER];
+					double lowerWeight = rep.averageFuzzyRS[nMP][LOWER_WEIGHT];
+					double ruleEpsilon = rep.averageFuzzyRS[nMP][EPSILON];
+					FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
+
+					defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, greaterAccepeted, lowerAccepted);
+
+					//fuzzyWeights.push_back(mean);
+				}
+
+				for (int nDP = 0; nDP < sizeDP; nDP++)
+				{
+					vector<pair<int, int> > derivateK = rep.derivativeIndex[nDP];
+
+					double d = 0;
+					for (int dK = 0; dK < derivateK.size(); dK++)
+					{
+						int file = derivateK[dK].first;
+						int K = derivateK[dK].second;
+
+						double value = getKValue(K, file, i, pa, vForecastings, predicteds);
+
+						if (dK == 0)
+							d += value;
+						else
+							d -= value;
+					}
+
+					//fuzzyWeights.push_back(d);
+
+					double ruleGreater = rep.derivativeFuzzyRS[nDP][GREATER];
+					double greaterWeight = rep.derivativeFuzzyRS[nDP][GREATER_WEIGHT];
+					double ruleLower = rep.derivativeFuzzyRS[nDP][LOWER];
+					double lowerWeight = rep.derivativeFuzzyRS[nDP][LOWER_WEIGHT];
+					double ruleEpsilon = rep.derivativeFuzzyRS[nDP][EPSILON];
+					FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.derivativeFuzzyRS[nDP][PERTINENCEFUNC]);
+
+					defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, greaterAccepeted, lowerAccepted);
+				}
+
+				//cout << "EstimationAntes:" << estimation << endl;
+				double accepted = greaterAccepeted + lowerAccepted;
+				if (accepted > 0)
+					estimation /= accepted;
+
+				if (aprox != 0)
+				{
+					double alpha = rep.alpha;
+					vector<double> vAlpha = rep.vAlpha;
+					vector<double> vIndexAlphas = rep.vIndexAlphas;
+					vector<int> vIndex = rep.vIndex;
+
+					approximationsEnayatifar(aprox, alpha, vAlpha, vIndexAlphas, vIndex, estimation, i, pa, vForecastings, predicteds, maxLag);
+				}
+
+//				Remove this for other forecast problem -- rain forecast
+//				if (estimation < 0)
+//					estimation = 0;
+
+				double forecastingTarget = vForecastings[targetFile][i + pa];
+				//cout << "forecastingTarget:" << forecastingTarget << endl;
+				if (forecastingTarget <= 0.001)
+					forecastingTarget = 0.001;
+				predicteds.push_back(estimation);
+
+				if (returnForecasts == true)
+				{
+					allForecasts.push_back(estimation);
+					allTrue.push_back(forecastingTarget);
+				}
+
+				//MAPE CALCULUSS
+				if (evalFO == MAPE_INDEX || validationMode == true)
+				{
+
+					foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTarget));
+					//teste MAPE invertido
+//					if (validationMode)
+//					{
+//						foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTarget));
+//					}
+//					else
+//					{
+//						//foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(183 - forecastingTarget));
+//						double a = 0;
+//						a += (abs(estimation - forecastingTarget) / abs(forecastingTarget));
+//						//a += (abs(estimation - forecastingTarget) / abs(183 - forecastingTarget));
+//						foIndicator[MAPE_INDEX] += a;
+//					}
+
+					//maxRainLE 183
+					//cout<<estimation<<endl;
+					//cout<<forecastingTarget<<endl;
+					//getchar();
+				}
+
+				if (evalFO == SMAPE_INDEX || validationMode == true)
+				{
+					foIndicator[SMAPE_INDEX] += (abs(estimation - forecastingTarget) / (abs(forecastingTarget) + abs(estimation)) / 2);
+				}
+
+				// ===================  MAPE FOR EACH STEP AHEAD ========================
+				//foIndicatorStepsAhead[MAPE_INDEX][pa] += (abs(estimation - forecastingTarget) / abs(forecastingTarget));
+				// =================== FINISH MAPE FOR EACH STEP AHEAD ========================
+
+				//PinballFunction
+				if (evalFO == PINBALL_INDEX || validationMode == true)
+				{
+					double quantilError = 0.5;
+					double pinballFunctionQuantils = 0;
+					for (int a = 1; a < 100; a++)
+					{
+						double quantilFactor = (50 - a) / 100.0;
+
+						double qa = estimation - estimation * quantilError * quantilFactor;
+
+						if (forecastingTarget < qa)
+							pinballFunctionQuantils += (1 - (a / 100.0)) * (qa - forecastingTarget);
+
+						if (forecastingTarget >= qa)
+							pinballFunctionQuantils += (a / 100.0) * (forecastingTarget - qa);
+					}
+					pinballFunctionQuantils /= 99;
+					foIndicator[PINBALL_INDEX] += pinballFunctionQuantils;
+				}
+				/*
+				 int vQ = 0;
+				 for (double quantilError = 0; quantilError <= 1; quantilError = quantilError + 0.05)
+				 {
+				 double pinballFunctionQuantils = 0;
+				 for (int a = 1; a < 100; a++)
+				 {
+				 double quantilFactor = (50 - a) / 100.0;
+
+				 double qa = estimation - estimation * quantilError * quantilFactor;
+
+				 if (forecastingTarget < qa)
+				 pinballFunctionQuantils += (1 - (a / 100.0)) * (qa - forecastingTarget);
+
+				 if (forecastingTarget >= qa)
+				 pinballFunctionQuantils += (a / 100.0) * (forecastingTarget - qa);
+				 }
+				 pinballFunctionQuantils /= 99;
+				 vPinballFunctions[vQ].first += pinballFunctionQuantils;
+				 vPinballFunctions[vQ].second = quantilError;
+				 vQ++;
+				 }*/
+
+				//MSE CALCULUSS
+				if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
+					foIndicator[MSE_INDEX] += pow((estimation - forecastingTarget), 2);
+			} //End of current iteration 1 ... steps head
+
+			//cout<<"foIndicator[0]: "<<foIndicator[0]<<endl;
+			//getchar();
+
+		} // end of the data set | loop incremental +=stepsAhead
+
+		if (returnForecasts == true)
+		{
+//			cout<<allTrue<<endl;
+//			cout<<allForecasts<<endl;
+//			getchar();
+
+			string saidaPrev = "./EvaluatorOutoput-RealTimeForecastsAppredForecastAgaintReal";
+
+			FILE* fPrev = fopen(saidaPrev.c_str(), "a");
+
+			for (int i = 0; i < allForecasts.size(); i++)
+			{
+				fprintf(fPrev, "%.7f\t%.7f \n", allForecasts[i], allTrue[i]);
+			}
+
+			fclose(fPrev);
+		}
+
+		//MAPE FINAL CALC
+		if (evalFO == MAPE_INDEX || validationMode == true)
+		{
+			foIndicator[MAPE_INDEX] *= 100;
+			foIndicator[MAPE_INDEX] /= nSamples;
+		}
+
+		if (evalFO == SMAPE_INDEX || validationMode == true)
+		{
+			foIndicator[SMAPE_INDEX] *= 100;
+			foIndicator[SMAPE_INDEX] /= nSamples;
+		}
+		// ===================  MAPE FOR EACH STEP AHEAD ========================
+		/*for (int mp = 0; mp < stepsAhead; mp++)
+		 {
+		 foIndicatorStepsAhead[MAPE_INDEX][mp] = foIndicatorStepsAhead[0][mp] * 100;
+
+		 foIndicatorStepsAhead[MAPE_INDEX][mp] = foIndicatorStepsAhead[0][mp] / ((nForecastingValidations - notUsedForTest) / stepsAhead);
+		 }
+		 */
+		// ===================  MAPE FOR EACH STEP AHEAD ========================
+		//cout << foIndicator[MAPE_INDEX] << endl;
+		//MSE AND RSME FINAL CALC
+		if (evalFO == MSE_INDEX || validationMode == true)
+			foIndicator[MSE_INDEX] /= nSamples;
+
+		if (evalFO == RMSE_INDEX || validationMode == true)
+			foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
+
+		//PINBALL FINAL CALC
+		if (evalFO == PINBALL_INDEX || validationMode == true)
+		{
+			foIndicator[PINBALL_INDEX] /= nSamples;
+		}
+		/*
+		 double minPinball = 1000000;
+		 double pinbalError;
+		 for (int pF = 0; pF < 20; pF++)
+		 {
+		 vPinballFunctions[pF].first /= (nForTargetFile - earliestInput);
+		 if (vPinballFunctions[pF].first < minPinball)
+		 {
+		 minPinball = vPinballFunctions[pF].first;
+		 pinbalError = vPinballFunctions[pF].second;
+		 }
+		 }
+
+		 foIndicator[PINBALL_INDEX] = minPinball;
+		 foIndicator[PINBALL_ERROR_INDEX] = pinbalError;*/
+
+		//cout << "Fo Indicator:";
+		//cout << foIndicator << endl;
+		//cout << "steps Ahead:";
+		//cout << foIndicatorStepsAhead << endl;
+		if (returnForecasts == true)
+			return allForecasts;
+
+		return foIndicator;
+	}
+
 	vector<double> blindForecasting(const RepEFP& rep, const vector<vector<double> > vForecastings)
 	{
 
@@ -768,6 +1087,25 @@ public:
 		return predicteds;
 	}
 
+	EvaluationEFP& evaluateOld(const RepEFP& rep)
+	{
+		//Fo vector with different metrics calculations
+		vector<double> foIndicator(NMETRICS + 1, 0); //nMetrics + ErrorPinball
+
+		/*
+		 vector<vector<double> > foIndicatorStepsAhead(NMETRICS + 1);
+		 for (int i = 0; i < foIndicatorStepsAhead.size(); i++)
+		 foIndicatorStepsAhead[i].resize(stepsAhead);*/
+
+		vector<vector<double> > vForecastings = pEFP.getForecastingsVector();
+
+		//validation mode = false | returnforecasts = false
+		foIndicator = returnForecastingsFO(rep, vForecastings, false, false);
+
+		double fo = foIndicator[evalFO];		// Evaluation Function Value
+
+		return *new EvaluationEFP(fo);
+	}
 
 	EvaluationEFP& evaluate(const RepEFP& rep)
 	{

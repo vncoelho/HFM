@@ -168,7 +168,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 		ProblemParameters problemParam;
 		//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
 		int nVR = 168;
-		int nSA = 1;
+		int nSA = 24;
 		problemParam.setStepsAhead(nSA);
 		int stepsAhead = problemParam.getStepsAhead();
 		//========SET PROBLEM MAXIMUM LAG ===============
@@ -182,7 +182,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 
 		int maxTrainningRounds = 20;
 		int nTrainningRounds = rg.rand(maxTrainningRounds) + 1;
-		nTrainningRounds = 672;
+		nTrainningRounds = 20;
 		int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
 
 		int beginTrainingSet = 672;
