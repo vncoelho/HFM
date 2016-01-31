@@ -197,6 +197,7 @@ int CIFWCCICalibration(int argc, char **argv)
 		foIndicators.push_back(errors[SMAPE_INDEX]);
 		foIndicators.push_back(sol->second.evaluation());
 		foIndicators.push_back(argvTargetTimeSeries);
+		foIndicators.push_back(argvMaxLagRate);
 		foIndicators.push_back(maxLag);
 		foIndicators.push_back(NTRaprox);
 		foIndicators.push_back(timeES);
