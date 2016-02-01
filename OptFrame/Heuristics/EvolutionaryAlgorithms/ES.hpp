@@ -84,25 +84,28 @@ template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class ES: public SingleObjSearch<R, ADS>
 {
 private:
-	string path, outputFile;
-	int batch;
-	Solution<R, ADS>* sStar;
-	Evaluation* eStar;
 	Evaluator<R, ADS>& eval;
 	Constructive<R, ADS>& constructive;
 	vector<NSSeq<R, ADS>*> vNS;
 	vector<int> vNSeqMaxApplication;
 	LocalSearch<R, ADS>& ls;
+	int selectionMethod;
+	double mutationRate;
 	RandGen& rg;
-
-	int nNS;
 	const int mi;
 	const int lambda;
 	const int gMaxWithoutImprovement;
+	string outputFile;
+	int batch;
+	string path;
+	Solution<R, ADS>* sStar;
+	Evaluation* eStar;
+	int nNS;
+
 	int iterWithoutImprovement;
 	int gAtual;
-	int selectionMethod;
-	double mutationRate;
+
+
 
 	typedef vector<IndividuoES<R, ADS> > Populacao;
 
@@ -336,26 +339,21 @@ public:
 
 		if (eval.betterThan(fo, eStar->evaluation()))
 		{
-			//TODO check why ES goes more generations some time when we do not have improvements.
-			//What is computational expensive here? Even removing eStar and sStar updates it was heavy
 			delete eStar;
 			delete sStar;
 			eStar = &v[0].e->clone();
 			sStar = &v[0].sInd->clone();
 
-			if (Component::information)
+			cout << "Gen:" << gAtual << " | noImp: " << iterWithoutImprovement;
+			cout << " | Best: " << eStar->evaluation() << "\t [";
+			for (int param = 0; param < nNS; param++)
 			{
-				cout << "Gen:" << gAtual << " | noImp: " << iterWithoutImprovement;
-				cout << " | Best: " << eStar->evaluation() << "\t [";
-				for (int param = 0; param < nNS; param++)
-				{
-					cout << "(" << p->at(0).vEsStructureInd->at(param).pr;
-					cout << ",";
-					cout << p->at(0).vEsStructureInd->at(param).nap << ") ";
-				}
-				cout << "]\t";
-				cout << p->at(0).vNSInd << endl;
+				cout << "(" << p->at(0).vEsStructureInd->at(param).pr;
+				cout << ",";
+				cout << p->at(0).vEsStructureInd->at(param).nap << ") ";
 			}
+			cout << "]\t";
+			cout << p->at(0).vNSInd << endl;
 
 			if (Component::debug)
 			{
@@ -379,40 +377,6 @@ public:
 					}
 					fprintf(arquivo, "\n");
 					fclose(arquivo);
-				}
-			}
-
-			if (Component::debug)
-			{
-				int nRules = sStar->getR().singleIndex.size();
-				cout << "nRules sStar:" << nRules << endl;
-				vector<int> inputFrequency(10000, 0);
-				for (int rule = 0; rule < nRules; rule++)
-				{
-					int ruleK = sStar->getR().singleIndex[rule].second;
-					inputFrequency[ruleK] += 1;
-				}
-				stringstream ss;
-				ss << outputFile << "_" << "Rules";
-				string outputBest = ss.str();
-				FILE* arquivo = fopen(outputBest.c_str(), "a");
-				if (!arquivo)
-				{
-					cout << "ERRO: falha ao criar arquivo \"outputRules.txt\"" << endl;
-				}
-				else
-				{
-					fprintf(arquivo, "=========================================== \n %d\t%d\t%d\n", gAtual, iterWithoutImprovement, nRules);
-					for (int rule = 0; rule < inputFrequency.size(); rule++)
-					{
-						if (inputFrequency[rule] > 0)
-							fprintf(arquivo, "%d\t%d\n", rule, inputFrequency[rule]);
-					}
-					fprintf(arquivo, "=========================================== \n");
-					fclose(arquivo);
-
-//					cout<<sStar->getR()<<endl;
-//					getchar();
 				}
 			}
 			iterWithoutImprovement = 0;
@@ -466,6 +430,7 @@ public:
 		//GERANDO VETOR DE POPULACAO INICIAL
 		for (int i = 0; i < mi; i++)
 		{
+			//PartialGreedyInitialSolutionOPM is(opm, 0.4, 0.4, 0.4); // waste, ore, shovel
 			Solution<R, ADS>* s = &constructive.generateSolution();
 			vector<EsStructure<R, ADS> >* m = new vector<EsStructure<R, ADS> >;
 
@@ -590,14 +555,7 @@ public:
 			// =====================End Selection ==================
 
 			// ====================================================
-			//Statitics about evolution of the params of population
-			double fo_newPop = 0;
-			for (int i = 0; i < mi; i++)
-			{
-				fo_newPop += pop[i].e->evaluation();
-			}
-			fo_newPop /= mi;
-			//cout << "Pop mean FO, iter " << gAtual << ":\t" << fo_newPop << endl;
+			//Statitics about evolution of the params
 
 			vector<pair<double, double> > meanParams;
 
@@ -639,7 +597,7 @@ public:
 						double pr = meanParams[param].first;
 						double nap = meanParams[param].second;
 						double prNap = meanParams[param].second * meanParams[param].first;
-						fprintf(arquivo, "%f\t%f\t%f\t%f\t", pr, nap, prNap, fo_newPop);
+						fprintf(arquivo, "%f\t%f\t%f\t", pr, nap, prNap);
 					}
 					fprintf(arquivo, "\n");
 					fclose(arquivo);
@@ -658,9 +616,9 @@ public:
 		 cout << "eStarBL = " << (double) eStarBL.evaluation() << endl;
 		 cout << "eStar = " << (double) eStar->evaluation() << endl;*/
 
-		cout << "tnow.now():" << tnow.now() << " timelimit:" << timelimit << endl;
-		cout << "End Discrete ES! iterWithoutImprovement:" << iterWithoutImprovement << " gMaxWithoutImprovement:" << gMaxWithoutImprovement << " gLast:" << gAtual << endl;
-		cout << "target_f:" << target_f << " bestFO:" << eStar->evaluation() << endl;
+		cout << "tnow.now() = " << tnow.now() << " timelimit = " << timelimit << endl;
+		cout << "Acabou ES = iterWithoutImprovement = " << iterWithoutImprovement << " gMaxWithoutImprovement = " << gMaxWithoutImprovement << endl;
+		cout << "target_f = " << target_f << " eStar->evaluation() = " << eStar->evaluation() << endl;
 		//getchar();
 
 		return new pair<Solution<R, ADS>&, Evaluation&>(*sStar, *eStar);

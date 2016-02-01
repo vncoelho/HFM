@@ -26,10 +26,11 @@ struct esParameters
 class EFPESContinous: public ESContinous<RepEFP, OPTFRAME_DEFAULT_ADS, esParameters>
 {
 private:
+	RandGen& rg;
 	double initialDesv;
 	double mutationDesv;
 
-	RandGen& rg;
+
 public:
 
 	using ESContinous<RepEFP, OPTFRAME_DEFAULT_ADS,esParameters>::search; // prevents name hiding

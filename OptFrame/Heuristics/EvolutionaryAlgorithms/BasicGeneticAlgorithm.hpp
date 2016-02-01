@@ -26,7 +26,7 @@
 #include "../../SingleObjSearch.hpp"
 #include "../../MultiSolution.hpp"
 
-#include "InitialPopulation.hpp"
+#include "InitialMultiSolution.hpp"
 
 #include "Crossover.hpp"
 

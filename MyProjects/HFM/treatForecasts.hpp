@@ -26,7 +26,7 @@ public:
 	treatForecasts(vector<string> explanatoryVariables)
 	{
 		vector<Scanner*> scannerFiles;
-		for (int v = 0; v < explanatoryVariables.size(); v++)
+		for (int v = 0; v < int( explanatoryVariables.size() ); v++)
 		{
 			File* fileP;
 

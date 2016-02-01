@@ -32,6 +32,7 @@ class ConstructiveACF: public GRConstructive<RepEFP>
 {
 private:
 	ProblemInstance& pEFP;
+	ProblemParameters problemParam;
 	RandGen& rg;
 
 	int precisionSP;
@@ -39,7 +40,7 @@ private:
 	int precisionDP;
 	int precision;
 	// Your private vars
-	ProblemParameters problemParam;
+
 
 	int lags;
 	vector<double> alphaACF;
@@ -61,7 +62,7 @@ public:
 		precisionSP = precision;
 		precisionMP = precision;
 		precisionDP = precision;
-		precisionMP = 1;
+		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
 		precisionDP = 1;
 	}
 
@@ -384,7 +385,7 @@ public:
 			int K = lagsRLC[0][index].second;
 
 			vIndex.push_back(K);
-			double std = rg.rand(300) / 1000;
+			//double std = rg.rand(300) / 1000;
 			vIndexAlphas.push_back(rg.randG(0, 0.1));
 
 		}

@@ -160,7 +160,7 @@ int CIFWCCICalibration(int argc, char **argv)
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
-		int maxUpperLag = problemParam.getMaxUpperLag();
+		//int maxUpperLag = problemParam.getMaxUpperLag();
 		//=================================================
 
 		int timeES = argvTimeES; // online training time
@@ -168,7 +168,7 @@ int CIFWCCICalibration(int argc, char **argv)
 		vector<double> foIndicators;
 
 		int beginTrainingSet = 0;
-		int nTrainningRounds = 3;
+		//int nTrainningRounds = 3;
 		//int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
 
 		cout << std::setprecision(9);
@@ -186,8 +186,12 @@ int CIFWCCICalibration(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
+		forecastObject.runMultiObjSearch();
+		getchar();
 		pair<Solution<RepEFP>&, Evaluation&>* sol;
 		sol = forecastObject.run(timeES, 0, 0);
+
+
 
 		vector<double> foIndicatorCalibration;
 		vector<vector<double> > validationSet;
@@ -219,7 +223,7 @@ int CIFWCCICalibration(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i < int(vfoIndicatorCalibration[n].size()); i++)
 			cout << vfoIndicatorCalibration[n][i] << "\t";
 
 		cout << endl;
@@ -232,7 +236,7 @@ int CIFWCCICalibration(int argc, char **argv)
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 	for (int n = 0; n < nBatches; n++)
 	{
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i < int(vfoIndicatorCalibration[n].size()); i++)
 			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
 		fprintf(fResults, "\n");
 	}

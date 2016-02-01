@@ -9,6 +9,7 @@
 #define FORECASTCLASS_HPP_
 
 #include "Evaluator.hpp"
+#include "Evaluation.h"
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
 #include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/ES.hpp"
@@ -20,6 +21,11 @@
 #include "../../OptFrame/Heuristics/LocalSearches/RandomDescentMethod.hpp"
 #include "../../OptFrame/Heuristics/ILS/IteratedLocalSearchLevels.hpp"
 #include "../../OptFrame/Heuristics/GRASP/BasicGRASP.hpp"
+#include "../../OptFrame/Heuristics/VNS/MOVNSLevels.hpp"
+#include "../../OptFrame/Heuristics/2PPLS.hpp"
+#include "../../OptFrame/MultiEvaluator.hpp"
+#include "../../OptFrame/MultiObjSearch.hpp"
+#include "../../OptFrame/Util/UnionNDSets.hpp"
 
 namespace EFP
 {
@@ -71,15 +77,15 @@ public:
 		NSSeqNEIGHChangeSingleInput* nsChangeSingleInput = new NSSeqNEIGHChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
 		NSSeqNEIGHRemoveSingleInput* nsRemoveSingleInput = new NSSeqNEIGHRemoveSingleInput(rg);
 		NSSeqNEIGHAddSingleInput* nsAddSingleInput = new NSSeqNEIGHAddSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
-		NSSeqNEIGHAddX* nsAddMean01 = new NSSeqNEIGHAddX(*p, rg, 0.1);
-		NSSeqNEIGHAddX* nsAddMean1 = new NSSeqNEIGHAddX(*p, rg, 1);
-		NSSeqNEIGHAddX* nsAddMeanD15 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 15);
-		NSSeqNEIGHAddX* nsAddMeanD6 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 6);
-		NSSeqNEIGHAddX* nsAddMeanD2 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 2);
-		NSSeqNEIGHAddX* nsAddMean = new NSSeqNEIGHAddX(*p, rg, p->getMean(0));
-		NSSeqNEIGHAddX* nsAddMeanM2 = new NSSeqNEIGHAddX(*p, rg, 2 * p->getMean(0));
-		NSSeqNEIGHAddX* nsAddMeanM5 = new NSSeqNEIGHAddX(*p, rg, 5 * p->getMean(0));
-		NSSeqNEIGHAddX* nsAddMeanBigM = new NSSeqNEIGHAddX(*p, rg, 100 * p->getMean(0));
+//		NSSeqNEIGHAddX* nsAddMean01 = new NSSeqNEIGHAddX(*p, rg, 0.1);
+//		NSSeqNEIGHAddX* nsAddMean1 = new NSSeqNEIGHAddX(*p, rg, 1);
+//		NSSeqNEIGHAddX* nsAddMeanD15 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 15);
+//		NSSeqNEIGHAddX* nsAddMeanD6 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 6);
+//		NSSeqNEIGHAddX* nsAddMeanD2 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 2);
+//		NSSeqNEIGHAddX* nsAddMean = new NSSeqNEIGHAddX(*p, rg, p->getMean(0));
+//		NSSeqNEIGHAddX* nsAddMeanM2 = new NSSeqNEIGHAddX(*p, rg, 2 * p->getMean(0));
+//		NSSeqNEIGHAddX* nsAddMeanM5 = new NSSeqNEIGHAddX(*p, rg, 5 * p->getMean(0));
+//		NSSeqNEIGHAddX* nsAddMeanBigM = new NSSeqNEIGHAddX(*p, rg, 100 * p->getMean(0));
 
 		int cMethod = methodParam.getConstrutiveMethod();
 		int cPre = methodParam.getConstrutivePrecision();
@@ -166,6 +172,41 @@ public:
 		delete vnd;
 		delete EsCOpt;
 
+	}
+
+	void runMultiObjSearch()
+	{
+		GRInitialPopulation<RepEFP> bip(*c, rg, 0.2);
+
+		vector<Evaluator<RepEFP>*> v_e;
+		v_e.push_back(new EFPEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), MAPE_INDEX));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), RMSE_INDEX));
+
+		MultiEvaluator<RepEFP> mev(v_e);
+		int initial_population_size = 10;
+
+		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
+		TwoPhaseParetoLocalSearch<RepEFP> paretoSearch(mev, bip, initial_population_size, vNSeq);
+
+		Pareto<RepEFP>* pf;
+		//pf = paretoSearch.search(120, 0);
+		pf = multiobjectvns.search(20, 0);
+
+		vector<vector<EvaluationEFP*> > vEval = pf->getParetoFront();
+		vector<Solution<RepEFP>*> vSolPf = pf->getParetoSet();
+
+		int nObtainedParetoSol = vEval.size();
+		for (int i = 0; i < nObtainedParetoSol; i++)
+		{
+			vector<double> solEvaluations;
+			double foProfit = vEval[i][0]->getObjFunction();
+			double foVolatility = vEval[i][1]->getObjFunction();
+			solEvaluations.push_back(foProfit);
+			solEvaluations.push_back(foVolatility);
+
+			cout << foProfit << "\t" << foVolatility << "\t";
+		}
+		getchar();
 	}
 
 	pair<Solution<RepEFP>&, Evaluation&>* runOLR()

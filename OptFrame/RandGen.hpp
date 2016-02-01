@@ -142,17 +142,21 @@ public:
 
 	virtual int randBinomial(double p, int tries)
 	{
-		std::tr1::variate_generator<std::tr1::mt19937, std::tr1::binomial_distribution<> > rngB(std::tr1::mt19937(123), std::tr1::binomial_distribution<>(tries, p));
+		std::tr1::variate_generator<std::tr1::mt19937,
+				std::tr1::binomial_distribution<> > rngB(std::tr1::mt19937(123),
+				std::tr1::binomial_distribution<>(tries, p));
 		return rngB();
 	}
 
 	virtual int randBinomialWithNegative(double p, int tries)
 	{
-		std::tr1::variate_generator<std::tr1::mt19937, std::tr1::binomial_distribution<> > rngB(std::tr1::mt19937(123), std::tr1::binomial_distribution<>(tries, p));
+		std::tr1::variate_generator<std::tr1::mt19937,
+				std::tr1::binomial_distribution<> > rngB(std::tr1::mt19937(123),
+				std::tr1::binomial_distribution<>(tries, p));
 		int y = rngB();
 		int sign = this->rand(2);
-		if(sign == 1)
-			y*=-1;
+		if (sign == 1)
+			y *= -1;
 		return y;
 	}
 
@@ -244,7 +248,9 @@ public:
 	{
 	}
 
-	virtual Component* buildComponent(Scanner& scanner, HeuristicFactory<R, ADS>& hf, string family = "")
+	virtual Component*
+	buildComponent(Scanner& scanner, HeuristicFactory<R, ADS>& hf,
+			string family = "")
 	{
 		if (!scanner.hasNext())
 			return NULL;

@@ -99,9 +99,6 @@ public:
 			iter++;
 		}
 
-		cout << "GRASP iter " << iter << "/ "<<iterMax<<endl;
-
-
 		return new pair<Solution<R, ADS>&, Evaluation&>(s, e);
 	}
 
