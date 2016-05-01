@@ -25,7 +25,8 @@ const int MSE_INDEX = 2;
 const int RMSE_INDEX = 3;
 const int PINBALL_ERROR_INDEX = 4;
 const int SMAPE_INDEX = 5;
-const int NMETRICS = 6;
+const int WMAPE_INDEX = 6;
+const int NMETRICS = 7;
 
 float sigmoid(float x)
 {
@@ -238,7 +239,7 @@ public:
 		{
 			double ajusts = 0;
 
-			for (int ind = 0; ind < int(vIndex.size() ); ind++)
+			for (int ind = 0; ind < int(vIndex.size()); ind++)
 			{
 				int indexK = vIndex[ind];
 				double valueIndexK = 0;
@@ -304,7 +305,7 @@ public:
 			adjustPrevValue.push_back(168);
 			adjustPrevValue.push_back(168 * 2);
 			adjustPrevValue.push_back(168 * 3);
-			for (int ind = 0; ind < int( adjustPrevValue.size() ); ind++)
+			for (int ind = 0; ind < int(adjustPrevValue.size()); ind++)
 			{
 				int indexK = adjustPrevValue[ind];
 				double valueIndexK = 0;
@@ -332,7 +333,7 @@ public:
 		int sizeMP = rep.averageIndex.size();
 		int sizeDP = rep.derivativeIndex.size();
 
-		int nForTargetFile = int(vForecastings[0].size() );
+		int nForTargetFile = int(vForecastings[0].size());
 		int maxLag = problemParam.getMaxLag();
 
 		vector<double> predicteds;
@@ -439,8 +440,8 @@ public:
 			}
 
 			//				Remove this for other forecast problem -- rain forecast
-			//				if (estimation < 0)
-			//					estimation = 0;
+			if (estimation < 0)
+				estimation = 0;
 
 			predicteds.push_back(estimation);
 
@@ -488,21 +489,41 @@ public:
 		vector<double> foIndicator(NMETRICS, 0);
 		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
 
+		double sumTarget = 0;
+
+		if (evalFO == WMAPE_INDEX || validationMode == true)
+		{
+			for (int i = 0; i < int(targetValues.size()); i++)
+			{
+				sumTarget += targetValues[i];
+			}
+		}
+
 		for (int i = 0; i < int(targetValues.size()); i++)
 		{
 			double estimation = estimatedValues[i];
 			double forecastingTarget = targetValues[i];
+			double forecastingTargetNotNull = forecastingTarget;
+			if (forecastingTargetNotNull == 0)
+				forecastingTargetNotNull = 0.0001;
 
 			//MAPE
 			if (evalFO == MAPE_INDEX || validationMode == true)
 			{
-				foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTarget));
+				foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTargetNotNull));
 			}
 
 			//SMAPE
 			if (evalFO == SMAPE_INDEX || validationMode == true)
 			{
-				foIndicator[SMAPE_INDEX] += (abs(estimation - forecastingTarget) / (abs(forecastingTarget) + abs(estimation)) / 2);
+				foIndicator[SMAPE_INDEX] += (abs(estimation - forecastingTarget) / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
+			}
+
+			if (evalFO == WMAPE_INDEX || validationMode == true)
+			{
+				foIndicator[WMAPE_INDEX] += (abs(estimation - forecastingTarget) / sumTarget);
+				if (validationMode)
+					cout << "sumTarget:" << sumTarget << endl;
 			}
 
 			//MSE or RMSE
@@ -543,6 +564,12 @@ public:
 		{
 			foIndicator[SMAPE_INDEX] *= 100;
 			foIndicator[SMAPE_INDEX] /= nSamples;
+		}
+
+		if (evalFO == WMAPE_INDEX || validationMode == true)
+		{
+			foIndicator[WMAPE_INDEX] *= 100;
+			foIndicator[WMAPE_INDEX] /= nSamples;
 		}
 
 		if (evalFO == MSE_INDEX || validationMode == true)

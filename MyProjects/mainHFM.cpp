@@ -21,6 +21,7 @@
 #include "./HFM/mainForecastingCodes/smartStorage.cpp"
 #include "./HFM/mainForecastingCodes/HFModel.cpp"
 #include "./HFM/mainForecastingCodes/CIF_WCCI.hpp"
+#include "./HFM/mainForecastingCodes/GAPSO.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -67,7 +68,10 @@ int main(int argc, char **argv)
 	type = 4; // rain forecast
 	type = 69; // mokoko forecast
 
-	type = 9999; // colocar o numero desejado
+	type = 9999; // WCCI Forecasting comp calibration
+	type = 2016; //GAPSO
+
+	type = 99992;
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
@@ -141,6 +145,19 @@ int main(int argc, char **argv)
 		cout << "Program ended successfully in CIF calibration WCCI Conference!" << endl;
 		return r;
 		break;
+
+	case 99992: //CIFWCCIGeneratingForecasts
+		r = CIFWCCIGeneratingForecasts(argc, argv);
+		cout << "Program ended successfully in CIF calibration WCCI Conference!" << endl;
+		return r;
+		break;
+
+	case 2016: //James Taylor 2007
+		r = GAPSO_SKU(argc, argv);
+		cout << "Program ended successfully in GAPSO-SKU forecasting!" << endl;
+		return r;
+		break;
+
 
 
 	default:

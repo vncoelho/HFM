@@ -186,8 +186,8 @@ int CIFWCCICalibration(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		forecastObject.runMultiObjSearch();
-		getchar();
+//		forecastObject.runMultiObjSearch();
+//		getchar();
 		pair<Solution<RepEFP>&, Evaluation&>* sol;
 		sol = forecastObject.run(timeES, 0, 0);
 
@@ -247,6 +247,258 @@ int CIFWCCICalibration(int argc, char **argv)
 	return 0;
 }
 
+
+int CIFWCCIGeneratingForecasts(int argc, char **argv)
+{
+	cout << "Welcome to WCCI forecasting competition! With this code we generated the forecasts." << endl;
+	RandGenMersenneTwister rg;
+	//long  1412730737
+	long seed = time(NULL); //CalibrationMode
+	//seed = 9;
+	cout << "Seed = " << seed << endl;
+	srand(seed);
+	rg.setSeed(seed);
+
+	if (argc != 5)
+	{
+		cout << "Parametros incorretos!" << endl;
+		cout << "Os parametros esperados sao: nomeOutput targetTS construtiveNRulesACF timeES" << endl;
+		exit(1);
+	}
+
+	const char* caminhoOutput = argv[1];
+	int argvTargetTimeSeries = atoi(argv[2]);
+	int argvMaxLagRate = atoi(argv[3]);
+	int argvTimeES = atoi(argv[4]);
+
+	cout<<"================================"<<endl;
+	cout<<"forcing MaxLagRate to 40% and timeTraining to 20s"<<endl;
+	argvMaxLagRate = 40;
+	argvTimeES = 20;
+	cout<<"================================"<<endl;
+
+	string nomeOutput = caminhoOutput;
+	//===================================
+	cout << "Parametros:" << endl;
+	cout << "nomeOutput=" << nomeOutput << endl;
+	cout << "argvTargetTimeSeries=" << argvTargetTimeSeries << endl;
+	cout << "argvMaxLagRate=" << argvMaxLagRate << endl;
+	cout << "argvTimeES=" << argvTimeES << endl;
+
+	File* fileWCCIInstances;
+
+	try
+	{
+		fileWCCIInstances = new File("./MyProjects/HFM/Instance/WCCI/CIFInstances");
+	} catch (FileNotFound& f)
+	{
+		cout << "File '" << "./MyProjects/HFM/Instance/WCCI/CIFInstances" << "' not found" << endl;
+		exit(1);
+	}
+
+	Scanner* scannerWCCI = new Scanner(fileWCCIInstances);
+	for (int i = 0; i < (argvTargetTimeSeries - 1); i++)
+		scannerWCCI->nextLine();
+
+	string testProblemWCCI = scannerWCCI->nextLine();
+	delete scannerWCCI;
+	scannerWCCI = new Scanner(testProblemWCCI);
+
+	cout << scannerWCCI->nextInt() << endl;
+	int WCCIStepsAhead = scannerWCCI->nextInt();
+	cout << "Required steps ahead:" << WCCIStepsAhead << endl;
+
+	vector<double> forecastsTSWCCI;
+	while (scannerWCCI->hasNext())
+		forecastsTSWCCI.push_back(scannerWCCI->nextDouble());
+	cout << forecastsTSWCCI << endl;
+
+	vector<vector<double> > forecastingWCCIExogenousVariables;
+	forecastingWCCIExogenousVariables.push_back(forecastsTSWCCI);
+
+	treatForecasts rF(forecastingWCCIExogenousVariables);
+
+	int nBatches = 1;
+
+	vector<vector<double> > vfoIndicatorCalibration; //vector with the FO of each batch
+
+	vector<SolutionEFP> vSolutionsBatches; //vector with the solution of each batch
+
+	for (int n = 0; n < nBatches; n++)
+	{
+//		int contructiveNumberOfRules = rg.rand(maxPrecision) + 10;
+//		int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
+//		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
+//		int construtive = rg.rand(3);
+//		double initialDesv = rg.rand(maxInitialDesv) + 1;
+//		double mutationDesv = rg.rand(maxMutationDesv) + 1;
+//		int mu = rg.rand(maxMu) + 1;
+//		int lambda = mu * 6;
+
+		//limit ACF for construtive ACF
+//		double alphaACF = rg.rand01();
+//		int alphaSign = rg.rand(2);
+//		if (alphaSign == 0)
+//			alphaACF = alphaACF * -1;
+
+		// ============ FORCES ======================
+//		initialDesv = 10;
+//		mutationDesv = 20;
+		int mu = 100;
+		int lambda = mu * 6;
+		int evalFOMinimizer = SMAPE_INDEX;
+		int contructiveNumberOfRules = 100;
+		int evalAprox = 0;
+		double alphaACF = 0;
+		int construtive = 2;
+		// ============ END FORCES ======================
+
+		// ============= METHOD PARAMETERS=================
+		methodParameters methodParam;
+		//seting up Continous ES params
+		methodParam.setESInitialDesv(10);
+		methodParam.setESMutationDesv(20);
+		methodParam.setESMaxG(100000);
+
+		//seting up ES params
+		methodParam.setESMU(mu);
+		methodParam.setESLambda(lambda);
+
+		//seting up ACF construtive params
+		methodParam.setConstrutiveMethod(construtive);
+		methodParam.setConstrutivePrecision(contructiveNumberOfRules);
+		vector<double> vAlphaACFlimits;
+		vAlphaACFlimits.push_back(alphaACF);
+		methodParam.setConstrutiveLimitAlphaACF(vAlphaACFlimits);
+
+		//seting up Eval params
+		methodParam.setEvalAprox(evalAprox);
+		methodParam.setEvalFOMinimizer(evalFOMinimizer);
+		// ==========================================
+
+		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
+		ProblemParameters problemParam;
+		//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+		int nSA = WCCIStepsAhead;
+		problemParam.setStepsAhead(nSA);
+		int stepsAhead = problemParam.getStepsAhead();
+
+		int nTotalForecastingsTrainningSet = rF.getForecastsSize(0);
+
+		//========SET PROBLEM MAXIMUM LAG ===============
+		cout << "argvMaxLagRate = " << argvMaxLagRate << endl;
+
+		int iterationMaxLag = ((nTotalForecastingsTrainningSet - stepsAhead) * argvMaxLagRate) / 100.0;
+		iterationMaxLag = ceil(iterationMaxLag);
+		if (iterationMaxLag > (nTotalForecastingsTrainningSet - stepsAhead))
+			iterationMaxLag--;
+		if (iterationMaxLag <= 0)
+			iterationMaxLag = 1;
+
+		problemParam.setMaxLag(iterationMaxLag);
+		int maxLag = problemParam.getMaxLag();
+
+		//If maxUpperLag is greater than 0 model uses predicted data
+		problemParam.setMaxUpperLag(0);
+		//int maxUpperLag = problemParam.getMaxUpperLag();
+		//=================================================
+
+		int timeES = argvTimeES; // online training time
+
+		vector<double> foIndicators;
+
+		int beginTrainingSet = 0;
+		//int nTrainningRounds = 3;
+		//int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
+
+		cout << std::setprecision(9);
+		cout << std::fixed;
+		double NTRaprox = (nTotalForecastingsTrainningSet - maxLag) / double(stepsAhead);
+		cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
+		cout << "#nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
+		cout << "#~NTR: " << NTRaprox << endl;
+		cout << "#sizeTrainingSet: " << rF.getForecastsSize(0) << endl;
+		cout << "#maxNotUsed: " << maxLag << endl;
+		cout << "#StepsAhead: " << stepsAhead << endl << endl;
+
+		vector<vector<double> > trainningSet; // trainningSetVector
+		trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, nTotalForecastingsTrainningSet));
+
+		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
+
+//		forecastObject.runMultiObjSearch();
+//		getchar();
+		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		sol = forecastObject.run(timeES, 0, 0);
+
+
+
+		vector<double> foIndicatorCalibration;
+		vector<vector<double> > dataForBlindForecasts;
+		dataForBlindForecasts.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag));
+		vector<double> blindForecasts = forecastObject.returnBlind(sol, dataForBlindForecasts);
+
+
+		cout<<blindForecasts<<endl;
+
+		string resultsWCCIComp = "./WCCI_CFI_FinalResults";
+
+		FILE* fResults = fopen(resultsWCCIComp.c_str(), "a");
+		fprintf(fResults, "ts%d", argvTargetTimeSeries);
+		for (int n = 0; n < stepsAhead; n++)
+		{
+				fprintf(fResults, ";%f", blindForecasts[n]);
+		}
+		fprintf(fResults, "\n");
+
+		getchar();
+//		foIndicators.push_back(sol->second.evaluation());
+//		foIndicators.push_back(argvTargetTimeSeries);
+//		foIndicators.push_back(argvMaxLagRate);
+//		foIndicators.push_back(maxLag);
+//		foIndicators.push_back(NTRaprox);
+//		foIndicators.push_back(timeES);
+//		foIndicators.push_back(seed);
+		vfoIndicatorCalibration.push_back(foIndicators);
+	}
+
+	cout << setprecision(3);
+
+//	double averageError = 0;
+//	for (int t = 0; t < (vfoIndicatorCalibration[0].size() - 1); t++)
+//	{
+//		averageError += vfoIndicatorCalibration[0][t];
+//	}
+//
+//	averageError /= (vfoIndicatorCalibration[0].size() - 1);
+//	vfoIndicatorCalibration[0].push_back(averageError);
+	// =================== PRINTING RESULTS ========================
+	for (int n = 0; n < nBatches; n++)
+	{
+
+		for (int i = 0; i < int(vfoIndicatorCalibration[n].size()); i++)
+			cout << vfoIndicatorCalibration[n][i] << "\t";
+
+		cout << endl;
+	}
+	// =======================================================
+
+	// =================== PRINTING RESULTS ON FILE ========================
+	string calibrationFile = "./WCCI_CFI_Calibration";
+
+	FILE* fResults = fopen(calibrationFile.c_str(), "a");
+	for (int n = 0; n < nBatches; n++)
+	{
+		for (int i = 0; i < int(vfoIndicatorCalibration[n].size()); i++)
+			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
+		fprintf(fResults, "\n");
+	}
+
+	fclose(fResults);
+	// =======================================================
+
+	return 0;
+}
 //
 //for (int w = 4; w >= 1; w--)
 //	{

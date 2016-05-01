@@ -41,7 +41,6 @@ private:
 	int precision;
 	// Your private vars
 
-
 	int lags;
 	vector<double> alphaACF;
 
@@ -58,7 +57,7 @@ public:
 		}
 
 		lags = problemParam.getMaxLag();
-		lags +=1; //the ACF generator counts lag 0
+		lags += 1; //the ACF generator counts lag 0
 		precisionSP = precision;
 		precisionMP = precision;
 		precisionDP = precision;
@@ -186,6 +185,11 @@ public:
 		}
 
 		vector<vector<pair<double, int> > > acfGreedy(numberExplanatoryVariables);
+		if (acfPoints[0].size() == 1)
+		{
+			cout << "exiting Forecasting! There are no points to use as input of the model";
+			exit(1);
+		}
 
 		while (acfGreedy[0].size() == 0)
 		{
@@ -244,6 +248,7 @@ public:
 
 			for (int p = 0; p < pSP; p++)
 			{
+
 				int index = rg.rand(nACFUsefullPoints);
 				int K = lagsRLC[nEXV][index].second;
 				singleIndex.push_back(make_pair(nEXV, K));
