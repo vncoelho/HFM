@@ -11,6 +11,22 @@
 namespace EFP
 {
 
+
+const int MAPE_INDEX = 0;
+const int PINBALL_INDEX = 1;
+const int MSE_INDEX = 2;
+const int RMSE_INDEX = 3;
+const int PINBALL_ERROR_INDEX = 4;
+const int SMAPE_INDEX = 5;
+const int WMAPE_INDEX = 6;
+const int NMETRICS = 7;
+
+static bool comparaTreatQuantiles(double d1, double d2)
+{
+	return d1 < d2;
+}
+
+
 class treatForecasts
 {
 private:
@@ -26,7 +42,7 @@ public:
 	treatForecasts(vector<string> explanatoryVariables)
 	{
 		vector<Scanner*> scannerFiles;
-		for (int v = 0; v < int( explanatoryVariables.size() ); v++)
+		for (int v = 0; v < int(explanatoryVariables.size()); v++)
 		{
 			File* fileP;
 
@@ -431,7 +447,7 @@ public:
 	vector<double> generateQuantis(vector<double> forecasts, int firstQuantil, int lastQuantil)
 	{
 
-		sort(forecasts.begin(), forecasts.end(), compara); // ordena com QuickSort
+		sort(forecasts.begin(), forecasts.end(), comparaTreatQuantiles); // ordena com QuickSort
 		//cout<<forecasts<<endl;
 		//getchar();
 		int sizeForecasts = forecasts.size();

@@ -13,20 +13,12 @@
 #include "Evaluation.h"
 
 #include "ProblemInstance.hpp"
+#include "treatForecasts.hpp"
 
 #define EPSILON_EFP 0.0001
 
 namespace EFP
 {
-
-const int MAPE_INDEX = 0;
-const int PINBALL_INDEX = 1;
-const int MSE_INDEX = 2;
-const int RMSE_INDEX = 3;
-const int PINBALL_ERROR_INDEX = 4;
-const int SMAPE_INDEX = 5;
-const int WMAPE_INDEX = 6;
-const int NMETRICS = 7;
 
 float sigmoid(float x)
 {
@@ -62,11 +54,13 @@ private:
 
 	int aprox;
 
+	bool roundToZero;
 public:
 
 	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _evalFO, int _aprox) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), evalFO(_evalFO), aprox(_aprox)
 	{
+		roundToZero = false; // If true, forecasts are all rounded to 0!
 		targetFile = 0; //this is the file to be learned
 
 		stepsAhead = problemParam.getStepsAhead();
@@ -333,7 +327,7 @@ public:
 		int sizeMP = rep.averageIndex.size();
 		int sizeDP = rep.derivativeIndex.size();
 
-		int nForTargetFile = int(vForecastings[0].size());
+//		int nForTargetFile = int(vForecastings[0].size());
 		int maxLag = problemParam.getMaxLag();
 
 		vector<double> predicteds;
@@ -440,8 +434,11 @@ public:
 			}
 
 			//				Remove this for other forecast problem -- rain forecast
-			if (estimation < 0)
-				estimation = 0;
+			if (roundToZero == true)
+			{
+				if (estimation < 0)
+					estimation = 0;
+			}
 
 			predicteds.push_back(estimation);
 
@@ -474,147 +471,6 @@ public:
 		}
 
 		return allForecasts;
-	}
-
-	vector<double> getAccuracy(vector<double> targetValues, vector<double> estimatedValues, bool validationMode)
-	{
-
-		int nSamples = targetValues.size();
-		if (targetValues.size() != estimatedValues.size())
-		{
-			cout << "ERROR on GetAccuracy! Different sizes!" << endl;
-			cout << "targetValues.size() = " << targetValues.size() << "\t";
-			cout << "estimatedValues.size() = " << estimatedValues.size() << endl;
-		}
-		vector<double> foIndicator(NMETRICS, 0);
-		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
-
-		double sumTarget = 0;
-
-		if (evalFO == WMAPE_INDEX || validationMode == true)
-		{
-			for (int i = 0; i < int(targetValues.size()); i++)
-			{
-				sumTarget += targetValues[i];
-			}
-		}
-
-		for (int i = 0; i < int(targetValues.size()); i++)
-		{
-			double estimation = estimatedValues[i];
-			double forecastingTarget = targetValues[i];
-			double forecastingTargetNotNull = forecastingTarget;
-			if (forecastingTargetNotNull == 0)
-				forecastingTargetNotNull = 0.0001;
-
-			//MAPE
-			if (evalFO == MAPE_INDEX || validationMode == true)
-			{
-				foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTargetNotNull));
-			}
-
-			//SMAPE
-			if (evalFO == SMAPE_INDEX || validationMode == true)
-			{
-				foIndicator[SMAPE_INDEX] += (abs(estimation - forecastingTarget) / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
-			}
-
-			if (evalFO == WMAPE_INDEX || validationMode == true)
-			{
-				foIndicator[WMAPE_INDEX] += (abs(estimation - forecastingTarget) / sumTarget);
-				if (validationMode)
-					cout << "sumTarget:" << sumTarget << endl;
-			}
-
-			//MSE or RMSE
-			if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
-				foIndicator[MSE_INDEX] += pow((estimation - forecastingTarget), 2);
-
-			//PinballFunction
-			if (evalFO == PINBALL_INDEX || validationMode == true)
-			{
-				double quantilError = 0.5;
-				double pinballFunctionQuantils = 0;
-				for (int a = 1; a < 100; a++)
-				{
-					double quantilFactor = (50 - a) / 100.0;
-
-					double qa = estimation - estimation * quantilError * quantilFactor;
-
-					if (forecastingTarget < qa)
-						pinballFunctionQuantils += (1 - (a / 100.0)) * (qa - forecastingTarget);
-
-					if (forecastingTarget >= qa)
-						pinballFunctionQuantils += (a / 100.0) * (forecastingTarget - qa);
-				}
-				pinballFunctionQuantils /= 99;
-				foIndicator[PINBALL_INDEX] += pinballFunctionQuantils;
-			}
-
-		}
-
-		//MAPE FINAL CALC
-		if (evalFO == MAPE_INDEX || validationMode == true)
-		{
-			foIndicator[MAPE_INDEX] *= 100;
-			foIndicator[MAPE_INDEX] /= nSamples;
-		}
-
-		if (evalFO == SMAPE_INDEX || validationMode == true)
-		{
-			foIndicator[SMAPE_INDEX] *= 100;
-			foIndicator[SMAPE_INDEX] /= nSamples;
-		}
-
-		if (evalFO == WMAPE_INDEX || validationMode == true)
-		{
-			foIndicator[WMAPE_INDEX] *= 100;
-			foIndicator[WMAPE_INDEX] /= nSamples;
-		}
-
-		if (evalFO == MSE_INDEX || validationMode == true)
-			foIndicator[MSE_INDEX] /= nSamples;
-
-		if (evalFO == RMSE_INDEX || validationMode == true)
-			foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
-
-		// ===================  MAPE FOR EACH STEP AHEAD ========================
-		/*for (int mp = 0; mp < stepsAhead; mp++)
-		 {
-		 foIndicatorStepsAhead[MAPE_INDEX][mp] = foIndicatorStepsAhead[0][mp] * 100;
-
-		 foIndicatorStepsAhead[MAPE_INDEX][mp] = foIndicatorStepsAhead[0][mp] / ((nForecastingValidations - notUsedForTest) / stepsAhead);
-		 }
-		 */
-		// ===================  MAPE FOR EACH STEP AHEAD ========================
-		//cout << foIndicator[MAPE_INDEX] << endl;
-		//MSE AND RSME FINAL CALC
-		//PINBALL FINAL CALC
-		if (evalFO == PINBALL_INDEX || validationMode == true)
-		{
-			foIndicator[PINBALL_INDEX] /= nSamples;
-		}
-		/*
-		 double minPinball = 1000000;
-		 double pinbalError;
-		 for (int pF = 0; pF < 20; pF++)
-		 {
-		 vPinballFunctions[pF].first /= (nForTargetFile - earliestInput);
-		 if (vPinballFunctions[pF].first < minPinball)
-		 {
-		 minPinball = vPinballFunctions[pF].first;
-		 pinbalError = vPinballFunctions[pF].second;
-		 }
-		 }
-
-		 foIndicator[PINBALL_INDEX] = minPinball;
-		 foIndicator[PINBALL_ERROR_INDEX] = pinbalError;*/
-
-		//cout << "Fo Indicator:";
-		//cout << foIndicator << endl;
-		//cout << "steps Ahead:";
-		//cout << foIndicatorStepsAhead << endl;
-		return foIndicator;
 	}
 
 	vector<double> blindForecasting(const RepEFP& rep, const vector<vector<double> >& vForecastings)
@@ -837,6 +693,146 @@ public:
 		return *new EvaluationEFP(fo);
 	}
 
+	const vector<double> getAccuracy(vector<double> targetValues, vector<double> estimatedValues, bool validationMode)
+	{
+
+		int nSamples = targetValues.size();
+		if (targetValues.size() != estimatedValues.size())
+		{
+			cout << "ERROR on GetAccuracy! Different sizes!" << endl;
+			cout << "targetValues.size() = " << targetValues.size() << "\t";
+			cout << "estimatedValues.size() = " << estimatedValues.size() << endl;
+		}
+		vector<double> foIndicator(NMETRICS, 0);
+		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
+
+		double sumTarget = 0;
+
+		if (evalFO == WMAPE_INDEX || validationMode == true)
+		{
+			for (int i = 0; i < int(targetValues.size()); i++)
+			{
+				sumTarget += targetValues[i];
+			}
+		}
+
+		for (int i = 0; i < int(targetValues.size()); i++)
+		{
+			double estimation = estimatedValues[i];
+			double forecastingTarget = targetValues[i];
+			double forecastingTargetNotNull = forecastingTarget;
+			if (forecastingTargetNotNull == 0)
+				forecastingTargetNotNull = 0.0001;
+
+			//MAPE
+			if (evalFO == MAPE_INDEX || validationMode == true)
+			{
+				foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTargetNotNull));
+			}
+
+			//SMAPE
+			if (evalFO == SMAPE_INDEX || validationMode == true)
+			{
+				foIndicator[SMAPE_INDEX] += (abs(estimation - forecastingTarget) / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
+			}
+
+			if (evalFO == WMAPE_INDEX || validationMode == true)
+			{
+				foIndicator[WMAPE_INDEX] += (abs(estimation - forecastingTarget) / sumTarget);
+				//				if (validationMode)
+				//					cout << "sumTarget:" << sumTarget << endl;
+			}
+
+			//MSE or RMSE
+			if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
+				foIndicator[MSE_INDEX] += pow((estimation - forecastingTarget), 2);
+
+			//PinballFunction
+			if (evalFO == PINBALL_INDEX || validationMode == true)
+			{
+				double quantilError = 0.5;
+				double pinballFunctionQuantils = 0;
+				for (int a = 1; a < 100; a++)
+				{
+					double quantilFactor = (50 - a) / 100.0;
+
+					double qa = estimation - estimation * quantilError * quantilFactor;
+
+					if (forecastingTarget < qa)
+						pinballFunctionQuantils += (1 - (a / 100.0)) * (qa - forecastingTarget);
+
+					if (forecastingTarget >= qa)
+						pinballFunctionQuantils += (a / 100.0) * (forecastingTarget - qa);
+				}
+				pinballFunctionQuantils /= 99;
+				foIndicator[PINBALL_INDEX] += pinballFunctionQuantils;
+			}
+
+		}
+
+		//MAPE FINAL CALC
+		if (evalFO == MAPE_INDEX || validationMode == true)
+		{
+			foIndicator[MAPE_INDEX] *= 100;
+			foIndicator[MAPE_INDEX] /= nSamples;
+		}
+
+		if (evalFO == SMAPE_INDEX || validationMode == true)
+		{
+			foIndicator[SMAPE_INDEX] *= 100;
+			foIndicator[SMAPE_INDEX] /= nSamples;
+		}
+
+		if (evalFO == WMAPE_INDEX || validationMode == true)
+		{
+			foIndicator[WMAPE_INDEX] *= 100;
+			foIndicator[WMAPE_INDEX] /= nSamples;
+		}
+
+		if (evalFO == MSE_INDEX || validationMode == true)
+			foIndicator[MSE_INDEX] /= nSamples;
+
+		if (evalFO == RMSE_INDEX || validationMode == true)
+			foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
+
+		// ===================  MAPE FOR EACH STEP AHEAD ========================
+		/*for (int mp = 0; mp < stepsAhead; mp++)
+		 {
+		 foIndicatorStepsAhead[MAPE_INDEX][mp] = foIndicatorStepsAhead[0][mp] * 100;
+
+		 foIndicatorStepsAhead[MAPE_INDEX][mp] = foIndicatorStepsAhead[0][mp] / ((nForecastingValidations - notUsedForTest) / stepsAhead);
+		 }
+		 */
+		// ===================  MAPE FOR EACH STEP AHEAD ========================
+		//cout << foIndicator[MAPE_INDEX] << endl;
+		//MSE AND RSME FINAL CALC
+		//PINBALL FINAL CALC
+		if (evalFO == PINBALL_INDEX || validationMode == true)
+		{
+			foIndicator[PINBALL_INDEX] /= nSamples;
+		}
+		/*
+		 double minPinball = 1000000;
+		 double pinbalError;
+		 for (int pF = 0; pF < 20; pF++)
+		 {
+		 vPinballFunctions[pF].first /= (nForTargetFile - earliestInput);
+		 if (vPinballFunctions[pF].first < minPinball)
+		 {
+		 minPinball = vPinballFunctions[pF].first;
+		 pinbalError = vPinballFunctions[pF].second;
+		 }
+		 }
+
+		 foIndicator[PINBALL_INDEX] = minPinball;
+		 foIndicator[PINBALL_ERROR_INDEX] = pinbalError;*/
+
+		//cout << "Fo Indicator:";
+		//cout << foIndicator << endl;
+		//cout << "steps Ahead:";
+		//cout << foIndicatorStepsAhead << endl;
+		return foIndicator;
+	}
 	virtual bool betterThan(double a, double b)
 	{
 		// MINIMIZATION

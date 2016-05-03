@@ -451,7 +451,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 		}
 		fprintf(fResults, "\n");
 
-		getchar();
+
 //		foIndicators.push_back(sol->second.evaluation());
 //		foIndicators.push_back(argvTargetTimeSeries);
 //		foIndicators.push_back(argvMaxLagRate);

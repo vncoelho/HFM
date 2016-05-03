@@ -22,6 +22,7 @@
 #include "./HFM/mainForecastingCodes/HFModel.cpp"
 #include "./HFM/mainForecastingCodes/CIF_WCCI.hpp"
 #include "./HFM/mainForecastingCodes/GAPSO.hpp"
+#include "./HFM/mainForecastingCodes/EEGLearning.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -72,6 +73,7 @@ int main(int argc, char **argv)
 	type = 2016; //GAPSO
 
 	type = 99992;
+	type = 1111111;
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
@@ -155,6 +157,12 @@ int main(int argc, char **argv)
 	case 2016: //James Taylor 2007
 		r = GAPSO_SKU(argc, argv);
 		cout << "Program ended successfully in GAPSO-SKU forecasting!" << endl;
+		return r;
+		break;
+
+	case 1111111: //James Taylor 2007
+		r = EEGLearning(argc, argv);
+		cout << "Program ended successfully in EEG learning!" << endl;
 		return r;
 		break;
 

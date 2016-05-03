@@ -12,6 +12,7 @@
 #include "Evaluation.h"
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
+#include "treatForecasts.hpp"
 #include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/ES.hpp"
 #include "../../OptFrame/Heuristics/Empty.hpp"
 #include "../../OptFrame/NSSeq.hpp"
@@ -301,12 +302,17 @@ public:
 
 		int maxLag = problemParam.getMaxLag();
 		vector<double> validationSetValues;
-		for (int i = (vForecastingsValidation[0].size() - problemParam.getStepsAhead()); i < vForecastingsValidation[0].size(); i++)
+//		for (int i = (vForecastingsValidation[0].size() - problemParam.getStepsAhead()); i < vForecastingsValidation[0].size(); i++)
+//			validationSetValues.push_back(vForecastingsValidation[0][i]);
+
+		for (int i = maxLag; i < vForecastingsValidation[0].size(); i++)
 			validationSetValues.push_back(vForecastingsValidation[0][i]);
 
+//		cout << validationSetValues << endl;
+//		getchar();
 		foIndicatorNew = eval->getAccuracy(validationSetValues, estimatedValues, true);
-		cout << "insideForecastClassNew" << endl;
-		cout << foIndicatorNew << endl;
+//		cout << "insideForecastClassNew" << endl;
+//		cout << foIndicatorNew << endl;
 
 		return foIndicatorNew;
 	}
