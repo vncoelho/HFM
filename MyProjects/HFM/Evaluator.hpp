@@ -60,7 +60,7 @@ public:
 	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _evalFO, int _aprox) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), evalFO(_evalFO), aprox(_aprox)
 	{
-		roundToZero = false; // If true, forecasts are all rounded to 0!
+		roundToZero = false; // If true, forecasts are all rounded to 0! TODO
 		targetFile = 0; //this is the file to be learned
 
 		stepsAhead = problemParam.getStepsAhead();
@@ -455,6 +455,7 @@ public:
 
 		vector<double> allForecasts;
 
+		//for (int begin = maxLag; begin < nForTargetFile; begin ++) // main loop that varries all the time series
 		for (int begin = maxLag; begin < nForTargetFile; begin += stepsAhead) // main loop that varries all the time series
 		{
 			vector<double> predicteds = returnForecasts(rep, vForecastings, begin);

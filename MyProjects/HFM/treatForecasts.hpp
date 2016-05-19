@@ -11,7 +11,6 @@
 namespace EFP
 {
 
-
 const int MAPE_INDEX = 0;
 const int PINBALL_INDEX = 1;
 const int MSE_INDEX = 2;
@@ -25,7 +24,6 @@ static bool comparaTreatQuantiles(double d1, double d2)
 {
 	return d1 < d2;
 }
-
 
 class treatForecasts
 {
@@ -104,6 +102,21 @@ public:
 		return forecastings[file].size();
 	}
 
+	vector<double> getTSFile(int file)
+	{
+		return forecastings[file];
+	}
+	vector<vector<double> > getTS()
+	{
+		return forecastings;
+	}
+
+	void setTSFile(vector<double> newTS, int file)
+	{
+		forecastings[file].clear();
+		forecastings[file] = newTS;
+	}
+
 	vector<vector<double> > readQuantilesFromFile(string quantilFile, int fileStepsAhead)
 	{
 		vector < vector<double> > quantiles(fileStepsAhead);
@@ -166,6 +179,21 @@ public:
 		vector<double> partsOfForecasts(forecastings[file].end() - nPoints - e, forecastings[file].end() - e);
 
 		return partsOfForecasts;
+	}
+
+	vector<double> getPercentageFromBeginToEnd(int file, int b, double percentage)
+	{
+
+		int nS = getForecastsSize(file) * percentage;
+
+		return getPartsForecastsBeginToEnd(file, b, nS);
+	}
+
+	vector<double> getPercentageFromEndToBegin(int file, int e, double percentage)
+	{
+		int nS = getForecastsSize(file) * percentage;
+
+		return getPartsForecastsEndToBegin(file, e, nS);
 	}
 
 	vector<double> getPartsForecastsEndToBegin(vector<double> forecasts, int e, int nPoints)

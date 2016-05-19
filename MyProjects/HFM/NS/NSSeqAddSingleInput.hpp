@@ -44,8 +44,8 @@ public:
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
 	{
 		rep.singleIndex.push_back(make_pair(file, K));
-//		if (K > rep.earliestInput)
-//			rep.earliestInput = K;
+		if (K > rep.earliestInput)
+			rep.earliestInput = K;
 
 		int nEXV = file;
 		int mean = pEFP.getMean(nEXV);
@@ -180,7 +180,7 @@ public:
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
 	{
 
-		int K = rg.rand(maxLag) + 1;
+		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
 		int file = rg.rand(pEFP.getNumberExplanatoryVariables());
 
 		return *new MoveNEIGHAddSingleInput(file, K, false, pEFP, rg); // return a random move

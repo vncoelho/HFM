@@ -38,7 +38,7 @@ struct RepEFP
 	vector<vector<pair<int, int> > > derivativeIndex;
 	vector<vector<double> > derivativeFuzzyRS;
 
-	//int earliestInput;
+	int earliestInput;
 
 	double alpha;
 

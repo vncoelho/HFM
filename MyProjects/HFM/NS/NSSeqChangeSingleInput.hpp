@@ -38,14 +38,14 @@ public:
 	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
 	{
 		bool minimumLag = false;
-		bool maxLag = false;
+		bool maxLagCheck = false;
 		if (rule >= 0)
 		{
-			minimumLag = ((rep.singleIndex[rule].second + 1) <= maxLag);
-			maxLag = ((rep.singleIndex[rule].second - 1) > 0);
+			maxLagCheck = ((rep.singleIndex[rule].second + 1) <= maxLag);
+			minimumLag = ((rep.singleIndex[rule].second - 1) > 0);
 		}
 
-		return minimumLag && maxLag && (rule >= 0) && (rule < rep.singleIndex.size());
+		return minimumLag && maxLagCheck && (rule >= 0) && (rule < rep.singleIndex.size());
 	}
 
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
@@ -56,8 +56,8 @@ public:
 		else
 			rep.singleIndex[rule].second -= 1;
 
-//		if (rep.singleIndex[rule].second > rep.earliestInput)
-//			rep.earliestInput = rep.singleIndex[rule].second;
+		if (rep.singleIndex[rule].second > rep.earliestInput)
+			rep.earliestInput = rep.singleIndex[rule].second;
 
 		return new MoveNEIGHChangeSingleInput(rule, !sign, maxLag, maxUpperLag);
 	}

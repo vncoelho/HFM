@@ -246,6 +246,7 @@ public:
 
 			int pSP = rg.rand(precisionSP);
 
+
 			for (int p = 0; p < pSP; p++)
 			{
 
@@ -373,7 +374,7 @@ public:
 		newRep.averageFuzzyRS = averageFuzzyRS;
 		newRep.derivativeIndex = derivativeIndex;
 		newRep.derivativeFuzzyRS = derivativeFuzzyRS;
-		//newRep.earliestInput = earliestInput;
+		newRep.earliestInput = earliestInput;
 
 		vector<double> vAlpha(NAJUSTS, rg.randG(0, 0.1));
 		newRep.alpha = rg.rand(100) / 10000.0;
