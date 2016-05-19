@@ -14,7 +14,7 @@
 #include "./HFM/NS/NSSeqChangeSingleInput.hpp"
 #include "./HFM/NS/NSSeqRemoveSingleInput.hpp"
 #include "./HFM/NS/NSSeqAddSingleInput.hpp"
-#include "./HFM/OptimalLinearRegression.hpp"
+//#include "./HFM/OptimalLinearRegression.hpp"
 #include "./HFM/ConstructiveRandom.hpp"
 #include "./HFM/ConstructiveRandomACF.hpp"
 #include "./HFM/HFMESContinous.hpp"

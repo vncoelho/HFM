@@ -7,6 +7,7 @@
 #include <math.h>
 #include <iostream>
 #include <numeric>
+#include <iomanip>
 #include "../../../OptFrame/RandGen.hpp"
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
 
@@ -54,6 +55,31 @@ vector<pair<int, int> > decisionMaking(vector<pair<double, int> > betterAVG, vec
 		volunteersPoints[betterAVG[m].second].second += metricWeights[m] * avgWeight;
 		volunteersPoints[betterMin[m].second].second += metricWeights[m] * minWeight;
 		volunteersPoints[betterMax[m].second].second -= metricWeights[m] * maxWeight;
+		volunteersPoints[betterGAP[m].second].second += metricWeights[m] * gapWeight;
+	}
+
+	sort(volunteersPoints.begin(), volunteersPoints.end(), comparaVolunteersPoints); // ordena com QuickSort
+
+//	cout << volunteersPoints << endl;
+	return volunteersPoints;
+}
+
+vector<pair<int, int> > decisionMaking3(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
+{
+	int nIQ = metricWeights.size(); //number of indicators of quality
+	int avgWeight = 4;
+	int minWeight = 1;
+	int maxWeight = 1;
+	int gapWeight = 3;
+	vector<pair<int, int> > volunteersPoints(nVolunteers);
+	for (int v = 0; v < nVolunteers; v++)
+		volunteersPoints[v] = make_pair(v, 0);
+
+	for (int m = 0; m < nIQ; m++)
+	{
+		volunteersPoints[betterAVG[m].second].second += metricWeights[m] * avgWeight;
+		volunteersPoints[betterMin[m].second].second += metricWeights[m] * minWeight;
+		volunteersPoints[betterMax[m].second].second += metricWeights[m] * maxWeight;
 		volunteersPoints[betterGAP[m].second].second += metricWeights[m] * gapWeight;
 	}
 
@@ -365,22 +391,37 @@ int EEGLearning(int argc, char **argv)
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	//seed = 1462831500;
+	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
 
-	int argvMaxLagRate = 3;
-	int argvTimeES = 5;
+	int argvMaxLagRate = 3; // percentage of ts to be used
+	int argvTimeES = 60;
 	int minTime = 0; // not used for now, since the random training time seams to be a bad idea TODO
 	int nVolunters = 4;
-	int maxNM = 1;
-	int argvFH = 30;
-	int fixedChannel = 40;
-	double trainingSetPercentage = 0.5;
+	int maxNM = 3;
+	int argvFH = 20;
+
+	//=============================================
+	//Learning instance and validation
+
+	double trainingSetPercentage = 0.7;
 	double validationSetPercentage = 1 - trainingSetPercentage;
 	trainingSetPercentage = 1;
 	validationSetPercentage = 1;
+
+	//Training experiment - 1 to 14
+	int expT = 1;
+	int expV = 2;
+
+	//Channel to be trained and channel to be validated
+	int fixedChannelT = 20;
+	int fixedChannelV = 20;
+
+	cout<<"expT: "<<expT<<" -- channel: "<<fixedChannelT<<" with "<<trainingSetPercentage*100<<"%"<<endl;
+	cout<<"expV: "<<expV<<" -- channel: "<<fixedChannelV<<" with "<<validationSetPercentage*100<<"%"<<endl;
+	//=============================================
 
 	//===================================
 	cout << "===========================" << endl;
@@ -441,7 +482,7 @@ int EEGLearning(int argc, char **argv)
 		{
 			int randomChannel = rg.rand(64) + 1;
 			randomChannel = 40;
-			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v << " -- EEG Channel " << fixedChannel << endl;
+			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v << " -- EEG Channel " << fixedChannelT << endl;
 
 			stringstream EEGTimeSeriesToBeLearned;
 			stringstream sName;
@@ -452,7 +493,7 @@ int EEGLearning(int argc, char **argv)
 				sName << "S0";
 			else
 				sName << "S";
-			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R01/Channel-" << fixedChannel;
+			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R0" << expT << "/Channel-" << fixedChannelT;
 
 			vector<string> explanatoryVariables;
 			explanatoryVariables.push_back(EEGTimeSeriesToBeLearned.str());
@@ -496,6 +537,7 @@ int EEGLearning(int argc, char **argv)
 	// A different experiment is verified
 	int nTruePositivesM1 = 0;
 	int nTruePositivesM2 = 0;
+	int nTruePositivesM3 = 0;
 	int nChannels = 1;
 	for (int hiddenV = 0; hiddenV < nVolunters; hiddenV++) // how is volunter v?
 	{
@@ -533,7 +575,7 @@ int EEGLearning(int argc, char **argv)
 					else
 						sName << "S";
 					//checkError << "./MyProjects/HFM/Instance/Physionet/S00" << hiddenV + 1 << "R01/Channel-" << i + 1;
-					checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R02/Channel-" << fixedChannel;
+					checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << fixedChannelV;
 					vector<string> validationExplanotoryVariables;
 					validationExplanotoryVariables.push_back(checkError.str());
 //				cout << "checking performance on " << checkError.str() << endl;
@@ -601,32 +643,39 @@ int EEGLearning(int argc, char **argv)
 
 		vector<pair<double, int> > lowerPairAVG = findBestPairsValuesByMetric(results, true);
 		vector<pair<double, int> > lowerPairMIN = findBestPairsValuesByMetric(resultsMin, true);
-		vector<pair<double, int> > lowerPairMAX = findBestPairsValuesByMetric(resultsMax, false);
+		vector<pair<double, int> > highestPairMAX = findBestPairsValuesByMetric(resultsMax, false);
+		vector<pair<double, int> > lowestPairMAX = findBestPairsValuesByMetric(resultsMax, true);
 		vector<pair<double, int> > lowerPairGAP = findBestPairsValuesByMetric(resultsGAP, true);
 
 //		cout << "AVG\n";
 //		cout << lowerPairAVG << endl;
 //		cout << results << endl;
-
+//
 //		cout << "MIN\n";
 //		cout << lowerPairMIN << endl;
 //		cout << resultsMin << endl;
 //
 //		cout << "MAX\n";
-//		cout << lowerPairMAX << endl;
+//		cout << highestPairMAX << endl;
+//		cout << lowestPairMAX << endl;
 //		cout << resultsMax << endl;
 //
 //		cout << "GAP\n";
 //		cout << lowerPairGAP << endl;
 //		cout << resultsGAP << endl;
+//		getchar();
 
-		vector<pair<int, int> > volunteerPoints = decisionMaking(lowerPairAVG, lowerPairMIN, lowerPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters);
-		cout << "\nM1 -- Model from volunteer:\t" << volunteerPoints[0].first << " is the most suitable for ts:\t" << hiddenV << endl;
+		vector<pair<int, int> > volunteerPoints = decisionMaking(lowerPairAVG, lowerPairMIN, highestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters);
+		cout << "\nM1 -- Model from volunteer: " << volunteerPoints[0].first << " is the most suitable for ts: " << hiddenV << endl;
 		cout << volunteerPoints << endl;
 
 		vector<pair<int, int> > volunteerPoints2 = decisionMaking2(results, resultsMin, resultsMax, resultsGAP, listOfIndicatorOfQualityWeights);
-		cout << "\nM2 -- Model from volunteer:\t" << volunteerPoints2[0].first << " is the most suitable for ts:\t" << hiddenV << endl;
+		cout << "\nM2 -- Model from volunteer: " << volunteerPoints2[0].first << " is the most suitable for ts: " << hiddenV << endl;
 		cout << volunteerPoints2 << endl;
+
+		vector<pair<int, int> > volunteerPoints3 = decisionMaking3(lowerPairAVG, lowerPairMIN, lowestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters);
+		cout << "\nM3 -- Model from volunteer: " << volunteerPoints3[0].first << " is the most suitable for ts: " << hiddenV << endl;
+		cout << volunteerPoints << endl;
 
 		//Checking true positives
 		if (volunteerPoints[0].first == hiddenV)
@@ -635,14 +684,18 @@ int EEGLearning(int argc, char **argv)
 		if (volunteerPoints2[0].first == hiddenV)
 			nTruePositivesM2++;
 
+		if (volunteerPoints3[0].first == hiddenV)
+			nTruePositivesM3++;
+
 		cout << "===================================================\n" << endl;
 
 	}
 	cout << "===================================================\n" << endl;
-	cout << "True positives are:\n" << "M1:" << nTruePositivesM1 << "\tM2:" << nTruePositivesM2 << endl;
+	cout << "True positives are:\n" << "M1:" << nTruePositivesM1 << "\tM2:" << nTruePositivesM2 << "\tM3:" << nTruePositivesM3 << endl;
 	double volunteerPointsM1Percentage = double(100.0 * nTruePositivesM1 / nVolunters);
 	double volunteerPointsM2Percentage = 100.0 * nTruePositivesM2 / nVolunters;
-	cout << "True percentage are:\n" << "M1:" << volunteerPointsM1Percentage << "\tM2:" << volunteerPointsM2Percentage << endl;
+	double volunteerPointsM3Percentage = 100.0 * nTruePositivesM3 / nVolunters;
+	cout << "True percentage are:\n" << "M1:" << volunteerPointsM1Percentage << "\tM2:" << volunteerPointsM2Percentage << "\tM3:" << volunteerPointsM3Percentage << endl;
 	cout << "===================================================\n" << endl;
 
 	// =================== PRINTING RESULTS ON FILE ========================
@@ -650,7 +703,7 @@ int EEGLearning(int argc, char **argv)
 
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 
-	fprintf(fResults, "%d\t%d\t%d\t%d\t%d\t%d\t%f\n", nTruePositivesM1, nTruePositivesM2, nVolunters, argvMaxLagRate, argvTimeES, argvFH, trainingSetPercentage);
+	fprintf(fResults, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%d\t%d\t\n", nTruePositivesM1, nTruePositivesM2, nTruePositivesM3, nVolunters, maxNM, argvMaxLagRate, argvTimeES, argvFH, trainingSetPercentage, validationSetPercentage, expT, expV);
 
 	fprintf(fResults, "\n");
 

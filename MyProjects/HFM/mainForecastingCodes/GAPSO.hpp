@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
+#include <iomanip>
 #include <numeric>
 #include "../../../OptFrame/RandGen.hpp"
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
