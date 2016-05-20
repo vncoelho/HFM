@@ -397,10 +397,10 @@ int EEGLearning(int argc, char **argv)
 	rg.setSeed(seed);
 
 	int argvMaxLagRate = 3; // percentage of ts to be used
-	int argvTimeES = 60;
+	int argvTimeES = 5;
 	int minTime = 0; // not used for now, since the random training time seams to be a bad idea TODO
 	int nVolunters = 4;
-	int maxNM = 3;
+	int maxNM = 1;
 	int argvFH = 20;
 
 	//=============================================
@@ -412,15 +412,15 @@ int EEGLearning(int argc, char **argv)
 	validationSetPercentage = 1;
 
 	//Training experiment - 1 to 14
-	int expT = 1;
-	int expV = 2;
+	int expT = 2;
+	int expV = 1;
 
 	//Channel to be trained and channel to be validated
-	int fixedChannelT = 20;
-	int fixedChannelV = 20;
+	int fixedChannelT = 30;
+	int fixedChannelV = 30;
 
-	cout<<"expT: "<<expT<<" -- channel: "<<fixedChannelT<<" with "<<trainingSetPercentage*100<<"%"<<endl;
-	cout<<"expV: "<<expV<<" -- channel: "<<fixedChannelV<<" with "<<validationSetPercentage*100<<"%"<<endl;
+	cout << "expT: " << expT << " -- channel: " << fixedChannelT << " with " << trainingSetPercentage * 100 << "%" << endl;
+	cout << "expV: " << expV << " -- channel: " << fixedChannelV << " with " << validationSetPercentage * 100 << "%" << endl;
 	//=============================================
 
 	//===================================
@@ -473,6 +473,12 @@ int EEGLearning(int argc, char **argv)
 
 	int nIndicatorsOfQuality = listOfIndicatorOfQuality.size();
 
+	vector<int> channelsToBeLearned;
+	for (int c = 1; c <= 64; c++)
+	{
+		channelsToBeLearned.push_back(c);
+	}
+
 	for (int v = 0; v < nVolunters; v++)
 	{
 //		vector<pair<Solution<RepEFP>&, Evaluation&>*> setOfLearningModels;
@@ -480,9 +486,10 @@ int EEGLearning(int argc, char **argv)
 		vector<HFMModelAndParam*> setOfHFMLearningModels;
 		for (int nM = 0; nM < maxNM; nM++)
 		{
-			int randomChannel = rg.rand(64) + 1;
-			randomChannel = 40;
-			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v << " -- EEG Channel " << fixedChannelT << endl;
+//			int randomChannel = rg.rand(64) + 1;
+//			randomChannel = 40;
+			int variableChannelT = channelsToBeLearned[nM];
+			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v << " -- EEG Channel " << variableChannelT << " -- exp" << expT << endl;
 
 			stringstream EEGTimeSeriesToBeLearned;
 			stringstream sName;
@@ -493,7 +500,8 @@ int EEGLearning(int argc, char **argv)
 				sName << "S0";
 			else
 				sName << "S";
-			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R0" << expT << "/Channel-" << fixedChannelT;
+			//EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R0" << expT << "/Channel-" << fixedChannelT;
+			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R0" << expT << "/Channel-" << variableChannelT;
 
 			vector<string> explanatoryVariables;
 			explanatoryVariables.push_back(EEGTimeSeriesToBeLearned.str());
@@ -523,7 +531,7 @@ int EEGLearning(int argc, char **argv)
 				currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
 
 //			setOfModelsStandardErrors.push_back(currentErrors);
-			HFMModelAndParam* HFMCurrentModelAndParams = new HFMModelAndParam(HFMmodel, currentErrors, fH, v, randomChannel);
+			HFMModelAndParam* HFMCurrentModelAndParams = new HFMModelAndParam(HFMmodel, currentErrors, fH, v, variableChannelT);
 			setOfHFMLearningModels.push_back(HFMCurrentModelAndParams);
 
 		}
@@ -533,12 +541,14 @@ int EEGLearning(int argc, char **argv)
 	}
 
 	cout << "The different time series has been learned with success!\n" << endl;
+	cout << "Time to check their performance...\n" << endl;
+
 	//Checking the performance of each HFM model in different EEG channels of different inviduals
 	// A different experiment is verified
 	int nTruePositivesM1 = 0;
 	int nTruePositivesM2 = 0;
 	int nTruePositivesM3 = 0;
-	int nChannels = 1;
+//	int nChannels = 1;
 	for (int hiddenV = 0; hiddenV < nVolunters; hiddenV++) // how is volunter v?
 	{
 		Matrix<double> results(nIndicatorsOfQuality, nVolunters);
@@ -563,48 +573,47 @@ int EEGLearning(int argc, char **argv)
 				pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = setOfVolunteersHFMLearningModels[v][nM]->HFMModel;
 				vector<double> modelStandardErrors = setOfVolunteersHFMLearningModels[v][nM]->forecastingErrors;
 				int modelFH = setOfVolunteersHFMLearningModels[v][nM]->fH;
+				int variableChannelV = setOfVolunteersHFMLearningModels[v][nM]->channel;
 
-				for (int i = 0; i < nChannels; i++)
-				{
-					stringstream checkError;
-					stringstream sName;
-					if (hiddenV + 1 <= 9)
-						sName << "S00";
-					else if (hiddenV + 1 <= 99)
-						sName << "S0";
-					else
-						sName << "S";
-					//checkError << "./MyProjects/HFM/Instance/Physionet/S00" << hiddenV + 1 << "R01/Channel-" << i + 1;
-					checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << fixedChannelV;
-					vector<string> validationExplanotoryVariables;
-					validationExplanotoryVariables.push_back(checkError.str());
+
+				stringstream checkError;
+				stringstream sName;
+				if (hiddenV + 1 <= 9)
+					sName << "S00";
+				else if (hiddenV + 1 <= 99)
+					sName << "S0";
+				else
+					sName << "S";
+				//checkError << "./MyProjects/HFM/Instance/Physionet/S00" << hiddenV + 1 << "R01/Channel-" << i + 1;
+				//checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << fixedChannelV;
+				checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << variableChannelV;
+				vector<string> validationExplanotoryVariables;
+				validationExplanotoryVariables.push_back(checkError.str());
 //				cout << "checking performance on " << checkError.str() << endl;
 
-					vector<double> currentErrors;
+				vector<double> currentErrors;
 
-					treatForecasts tFValidation(validationExplanotoryVariables);
-					tFValidation.setTSFile(tFValidation.getPercentageFromEndToBegin(0, 0, validationSetPercentage), 0);
+				treatForecasts tFValidation(validationExplanotoryVariables);
+				tFValidation.setTSFile(tFValidation.getPercentageFromEndToBegin(0, 0, validationSetPercentage), 0);
 
-					vector<double> allErrors = checkLearningAbility(tFValidation, HFMmodel, rg, modelFH);
+				vector<double> allErrors = checkLearningAbility(tFValidation, HFMmodel, rg, modelFH);
 
-					for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
-						currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
+				for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
+					currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
 
-					allValidationsByVolunter.push_back(currentErrors);
+				allValidationsByVolunter.push_back(currentErrors);
 
-					for (int m = 0; m < nIndicatorsOfQuality; m++)
-					{
-						sumOfErrors[m] += currentErrors[m];
+				for (int m = 0; m < nIndicatorsOfQuality; m++)
+				{
+					sumOfErrors[m] += currentErrors[m];
 
-						if (currentErrors[m] < minErrors[m])
-							minErrors[m] = currentErrors[m];
+					if (currentErrors[m] < minErrors[m])
+						minErrors[m] = currentErrors[m];
 
-						if (currentErrors[m] > maxErrors[m])
-							maxErrors[m] = currentErrors[m];
+					if (currentErrors[m] > maxErrors[m])
+						maxErrors[m] = currentErrors[m];
 
-						sumOfGAP[m] += abs(modelStandardErrors[m] - currentErrors[m]);
-					}
-
+					sumOfGAP[m] += abs(modelStandardErrors[m] - currentErrors[m]);
 				}
 
 			}
@@ -613,8 +622,8 @@ int EEGLearning(int argc, char **argv)
 
 			for (int m = 0; m < nIndicatorsOfQuality; m++)
 			{
-				sumOfErrors[m] /= (nChannels * maxNM);
-				sumOfGAP[m] /= (nChannels * maxNM);
+				sumOfErrors[m] /= maxNM;
+				sumOfGAP[m] /= maxNM;
 
 				results(m, v) = sumOfErrors[m];
 				resultsMin(m, v) = minErrors[m];
