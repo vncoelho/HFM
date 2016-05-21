@@ -39,7 +39,7 @@ static bool comparaVolunteersPoints2(pair<int, int> d1, pair<int, int> d2)
 	return d1.second < d2.second;
 }
 
-vector<pair<int, int> > decisionMaking(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
+vector<pair<int, int> > classificationRuleLessMax(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
 {
 	int nIQ = metricWeights.size(); //number of indicators of quality
 	int avgWeight = 4;
@@ -64,7 +64,7 @@ vector<pair<int, int> > decisionMaking(vector<pair<double, int> > betterAVG, vec
 	return volunteersPoints;
 }
 
-vector<pair<int, int> > decisionMaking3(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
+vector<pair<int, int> > classificationRulePlusMax(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
 {
 	int nIQ = metricWeights.size(); //number of indicators of quality
 	int avgWeight = 4;
@@ -89,7 +89,52 @@ vector<pair<int, int> > decisionMaking3(vector<pair<double, int> > betterAVG, ve
 	return volunteersPoints;
 }
 
-vector<pair<int, int> > decisionMaking2(Matrix<double> resultsAVG, Matrix<double> resultsMIN, Matrix<double> resultsMAX, Matrix<double> resultsGAP, vector<int> metricWeights)
+vector<pair<int, int> > classificationRuleNoGapSumMax(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
+{
+	int nIQ = metricWeights.size(); //number of indicators of quality
+	int avgWeight = 4;
+	int minWeight = 1;
+	int maxWeight = 1;
+	vector<pair<int, int> > volunteersPoints(nVolunteers);
+	for (int v = 0; v < nVolunteers; v++)
+		volunteersPoints[v] = make_pair(v, 0);
+
+	for (int m = 0; m < nIQ; m++)
+	{
+		volunteersPoints[betterAVG[m].second].second += metricWeights[m] * avgWeight;
+		volunteersPoints[betterMin[m].second].second += metricWeights[m] * minWeight;
+		volunteersPoints[betterMax[m].second].second += metricWeights[m] * maxWeight;
+	}
+
+	sort(volunteersPoints.begin(), volunteersPoints.end(), comparaVolunteersPoints); // ordena com QuickSort
+
+//	cout << volunteersPoints << endl;
+	return volunteersPoints;
+}
+
+vector<pair<int, int> > classificationRuleNoGapLessMax(vector<pair<double, int> > betterAVG, vector<pair<double, int> > betterMin, vector<pair<double, int> > betterMax, vector<pair<double, int> > betterGAP, vector<int> metricWeights, int nVolunteers)
+{
+	int nIQ = metricWeights.size(); //number of indicators of quality
+	int avgWeight = 4;
+	int minWeight = 1;
+	int maxWeight = 1;
+	vector<pair<int, int> > volunteersPoints(nVolunteers);
+	for (int v = 0; v < nVolunteers; v++)
+		volunteersPoints[v] = make_pair(v, 0);
+
+	for (int m = 0; m < nIQ; m++)
+	{
+		volunteersPoints[betterAVG[m].second].second += metricWeights[m] * avgWeight;
+		volunteersPoints[betterMin[m].second].second += metricWeights[m] * minWeight;
+		volunteersPoints[betterMax[m].second].second -= metricWeights[m] * maxWeight;
+	}
+
+	sort(volunteersPoints.begin(), volunteersPoints.end(), comparaVolunteersPoints); // ordena com QuickSort
+
+//	cout << volunteersPoints << endl;
+	return volunteersPoints;
+}
+vector<pair<int, int> > classificationRuleOrderLessMax(Matrix<double> resultsAVG, Matrix<double> resultsMIN, Matrix<double> resultsMAX, Matrix<double> resultsGAP, vector<int> metricWeights)
 {
 	int nVolunteers = resultsAVG.getNumCols();
 	int nIQ = metricWeights.size(); //number of indicators of quality
@@ -105,9 +150,7 @@ vector<pair<int, int> > decisionMaking2(Matrix<double> resultsAVG, Matrix<double
 	for (int m = 0; m < nIQ; m++)
 	{
 		vector<pair<int, double> > avgOrder(nVolunteers);
-
 		vector<pair<int, double> > minOrder(nVolunteers);
-
 		vector<pair<int, double> > maxOrder(nVolunteers);
 		vector<pair<int, double> > gapOrder(nVolunteers);
 		for (int v = 0; v < nVolunteers; v++)
@@ -134,10 +177,61 @@ vector<pair<int, int> > decisionMaking2(Matrix<double> resultsAVG, Matrix<double
 			volunteersPoints[minOrder[v].first].second += (metricWeights[m] * minWeight * (v + 1));
 			volunteersPoints[maxOrder[v].first].second -= (metricWeights[m] * maxWeight * (v + 1));
 			volunteersPoints[gapOrder[v].first].second += (metricWeights[m] * gapWeight * (v + 1));
-//			volunteersPoints[avgOrder[v].first].second += (1 * avgWeight * (v + 1));
-//			volunteersPoints[minOrder[v].first].second += (1 * minWeight * (v + 1));
-//			volunteersPoints[maxOrder[v].first].second -= (1 * maxWeight * (v + 1));
-//			volunteersPoints[gapOrder[v].first].second += (1 * gapWeight * (v + 1));
+		}
+
+	}
+
+	sort(volunteersPoints.begin(), volunteersPoints.end(), comparaVolunteersPoints); // ordena com QuickSort
+
+//	cout << volunteersPoints << endl;
+
+	return volunteersPoints;
+}
+
+
+vector<pair<int, int> > classificationRuleOrderPlusMax(Matrix<double> resultsAVG, Matrix<double> resultsMIN, Matrix<double> resultsMAX, Matrix<double> resultsGAP, vector<int> metricWeights)
+{
+	int nVolunteers = resultsAVG.getNumCols();
+	int nIQ = metricWeights.size(); //number of indicators of quality
+	int avgWeight = 4;
+	int minWeight = 1;
+	int maxWeight = 1;
+	int gapWeight = 3;
+
+	vector<pair<int, int> > volunteersPoints(nVolunteers);
+	for (int v = 0; v < nVolunteers; v++)
+		volunteersPoints[v] = make_pair(v, 0);
+
+	for (int m = 0; m < nIQ; m++)
+	{
+		vector<pair<int, double> > avgOrder(nVolunteers);
+		vector<pair<int, double> > minOrder(nVolunteers);
+		vector<pair<int, double> > maxOrder(nVolunteers);
+		vector<pair<int, double> > gapOrder(nVolunteers);
+		for (int v = 0; v < nVolunteers; v++)
+		{
+			avgOrder[v] = make_pair(v, resultsAVG(m, v));
+			minOrder[v] = make_pair(v, resultsMIN(m, v));
+			maxOrder[v] = make_pair(v, resultsMAX(m, v));
+			gapOrder[v] = make_pair(v, resultsGAP(m, v));
+		}
+		sort(avgOrder.begin(), avgOrder.end(), comparaVolunteersPoints); // ordena com QuickSort
+		sort(minOrder.begin(), minOrder.end(), comparaVolunteersPoints); // ordena com QuickSort
+		sort(maxOrder.begin(), maxOrder.end(), comparaVolunteersPoints); // ordena com QuickSort
+		sort(gapOrder.begin(), gapOrder.end(), comparaVolunteersPoints); // ordena com QuickSort
+
+//		cout << "ordered values for different IQ:" << m << endl;
+//		cout << avgOrder << endl;
+//		cout << minOrder << endl;
+//		cout << maxOrder << endl;
+//		cout << gapOrder << endl << endl;
+//		getchar();
+		for (int v = 0; v < nVolunteers; v++)
+		{
+			volunteersPoints[avgOrder[v].first].second += (metricWeights[m] * avgWeight * (v + 1));
+			volunteersPoints[minOrder[v].first].second += (metricWeights[m] * minWeight * (v + 1));
+			volunteersPoints[maxOrder[v].first].second += (metricWeights[m] * maxWeight * (v + 1));
+			volunteersPoints[gapOrder[v].first].second += (metricWeights[m] * gapWeight * (v + 1));
 		}
 
 	}
@@ -270,7 +364,7 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 	//int nTrainningRounds = 3;
 	//int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
 
-	cout << std::setprecision(9);
+	cout << std::setprecision(3);
 	cout << std::fixed;
 	double NTRaprox = (nTotalForecastingsTrainningSet - maxLag) / double(stepsAhead);
 	cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
@@ -391,36 +485,56 @@ int EEGLearning(int argc, char **argv)
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	seed = 1;
+//	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
 
+	if (argc != 6)
+	{
+		cout << "Parametros incorretos!" << endl;
+		cout << "Os parametros esperados sao: exp fh nTests timeES" << endl;
+		exit(1);
+	}
+
+	int argEXP = atoi(argv[1]);
+	int argvFH = atoi(argv[2]);
+	int maxNM = atoi(argv[3]);
+	int argvTimeES = atoi(argv[4]);
+	int argvNumberV = atoi(argv[5]);
+
+	int nVolunters = argvNumberV;
+
 	int argvMaxLagRate = 3; // percentage of ts to be used
-	int argvTimeES = 5;
-	int minTime = 0; // not used for now, since the random training time seams to be a bad idea TODO
-	int nVolunters = 4;
-	int maxNM = 1;
-	int argvFH = 20;
+
+	//Forcing some values TODO
+//	nVolunters = 4;
+//	argvFH = 20;
+//	argvTimeES = 5;
+//	maxNM = 3;
 
 	//=============================================
 	//Learning instance and validation
 
 	double trainingSetPercentage = 0.7;
 	double validationSetPercentage = 1 - trainingSetPercentage;
-	trainingSetPercentage = 1;
-	validationSetPercentage = 1;
+//	trainingSetPercentage = 1;
+//	validationSetPercentage = 1;
 
 	//Training experiment - 1 to 14
-	int expT = 2;
+	int expT = 1;
 	int expV = 1;
+	expT = argEXP;
+	expV = argEXP;
 
 	//Channel to be trained and channel to be validated
-	int fixedChannelT = 30;
-	int fixedChannelV = 30;
+//	int fixedChannelT = 30;
+//	int fixedChannelV = 30;
 
-	cout << "expT: " << expT << " -- channel: " << fixedChannelT << " with " << trainingSetPercentage * 100 << "%" << endl;
-	cout << "expV: " << expV << " -- channel: " << fixedChannelV << " with " << validationSetPercentage * 100 << "%" << endl;
+	//cout << "expT: " << expT << " -- channel: " << fixedChannelT << " with " << trainingSetPercentage * 100 << "%" << endl;
+	cout << maxNM << " models from " << nVolunters << " volunteers" << " expT " << expT << " with " << trainingSetPercentage * 100 << "%" << endl;
+	cout << "expV: " << expV << " with " << validationSetPercentage * 100 << "%" << endl;
+
 	//=============================================
 
 	//===================================
@@ -433,20 +547,8 @@ int EEGLearning(int argc, char **argv)
 	cout << "argvFH:" << argvFH << endl;
 	cout << "===========================" << endl << endl;
 
-//	vector<string> explanatoryVariables;
-//
-//	//DATA FROM LIU
-//	string v1R1 = "./MyProjects/HFM/Instance/Physionet/S001R01/Channel-1";
-////	string v1R2 = "./MyProjects/HFM/Instance/Physionet/S001R02/Channel-11";
-////	string v2R1 = "./MyProjects/HFM/Instance/Physionet/S002R01/Channel-11";
-////	string v2R2 = "./MyProjects/HFM/Instance/Physionet/S002R02/Channel-11";
-//	//	vTimeSeriesVoluntersChannels.push_back(v2R1);
-//	//	vTimeSeriesVoluntersChannels.push_back(v2R2);
-
 	//vector that carries each model that were trained and its characteristics and parameters
-	vector<vector<HFMModelAndParam*> > setOfVolunteersHFMLearningModels;
-//	vector<vector<pair<Solution<RepEFP>&, Evaluation&>*> > setOfVolunteersLearningModels;
-//	vector<vector<vector<double> > > setOfVolunteersStandardErrors;
+	vector<HFMModelAndParam*> setOfHFMLearningModels;
 
 	vector<int> listOfIndicatorOfQuality;
 	// this next, listOfIndicatorOfQualityWeights, vector is used in the decision making
@@ -474,21 +576,20 @@ int EEGLearning(int argc, char **argv)
 	int nIndicatorsOfQuality = listOfIndicatorOfQuality.size();
 
 	vector<int> channelsToBeLearned;
-	for (int c = 1; c <= 64; c++)
+	for (int c = 0; c < maxNM; c++)
 	{
-		channelsToBeLearned.push_back(c);
+		channelsToBeLearned.push_back(rg.rand(64) + 1);
+		//channelsToBeLearned.push_back(c+1); // this is for the case where all channels should be read
 	}
 
 	for (int v = 0; v < nVolunters; v++)
 	{
-//		vector<pair<Solution<RepEFP>&, Evaluation&>*> setOfLearningModels;
-//		vector<vector<double> > setOfModelsStandardErrors;
-		vector<HFMModelAndParam*> setOfHFMLearningModels;
+
 		for (int nM = 0; nM < maxNM; nM++)
 		{
 //			int randomChannel = rg.rand(64) + 1;
-//			randomChannel = 40;
 			int variableChannelT = channelsToBeLearned[nM];
+
 			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v << " -- EEG Channel " << variableChannelT << " -- exp" << expT << endl;
 
 			stringstream EEGTimeSeriesToBeLearned;
@@ -518,26 +619,20 @@ int EEGLearning(int argc, char **argv)
 			tFTraining.setTSFile(tFTraining.getPercentageFromBeginToEnd(0, 0, trainingSetPercentage), 0);
 
 			pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, contructiveNumberOfRules, fH);
-//			setOfLearningModels.push_back(HFMmodel);
 //			cout << "sol->first.getR().earliestInput: " << HFMmodel->first.getR().earliestInput << endl;
 //			cout<<HFMmodel->first.getR()<<endl;
 //			getchar();
 
 			vector<double> allErrors = checkLearningAbility(tFTraining, HFMmodel, rg, fH);
-//			cout << allErrors << endl;
-//			getchar();
 			vector<double> currentErrors;
 			for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
 				currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
+			//			cout << allErrors << endl;
+			//			getchar();
 
-//			setOfModelsStandardErrors.push_back(currentErrors);
 			HFMModelAndParam* HFMCurrentModelAndParams = new HFMModelAndParam(HFMmodel, currentErrors, fH, v, variableChannelT);
 			setOfHFMLearningModels.push_back(HFMCurrentModelAndParams);
-
 		}
-		setOfVolunteersHFMLearningModels.push_back(setOfHFMLearningModels);
-//		setOfVolunteersLearningModels.push_back(setOfLearningModels);
-//		setOfVolunteersStandardErrors.push_back(setOfModelsStandardErrors);
 	}
 
 	cout << "The different time series has been learned with success!\n" << endl;
@@ -545,112 +640,105 @@ int EEGLearning(int argc, char **argv)
 
 	//Checking the performance of each HFM model in different EEG channels of different inviduals
 	// A different experiment is verified
-	int nTruePositivesM1 = 0;
-	int nTruePositivesM2 = 0;
-	int nTruePositivesM3 = 0;
+
 //	int nChannels = 1;
+	int nClassificationRules = 6;
+	vector<int> truePositivesPerMetric(nClassificationRules, 0);
 	for (int hiddenV = 0; hiddenV < nVolunters; hiddenV++) // how is volunter v?
 	{
-		Matrix<double> results(nIndicatorsOfQuality, nVolunters);
+		cout << "===================================================\n" << endl;
+
+		Matrix<double> resultsAVG(nIndicatorsOfQuality, nVolunters);
 		Matrix<double> resultsMin(nIndicatorsOfQuality, nVolunters);
 		Matrix<double> resultsMax(nIndicatorsOfQuality, nVolunters);
 		Matrix<double> resultsGAP(nIndicatorsOfQuality, nVolunters);
-		cout << "===================================================\n" << endl;
+		vector<int> resultsCounter(nVolunters, 0); // can be removed, since allValidations[v].size() gives the number
+		vector<vector<vector<double> > > allValidations(nVolunters);
 
-		vector<vector<vector<double> > > allValidations;
-
+		float bigM = 10000000000;
 		for (int v = 0; v < nVolunters; v++)
-		{
-			vector<double> sumOfErrors(nIndicatorsOfQuality, 0);
-			vector<double> minErrors(nIndicatorsOfQuality, 1000000000);
-			vector<double> maxErrors(nIndicatorsOfQuality, -100000000);
-			vector<double> sumOfGAP(nIndicatorsOfQuality, 0);
-
-			vector<vector<double> > allValidationsByVolunter;
-
-			for (int nM = 0; nM < maxNM; nM++)
+			for (int m = 0; m < nIndicatorsOfQuality; m++)
 			{
-				pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = setOfVolunteersHFMLearningModels[v][nM]->HFMModel;
-				vector<double> modelStandardErrors = setOfVolunteersHFMLearningModels[v][nM]->forecastingErrors;
-				int modelFH = setOfVolunteersHFMLearningModels[v][nM]->fH;
-				int variableChannelV = setOfVolunteersHFMLearningModels[v][nM]->channel;
-
-
-				stringstream checkError;
-				stringstream sName;
-				if (hiddenV + 1 <= 9)
-					sName << "S00";
-				else if (hiddenV + 1 <= 99)
-					sName << "S0";
-				else
-					sName << "S";
-				//checkError << "./MyProjects/HFM/Instance/Physionet/S00" << hiddenV + 1 << "R01/Channel-" << i + 1;
-				//checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << fixedChannelV;
-				checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << variableChannelV;
-				vector<string> validationExplanotoryVariables;
-				validationExplanotoryVariables.push_back(checkError.str());
-//				cout << "checking performance on " << checkError.str() << endl;
-
-				vector<double> currentErrors;
-
-				treatForecasts tFValidation(validationExplanotoryVariables);
-				tFValidation.setTSFile(tFValidation.getPercentageFromEndToBegin(0, 0, validationSetPercentage), 0);
-
-				vector<double> allErrors = checkLearningAbility(tFValidation, HFMmodel, rg, modelFH);
-
-				for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
-					currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
-
-				allValidationsByVolunter.push_back(currentErrors);
-
-				for (int m = 0; m < nIndicatorsOfQuality; m++)
-				{
-					sumOfErrors[m] += currentErrors[m];
-
-					if (currentErrors[m] < minErrors[m])
-						minErrors[m] = currentErrors[m];
-
-					if (currentErrors[m] > maxErrors[m])
-						maxErrors[m] = currentErrors[m];
-
-					sumOfGAP[m] += abs(modelStandardErrors[m] - currentErrors[m]);
-				}
-
+				resultsAVG(m, v) = 0;
+				resultsGAP(m, v) = 0;
+				resultsMax(m, v) = -bigM;
+				resultsMin(m, v) = bigM;
 			}
 
-			allValidations.push_back(allValidationsByVolunter);
+		for (int nM = 0; nM < setOfHFMLearningModels.size(); nM++)
+		{
+			pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = setOfHFMLearningModels[nM]->HFMModel;
+			vector<double> modelStandardErrors = setOfHFMLearningModels[nM]->forecastingErrors;
+			int modelFH = setOfHFMLearningModels[nM]->fH;
+			int variableChannelV = setOfHFMLearningModels[nM]->channel;
+			int v = setOfHFMLearningModels[nM]->v;
+
+			stringstream checkError;
+			stringstream sName;
+			if (hiddenV + 1 <= 9)
+				sName << "S00";
+			else if (hiddenV + 1 <= 99)
+				sName << "S0";
+			else
+				sName << "S";
+			//checkError << "./MyProjects/HFM/Instance/Physionet/S00" << hiddenV + 1 << "R01/Channel-" << i + 1;
+			//checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << fixedChannelV;
+			checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << variableChannelV;
+			vector<string> validationExplanotoryVariables;
+			validationExplanotoryVariables.push_back(checkError.str());
+//				cout << "checking performance on " << checkError.str() << endl;
+
+			treatForecasts tFValidation(validationExplanotoryVariables);
+			tFValidation.setTSFile(tFValidation.getPercentageFromEndToBegin(0, 0, validationSetPercentage), 0);
+
+			vector<double> allErrors = checkLearningAbility(tFValidation, HFMmodel, rg, modelFH);
+			vector<double> currentErrors;
+
+			for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
+				currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
 
 			for (int m = 0; m < nIndicatorsOfQuality; m++)
 			{
-				sumOfErrors[m] /= maxNM;
-				sumOfGAP[m] /= maxNM;
+				resultsAVG(m, v) += currentErrors[m];
 
-				results(m, v) = sumOfErrors[m];
-				resultsMin(m, v) = minErrors[m];
-				resultsMax(m, v) = maxErrors[m];
-				resultsGAP(m, v) = sumOfGAP[m];
+				if (currentErrors[m] < resultsMin(m, v))
+					resultsMin(m, v) = currentErrors[m];
+
+				if (currentErrors[m] > resultsMax(m, v))
+					resultsMax(m, v) = currentErrors[m];
+
+				resultsGAP(m, v) += abs(modelStandardErrors[m] - currentErrors[m]);
+				resultsCounter[v]++;
 			}
-
-			cout << maxNM << " models from volunteer:" << v << "-->" << hiddenV << endl;
-
-			cout << "Average errors" << endl;
-			//<< " applied over all  errors vollunter " << v2 + 1 << " -- All channels from exp 2" << endl;
-			cout << sumOfErrors << endl;
-
-			cout << "Min errors" << endl;
-			//<< " applied over all  errors vollunter " << v2 + 1 << " -- All channels from exp 2" << endl;
-			cout << minErrors << endl;
-
-			cout << "Max errors" << endl;
-			cout << maxErrors << endl;
-
-			cout << "GAPS against standard errors" << endl;
-			cout << sumOfGAP << endl << endl;
-//			getchar();
+			allValidations[v].push_back(currentErrors);
 
 		}
 
-		vector<pair<double, int> > lowerPairAVG = findBestPairsValuesByMetric(results, true);
+		for (int v = 0; v < nVolunters; v++)
+			for (int m = 0; m < nIndicatorsOfQuality; m++)
+			{
+				resultsAVG(m, v) = resultsAVG(m, v) / resultsCounter[v];
+				resultsGAP(m, v) = resultsGAP(m, v) / resultsCounter[v];
+			}
+
+//		cout << maxNM << " models from volunteer:" << v << "-->" << hiddenV << endl;
+
+//			cout << "Average errors" << endl;
+//			//<< " applied over all  errors vollunter " << v2 + 1 << " -- All channels from exp 2" << endl;
+//			cout << sumOfErrors << endl;
+//
+//			cout << "Min errors" << endl;
+//			//<< " applied over all  errors vollunter " << v2 + 1 << " -- All channels from exp 2" << endl;
+//			cout << minErrors << endl;
+//
+//			cout << "Max errors" << endl;
+//			cout << maxErrors << endl;
+//
+//			cout << "GAPS against standard errors" << endl;
+//			cout << sumOfGAP << endl << endl;
+//			getchar();
+
+		vector<pair<double, int> > lowerPairAVG = findBestPairsValuesByMetric(resultsAVG, true);
 		vector<pair<double, int> > lowerPairMIN = findBestPairsValuesByMetric(resultsMin, true);
 		vector<pair<double, int> > highestPairMAX = findBestPairsValuesByMetric(resultsMax, false);
 		vector<pair<double, int> > lowestPairMAX = findBestPairsValuesByMetric(resultsMax, true);
@@ -674,47 +762,58 @@ int EEGLearning(int argc, char **argv)
 //		cout << resultsGAP << endl;
 //		getchar();
 
-		vector<pair<int, int> > volunteerPoints = decisionMaking(lowerPairAVG, lowerPairMIN, highestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters);
-		cout << "\nM1 -- Model from volunteer: " << volunteerPoints[0].first << " is the most suitable for ts: " << hiddenV << endl;
-		cout << volunteerPoints << endl;
+		vector<vector<pair<int, int> > > volunteerRankPerMetric;
+		volunteerRankPerMetric.push_back(classificationRuleLessMax(lowerPairAVG, lowerPairMIN, highestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters));
+		volunteerRankPerMetric.push_back(classificationRulePlusMax(lowerPairAVG, lowerPairMIN, lowestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters));
+		volunteerRankPerMetric.push_back(classificationRuleOrderLessMax(resultsAVG, resultsMin, resultsMax, resultsGAP, listOfIndicatorOfQualityWeights));
+		volunteerRankPerMetric.push_back(classificationRuleOrderPlusMax(resultsAVG, resultsMin, resultsMax, resultsGAP, listOfIndicatorOfQualityWeights));
+		volunteerRankPerMetric.push_back(classificationRuleNoGapSumMax(lowerPairAVG, lowerPairMIN, lowestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters));
+		volunteerRankPerMetric.push_back(classificationRuleNoGapLessMax(lowerPairAVG, lowerPairMIN, highestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters));
 
-		vector<pair<int, int> > volunteerPoints2 = decisionMaking2(results, resultsMin, resultsMax, resultsGAP, listOfIndicatorOfQualityWeights);
-		cout << "\nM2 -- Model from volunteer: " << volunteerPoints2[0].first << " is the most suitable for ts: " << hiddenV << endl;
-		cout << volunteerPoints2 << endl;
 
-		vector<pair<int, int> > volunteerPoints3 = decisionMaking3(lowerPairAVG, lowerPairMIN, lowestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters);
-		cout << "\nM3 -- Model from volunteer: " << volunteerPoints3[0].first << " is the most suitable for ts: " << hiddenV << endl;
-		cout << volunteerPoints << endl;
+		for (int vPM = 0; vPM < nClassificationRules; vPM++)
+		{
+			cout << "\nM" << vPM << "-- Model from volunteer: " << volunteerRankPerMetric[vPM][0].first << " is the most suitable for ts: " << hiddenV << endl;
+			cout << volunteerRankPerMetric[vPM] << endl;
 
-		//Checking true positives
-		if (volunteerPoints[0].first == hiddenV)
-			nTruePositivesM1++;
-
-		if (volunteerPoints2[0].first == hiddenV)
-			nTruePositivesM2++;
-
-		if (volunteerPoints3[0].first == hiddenV)
-			nTruePositivesM3++;
+			//Checking true positives
+			if (volunteerRankPerMetric[vPM][0].first == hiddenV)
+				truePositivesPerMetric[vPM]++;
+		}
 
 		cout << "===================================================\n" << endl;
 
 	}
 	cout << "===================================================\n" << endl;
-	cout << "True positives are:\n" << "M1:" << nTruePositivesM1 << "\tM2:" << nTruePositivesM2 << "\tM3:" << nTruePositivesM3 << endl;
-	double volunteerPointsM1Percentage = double(100.0 * nTruePositivesM1 / nVolunters);
-	double volunteerPointsM2Percentage = 100.0 * nTruePositivesM2 / nVolunters;
-	double volunteerPointsM3Percentage = 100.0 * nTruePositivesM3 / nVolunters;
-	cout << "True percentage are:\n" << "M1:" << volunteerPointsM1Percentage << "\tM2:" << volunteerPointsM2Percentage << "\tM3:" << volunteerPointsM3Percentage << endl;
+	cout << "True positives are:\n";
+	for (int vPM = 0; vPM < nClassificationRules; vPM++)
+	{
+		cout << "M" << vPM << ":" << truePositivesPerMetric[vPM] << "\t";
+	}
+	cout << "\n";
+	cout << "True percentage are:\n";
+	for (int vPM = 0; vPM < nClassificationRules; vPM++)
+	{
+		double tempPercentage = 100.0 * truePositivesPerMetric[vPM] / nVolunters;
+		cout << "M" << vPM << ":" << tempPercentage << "\t";
+	}
+	cout << "\n";
 	cout << "===================================================\n" << endl;
+
+	cout << maxNM << " models from " << nVolunters << " volunteers" << " expT " << expT << " with " << trainingSetPercentage * 100 << "%" << endl;
+	cout << "expV: " << expV << " with " << validationSetPercentage * 100 << "%" << endl;
 
 	// =================== PRINTING RESULTS ON FILE ========================
 	string calibrationFile = "./EEGLearningAccuracy";
 
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 
-	fprintf(fResults, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%f\t%f\t%d\t%d\t\n", nTruePositivesM1, nTruePositivesM2, nTruePositivesM3, nVolunters, maxNM, argvMaxLagRate, argvTimeES, argvFH, trainingSetPercentage, validationSetPercentage, expT, expV);
+	for (int vPM = 0; vPM < nClassificationRules; vPM++)
+	{
+		fprintf(fResults, "%d\t", truePositivesPerMetric[vPM]);
+	}
 
-	fprintf(fResults, "\n");
+	fprintf(fResults, "%d\t%d\t%d\t%d\t%d\t%f\t%f\t%d\t%d\t\n", nVolunters, maxNM, argvMaxLagRate, argvTimeES, argvFH, trainingSetPercentage, validationSetPercentage, expT, expV);
 
 	fclose(fResults);
 	// =======================================================

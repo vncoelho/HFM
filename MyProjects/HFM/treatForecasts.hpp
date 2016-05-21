@@ -11,15 +11,6 @@
 namespace EFP
 {
 
-const int MAPE_INDEX = 0;
-const int PINBALL_INDEX = 1;
-const int MSE_INDEX = 2;
-const int RMSE_INDEX = 3;
-const int PINBALL_ERROR_INDEX = 4;
-const int SMAPE_INDEX = 5;
-const int WMAPE_INDEX = 6;
-const int NMETRICS = 7;
-
 static bool comparaTreatQuantiles(double d1, double d2)
 {
 	return d1 < d2;
