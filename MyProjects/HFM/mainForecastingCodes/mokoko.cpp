@@ -13,18 +13,20 @@ using namespace std;
 using namespace optframe;
 using namespace EFP;
 
-int mokoko(int argc, char **argv)
+int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 {
 
-	cout << "Welcome to Mokoko place" << endl;
+	cout << "Welcome to Mokoko's place" << endl;
 	RandGenMersenneTwister rg;
-	//long
-	long seed = time(NULL); //CalibrationMode
-	seed = 1;
+
+	long seed = time(NULL);
+	seed = 1; // Fix the seed
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
 
+	//=================================================
+	//This comment part can be used for automatic generation of results
 //	if (argc != 10)
 //	{
 //		cout << "Parametros incorretos!" << endl;
@@ -55,19 +57,15 @@ int mokoko(int argc, char **argv)
 //	cout << "stepsAhead=" << stepsAhead << endl;
 //	cout << "mu=" << mu << endl;
 	//======================================
+	//=================================================
 
-	vector<string> vParametersFiles;
-	vParametersFiles.push_back("./MyProjects/ConfigParameters/JTEuropean/1Column_124Points");
-
-	//parametersFile = "./MyProjects/configParametersBestPrice3ColunaseForward";
-
+	//Mokokos boy - Mokoblaster - This vector contains the time series that will be learned.
+	// The model can receive more than one time series as input.
+	// in this case, the first one is considered as the target to be forecasted and the other one only as input (end
 	vector<string> explanatoryVariables;
-
-	string TriUm = "./MyProjects/EFP/Instance/Mokoko/1Tri";
-
-	explanatoryVariables.push_back(TriUm);
-
-
+	string inputTimeSeries = "./MyProjects/HFM/Instance/Mokoko/1Tri";
+	explanatoryVariables.push_back(inputTimeSeries);
+	//treatForecasts is the class that read and contains time series parameters
 	treatForecasts rF(explanatoryVariables);
 
 	//vector<vector<double> > batchOfBlindResults; //vector with the blind results of each batch
@@ -86,59 +84,28 @@ int mokoko(int argc, char **argv)
 
 	int maxPrecision = 20;
 	int maxTrainningRounds = 1000;
-
-	//int lambda = mu * 6;
-	double initialDesv;
-	double mutationDesv;
-
-	int maxMu = 100;
-	int maxInitialDesv = 10;
-	int maxMutationDesv = 30;
-
-
-
-	int timeES = 120;
-	int timeVND = 0;
-	int timeILS = 0;
-	int timeGRASP = 0;
+	int timeES = 5;
+	int stepsAheadR = 168;
 
 	vector<vector<double> > vfoIndicatorCalibration; //vector with the FO of each batch
 
 	vector<SolutionEFP> vSolutionsBatches; //vector with the solution of each batch
-	int stepsAheadR = 168;
-	int nBatches = 10;
 	// Matrix with forecasts of each batch of training and validation
 	vector<vector<double> > batchOfResults;
-
+	int nBatches = 5;
 	for (int n = 0; n < nBatches; n++)
 	{
-		int randomPrecision = rg.rand(maxPrecision) + 10;
-		int randomParametersFiles = rg.rand(vParametersFiles.size());
-		int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
-		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
-		int construtive = rg.rand(2);
-		initialDesv = rg.rand(maxInitialDesv) + 1;
-		mutationDesv = rg.rand(maxMutationDesv) + 1;
-		int mu = rg.rand(maxMu) + 1;
-		int lambda = mu * 6;
-		double alphaACF = rg.rand01(); //limit ACF for construtive ACF
-		int alphaSign = rg.rand(2);
-		if (alphaSign == 0)
-			alphaACF = alphaACF * -1;
-
+		int modelInitialNumberOfRules = rg.rand(maxPrecision) + 10;
 		// ============ FORCES ======================
 		// OPTIMIZATION PARAMETERS
-		mu = 100;
-		lambda = mu * 6;
-		initialDesv = 10;
-		mutationDesv = 20;
+		int mu = 100;
+		int lambda = mu * 6;
 		// ================================
 		//randomPrecision = 100;
-		randomParametersFiles = 0; // INUTIL // TODO REMOVER
-		evalFOMinimizer = MAPE_INDEX;
-		evalAprox = 0; // FIXED in 2
-		construtive = 2; // LAST BUILDER USING ACF CORRELATION IN ORDER TO CHOOSE MODEL's INPUTS
-		alphaACF = 0;
+		int evalFOMinimizer = MAPE_INDEX; // You can choose several function to be minimized -- check evaluator
+		int evalAprox = 0; // This is an approximation -- Check the evaluator class and the paper of Enayatafar
+		int construtive = 2; // As standand, construtive 2 is being adopted -- there is another one, but worse results
+		int alphaACF = 0; // The limit that guides the initial input of the model from [-1,1]
 		// ============ END FORCES ======================
 
 		// ============= METHOD PARAMETERS=================
@@ -147,12 +114,12 @@ int mokoko(int argc, char **argv)
 		//seting up ES params
 		methodParam.setESMU(mu);
 		methodParam.setESLambda(lambda);
-		methodParam.setESInitialDesv(initialDesv);
-		methodParam.setESMutationDesv(mutationDesv);
+		methodParam.setESInitialDesv(10); // used only if Continuous Evolution Strategies is being used
+		methodParam.setESMutationDesv(10); // used only if Continuous Evolution Strategies is being used
 		methodParam.setESMaxG(100000);
 		//seting up Construtive params
 		methodParam.setConstrutiveMethod(construtive);
-		methodParam.setConstrutivePrecision(randomPrecision);
+		methodParam.setConstrutivePrecision(modelInitialNumberOfRules);
 		vector<double> vAlphaACFlimits;
 		vAlphaACFlimits.push_back(alphaACF);
 		methodParam.setConstrutiveLimitAlphaACF(vAlphaACFlimits);
@@ -162,7 +129,7 @@ int mokoko(int argc, char **argv)
 		// ==========================================
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+		ProblemParameters problemParam;
 
 		problemParam.setStepsAhead(stepsAheadR);
 		int stepsAhead = problemParam.getStepsAhead();
@@ -197,43 +164,28 @@ int mokoko(int argc, char **argv)
 
 		pair<Solution<RepEFP>&, Evaluation&>* sol;
 
-		int optMethod = rg.rand(2);
-		optMethod = 0;
-		if (optMethod == 0)
-			sol = forecastObject.run(timeES, timeVND, timeILS);
-		else
-			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
+		sol = forecastObject.run(timeES, 0, 0);
 
-		//int maxLag = sol->first.getR().earliestInput + beginTrainingSet;
 		int maxLag = problemParam.getMaxLag();
-		vector<vector<double> > validationSet; //validation set for calibration
-		validationSet.push_back(rF.getLastForecasts(0, maxLag));
-		//validationSet.push_back(validationSetPure);
-
-		double intervalOfBeginTrainningSet = double(beginTrainingSet) / double(rF.getForecastsDataSize());
-
+		//validation set for calibration
+		vector<vector<double> > validationSet;
+		validationSet.push_back(rF.getLastForecasts(0, maxLag + stepsAhead));
 		batchOfResults.push_back(forecastObject.returnForecasts(sol, validationSet));
+
+
 		vector<double> foIndicatorCalibration;
 		foIndicatorCalibration = forecastObject.returnErrors(sol, validationSet);
-		foIndicatorCalibration.push_back(randomPrecision);
-		foIndicatorCalibration.push_back(randomParametersFiles);
+		foIndicatorCalibration.push_back(modelInitialNumberOfRules);
 		foIndicatorCalibration.push_back(nTrainningRounds);
 		foIndicatorCalibration.push_back(beginTrainingSet);
-		foIndicatorCalibration.push_back(intervalOfBeginTrainningSet);
 		foIndicatorCalibration.push_back(nTotalForecastingsTrainningSet);
 		foIndicatorCalibration.push_back(mu);
 		foIndicatorCalibration.push_back(lambda);
-		foIndicatorCalibration.push_back(initialDesv);
-		foIndicatorCalibration.push_back(mutationDesv);
 		foIndicatorCalibration.push_back(timeES);
-		foIndicatorCalibration.push_back(timeVND);
-		foIndicatorCalibration.push_back(timeILS);
-		foIndicatorCalibration.push_back(timeGRASP);
 		foIndicatorCalibration.push_back(evalFOMinimizer);
 		foIndicatorCalibration.push_back(evalAprox);
 		foIndicatorCalibration.push_back(construtive);
 		foIndicatorCalibration.push_back(alphaACF);
-		foIndicatorCalibration.push_back(optMethod);
 		foIndicatorCalibration.push_back(seed);
 		//getchar();
 		//cout << foIndicatorCalibration << endl;
@@ -241,6 +193,9 @@ int mokoko(int argc, char **argv)
 		vSolutionsBatches.push_back(sol->first);
 
 	}
+
+	cout << "Models has been trained with success!" << endl;
+	getchar();
 
 	vector<vector<double> > finalResultQuantis;
 
@@ -256,12 +211,15 @@ int mokoko(int argc, char **argv)
 		finalResultQuantis.push_back(quantis);
 	}
 
-	rF.exportQuantisVector(finalResultQuantis, "./EXPORAQUANTIL");
+	cout << "ok" << endl;
+	getchar();
+	rF.exportQuantisVector(finalResultQuantis, "./ExportQuantileMokoko");
+	cout << "ok2" << endl;
+	getchar();
 	rF.exportVectorOfVector(batchOfResults, "./MatrixOfBatchesAndForecasts");
-
-	cout<<"Pinball Function of Probabilistic Forecasting: \t"<<
-	rF.getPinball(finalResultQuantis,rF.getLastForecasts(0, stepsAheadR))<<endl;
-
+	cout << "ok3" << endl;
+	getchar();
+	cout << "Pinball Function of Probabilistic Forecasting: \t" << rF.getPinball(finalResultQuantis, rF.getLastForecasts(0, stepsAheadR)) << endl;
 
 	cout << vfoIndicatorCalibration << endl;
 	for (int n = 0; n < nBatches; n++)
@@ -273,7 +231,7 @@ int mokoko(int argc, char **argv)
 		cout << endl;
 	}
 
-	string calibrationFile = "./JamesTaylorSpainCalibration";
+	string calibrationFile = "./mokokosPlaceAggregatedResults";
 
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 	for (int n = 0; n < nBatches; n++)

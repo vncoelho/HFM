@@ -188,7 +188,6 @@ vector<pair<int, int> > classificationRuleOrderLessMax(Matrix<double> resultsAVG
 	return volunteersPoints;
 }
 
-
 vector<pair<int, int> > classificationRuleOrderPlusMax(Matrix<double> resultsAVG, Matrix<double> resultsMIN, Matrix<double> resultsMAX, Matrix<double> resultsGAP, vector<int> metricWeights)
 {
 	int nVolunteers = resultsAVG.getNumCols();
@@ -291,13 +290,13 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 	return bestPairs;
 }
 
-pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int _contructiveNumberOfRules, int _sa)
+pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int _sa)
 {
 
 	int mu = 100;
 	int lambda = mu * 6;
 	int evalFOMinimizer = evalFO;
-	int contructiveNumberOfRules = _contructiveNumberOfRules;
+	int contructiveNumberOfRules = 100;
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
@@ -479,9 +478,9 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 	return errors;
 }
 
-int EEGLearning(int argc, char **argv)
+int EEGBiometricSystem(int argc, char **argv)
 {
-	cout << "Welcome to EEG learning module!" << endl;
+	cout << "Welcome to EEG-Based Biometric system!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
@@ -502,30 +501,31 @@ int EEGLearning(int argc, char **argv)
 	int maxNM = atoi(argv[3]);
 	int argvTimeES = atoi(argv[4]);
 	int argvNumberV = atoi(argv[5]);
-
 	int nVolunters = argvNumberV;
 
-	int argvMaxLagRate = 3; // percentage of ts to be used
-
 	//Forcing some values TODO
-//	nVolunters = 4;
-//	argvFH = 20;
-//	argvTimeES = 5;
-//	maxNM = 3;
-
+	argEXP = 1;
+	argvFH = 80;
+	maxNM = 60;
+	argvTimeES = 10;
+	nVolunters = 4;
+	int argvMaxLagRate = 3; // percentage of ts to be used
+	bool randomFH = true;
+	bool randomChannel = true;
+	bool randomQI = false; //random indicator of quality (MAPE,SMAPE
 	//=============================================
 	//Learning instance and validation
 
 	double trainingSetPercentage = 0.7;
 	double validationSetPercentage = 1 - trainingSetPercentage;
-//	trainingSetPercentage = 1;
-//	validationSetPercentage = 1;
+	trainingSetPercentage = 1;
+	validationSetPercentage = 1;
 
 	//Training experiment - 1 to 14
 	int expT = 1;
 	int expV = 1;
 	expT = argEXP;
-	expV = argEXP;
+	expV = argEXP + 1;
 
 	//Channel to be trained and channel to be validated
 //	int fixedChannelT = 30;
@@ -576,9 +576,13 @@ int EEGLearning(int argc, char **argv)
 	int nIndicatorsOfQuality = listOfIndicatorOfQuality.size();
 
 	vector<int> channelsToBeLearned;
+	vector<int> fhToBeLearned;
+	vector<int> iQToBeLearned;
 	for (int c = 0; c < maxNM; c++)
 	{
 		channelsToBeLearned.push_back(rg.rand(64) + 1);
+		fhToBeLearned.push_back(rg.rand(argvFH) + 1);
+		iQToBeLearned.push_back(listOfIndicatorOfQuality[rg.rand(nIndicatorsOfQuality)]);
 		//channelsToBeLearned.push_back(c+1); // this is for the case where all channels should be read
 	}
 
@@ -587,38 +591,55 @@ int EEGLearning(int argc, char **argv)
 
 		for (int nM = 0; nM < maxNM; nM++)
 		{
-//			int randomChannel = rg.rand(64) + 1;
 			int variableChannelT = channelsToBeLearned[nM];
+			int fH = fhToBeLearned[nM]; //forecasting horizon
+			int evalFO = iQToBeLearned[nM];
+			int trainingTime = argvTimeES;
 
-			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v << " -- EEG Channel " << variableChannelT << " -- exp" << expT << endl;
+			if (!randomFH)
+			{
+				cout << "forcing FH in the learning phase!" << endl;
+				fH = argvFH;
+			}
+			if (!randomChannel)
+			{
+				cout << "forcing random channel in the learning phase!" << endl;
+				//int randomChannel = rg.rand(64) + 1;
+				variableChannelT = 10;
+			}
+			if (!randomQI)
+			{
+				cout << "forcing indicator of quality in the learning phase!" << endl;
+				evalFO = SMAPE_INDEX;
+			}
+
+			cout << "\nTraining model " << nM + 1 << "/" << maxNM << " of Volunteer " << v + 1 << " -- EEG Channel " << variableChannelT << " -- exp" << expT << endl;
 
 			stringstream EEGTimeSeriesToBeLearned;
 			stringstream sName;
+			stringstream expName;
 //			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/S00" << v + 1 << "R01/Channel-1";
 			if (v + 1 <= 9)
-				sName << "S00";
+				sName << "S00" << v + 1;
 			else if (v + 1 <= 99)
-				sName << "S0";
+				sName << "S0" << v + 1;
 			else
-				sName << "S";
-			//EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R0" << expT << "/Channel-" << fixedChannelT;
-			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << v + 1 << "R0" << expT << "/Channel-" << variableChannelT;
+				sName << "S" << v + 1;
+			if (expT <= 9)
+				expName << "R0" << expT;
+			else
+				expName << "R" << expT;
+			EEGTimeSeriesToBeLearned << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << expName.str() << "/Channel-" << variableChannelT;
 
 			vector<string> explanatoryVariables;
 			explanatoryVariables.push_back(EEGTimeSeriesToBeLearned.str());
 
 //			int trainingTime = rg.rand(argvTimeES) + minTime;
-			int trainingTime = argvTimeES;
-			int evalFO = listOfIndicatorOfQuality[rg.rand(nIndicatorsOfQuality)];
-			int contructiveNumberOfRules = 100;
-			int fH = argvFH;	// rg.rand(argvFH) + 1; //forecasting horizon
-			cout << "forcing some values in the learning phase!" << endl;
-			evalFO = SMAPE_INDEX;
 
 			treatForecasts tFTraining(explanatoryVariables);
 			tFTraining.setTSFile(tFTraining.getPercentageFromBeginToEnd(0, 0, trainingSetPercentage), 0);
 
-			pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, contructiveNumberOfRules, fH);
+			pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, fH);
 //			cout << "sol->first.getR().earliestInput: " << HFMmodel->first.getR().earliestInput << endl;
 //			cout<<HFMmodel->first.getR()<<endl;
 //			getchar();
@@ -671,19 +692,23 @@ int EEGLearning(int argc, char **argv)
 			vector<double> modelStandardErrors = setOfHFMLearningModels[nM]->forecastingErrors;
 			int modelFH = setOfHFMLearningModels[nM]->fH;
 			int variableChannelV = setOfHFMLearningModels[nM]->channel;
-			int v = setOfHFMLearningModels[nM]->v;
+			int modelV = setOfHFMLearningModels[nM]->v;
 
 			stringstream checkError;
 			stringstream sName;
+			stringstream expName;
 			if (hiddenV + 1 <= 9)
-				sName << "S00";
+				sName << "S00" << hiddenV + 1;
 			else if (hiddenV + 1 <= 99)
-				sName << "S0";
+				sName << "S0" << hiddenV + 1;
 			else
-				sName << "S";
-			//checkError << "./MyProjects/HFM/Instance/Physionet/S00" << hiddenV + 1 << "R01/Channel-" << i + 1;
-			//checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << fixedChannelV;
-			checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << hiddenV + 1 << "R0" << expV << "/Channel-" << variableChannelV;
+				sName << "S" << hiddenV + 1;
+			if (expT <= 9)
+				expName << "R0" << expV;
+			else
+				expName << "R" << expV;
+			checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << expName.str() << "/Channel-" << variableChannelV;
+
 			vector<string> validationExplanotoryVariables;
 			validationExplanotoryVariables.push_back(checkError.str());
 //				cout << "checking performance on " << checkError.str() << endl;
@@ -699,18 +724,18 @@ int EEGLearning(int argc, char **argv)
 
 			for (int m = 0; m < nIndicatorsOfQuality; m++)
 			{
-				resultsAVG(m, v) += currentErrors[m];
+				resultsAVG(m, modelV) += currentErrors[m];
 
-				if (currentErrors[m] < resultsMin(m, v))
-					resultsMin(m, v) = currentErrors[m];
+				if (currentErrors[m] < resultsMin(m, modelV))
+					resultsMin(m, modelV) = currentErrors[m];
 
-				if (currentErrors[m] > resultsMax(m, v))
-					resultsMax(m, v) = currentErrors[m];
+				if (currentErrors[m] > resultsMax(m, modelV))
+					resultsMax(m, modelV) = currentErrors[m];
 
-				resultsGAP(m, v) += abs(modelStandardErrors[m] - currentErrors[m]);
-				resultsCounter[v]++;
+				resultsGAP(m, modelV) += abs(modelStandardErrors[m] - currentErrors[m]);
+				resultsCounter[modelV]++;
 			}
-			allValidations[v].push_back(currentErrors);
+			allValidations[modelV].push_back(currentErrors);
 
 		}
 
@@ -769,7 +794,6 @@ int EEGLearning(int argc, char **argv)
 		volunteerRankPerMetric.push_back(classificationRuleOrderPlusMax(resultsAVG, resultsMin, resultsMax, resultsGAP, listOfIndicatorOfQualityWeights));
 		volunteerRankPerMetric.push_back(classificationRuleNoGapSumMax(lowerPairAVG, lowerPairMIN, lowestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters));
 		volunteerRankPerMetric.push_back(classificationRuleNoGapLessMax(lowerPairAVG, lowerPairMIN, highestPairMAX, lowerPairGAP, listOfIndicatorOfQualityWeights, nVolunters));
-
 
 		for (int vPM = 0; vPM < nClassificationRules; vPM++)
 		{

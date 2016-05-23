@@ -74,6 +74,7 @@ int main(int argc, char **argv)
 
 	type = 99992;
 	type = 1111111;
+	type = 69;
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
@@ -125,8 +126,8 @@ int main(int argc, char **argv)
 		break;
 
 	case 69: //James Taylor 2007
-		r = mokoko(argc, argv);
-		cout << "Program ended successfully in James Taylor Eurpean Dataset Mode" << endl;
+		r = mokokoProbabilisticForecastWindPower(argc, argv);
+		cout << "Program ended successfully in Mokoko's place configuration! \n Ziiz Gud ! \n A naice to meet you ! \n Godbye" << endl;
 		return r;
 		break;
 
@@ -161,7 +162,7 @@ int main(int argc, char **argv)
 		break;
 
 	case 1111111: //James Taylor 2007
-		r = EEGLearning(argc, argv);
+		r = EEGBiometricSystem(argc, argv);
 		cout << "Program ended successfully in EEG learning!" << endl;
 		return r;
 		break;

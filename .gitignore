@@ -5,5 +5,6 @@
 .settings
 WCCI_CFI_Calibration
 microGridCalibrationOnline
+EEGLearningAccuracy
 *.log
 mainHFMVRP
