@@ -195,7 +195,6 @@ int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 	}
 
 	cout << "Models has been trained with success!" << endl;
-	getchar();
 
 	vector<vector<double> > finalResultQuantis;
 
@@ -211,14 +210,9 @@ int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 		finalResultQuantis.push_back(quantis);
 	}
 
-	cout << "ok" << endl;
-	getchar();
+
 	rF.exportQuantisVector(finalResultQuantis, "./ExportQuantileMokoko");
-	cout << "ok2" << endl;
-	getchar();
 	rF.exportVectorOfVector(batchOfResults, "./MatrixOfBatchesAndForecasts");
-	cout << "ok3" << endl;
-	getchar();
 	cout << "Pinball Function of Probabilistic Forecasting: \t" << rF.getPinball(finalResultQuantis, rF.getLastForecasts(0, stepsAheadR)) << endl;
 
 	cout << vfoIndicatorCalibration << endl;

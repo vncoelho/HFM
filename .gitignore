@@ -6,5 +6,10 @@
 WCCI_CFI_Calibration
 microGridCalibrationOnline
 EEGLearningAccuracy
+MatrixOfBatchesAndForecasts
+JamesTaylorSpainCalibration
+GAPSO_InitialResults
+GAPSO_InitialResultsForecasts
+ExportQuantileMokoko
 *.log
 mainHFMVRP

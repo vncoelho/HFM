@@ -23,6 +23,8 @@
 #include "./HFM/mainForecastingCodes/CIF_WCCI.hpp"
 #include "./HFM/mainForecastingCodes/GAPSO.hpp"
 #include "./HFM/mainForecastingCodes/EEGLearning.hpp"
+#include "./HFM/mainForecastingCodes/hosseinData.hpp"
+#include "./HFM/mainForecastingCodes/MokokoWind.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -74,7 +76,9 @@ int main(int argc, char **argv)
 
 	type = 99992;
 	type = 1111111;
-	type = 69;
+//	type = 69;
+	type = 33333;
+	type = 692;
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
@@ -164,6 +168,19 @@ int main(int argc, char **argv)
 	case 1111111: //James Taylor 2007
 		r = EEGBiometricSystem(argc, argv);
 		cout << "Program ended successfully in EEG learning!" << endl;
+		return r;
+		break;
+
+
+	case 33333: //James Taylor 2007
+		r = hosseinBlindForecasts(argc, argv);
+		cout << "Program ended successfully in Hossein Model Blind !" << endl;
+		return r;
+		break;
+
+	case 692: //James Taylor 2007
+		r = mokokoWindSotavento(argc, argv);
+		cout << "Program ended successfully in Mokoko 2 !" << endl;
 		return r;
 		break;
 

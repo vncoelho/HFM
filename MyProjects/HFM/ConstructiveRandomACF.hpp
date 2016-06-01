@@ -61,6 +61,7 @@ public:
 		precisionSP = precision;
 		precisionMP = precision;
 		precisionDP = precision;
+		cout << "Inside constructive ACF -- Forcing average and derivative values" << endl;
 		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
 		precisionDP = 1;
 	}
@@ -167,6 +168,10 @@ public:
 		if (alphaACF.size() != numberExplanatoryVariables)
 		{
 			cout << "error on limits of ACF builder!" << endl;
+//			cout << "forcing some values...." << endl;
+//			for (int extraEV = 0; extraEV < (numberExplanatoryVariables - alphaACF.size()); extraEV++)
+//				alphaACF.push_back(alphaACF[0]);
+
 			exit(1);
 		}
 
@@ -185,16 +190,16 @@ public:
 		}
 
 		vector<vector<pair<double, int> > > acfGreedy(numberExplanatoryVariables);
+
 		if (acfPoints[0].size() == 1)
 		{
 			cout << "exiting Forecasting! There are no points to use as input of the model";
 			exit(1);
 		}
 
-		while (acfGreedy[0].size() == 0)
+		for (int nEXV = 0; nEXV < numberExplanatoryVariables; nEXV++)
 		{
-
-			for (int nEXV = 0; nEXV < numberExplanatoryVariables; nEXV++)
+			while (acfGreedy[nEXV].size() == 0)
 			{
 				vector<pair<double, int> > acfGreedyPoints;
 				for (int k = 0; k < acfPoints[nEXV].size(); k++)
@@ -208,7 +213,6 @@ public:
 				if ((acfGreedy[nEXV].size() == 0))
 					alphaACF[nEXV] -= 0.01;
 			}
-
 		}
 
 //		 cout << alphaACF << endl;
@@ -245,7 +249,6 @@ public:
 			double stdDesvWeight = pEFP.getStdDesv(0);
 
 			int pSP = rg.rand(precisionSP);
-
 
 			for (int p = 0; p < pSP; p++)
 			{
@@ -289,6 +292,7 @@ public:
 			//getchar();
 
 			int pMP = rg.rand(precisionMP);
+
 			for (int p = 0; p < pMP; p++)
 			{
 				int nAveragePoints = rg.rand(5) + 2;
@@ -411,7 +415,7 @@ public:
 		 */
 		//cout << "End of ACF sol generation!" << endl;
 		//getchar();
-		return *new TestSolution<RepEFP>(newRep);
+		return *new Solution<RepEFP>(newRep);
 	}
 
 };

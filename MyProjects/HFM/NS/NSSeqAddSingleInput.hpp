@@ -43,32 +43,39 @@ public:
 
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
 	{
-		rep.singleIndex.push_back(make_pair(file, K));
-		if (K > rep.earliestInput)
-			rep.earliestInput = K;
+		if (!reverse)
+		{
+			rep.singleIndex.push_back(make_pair(file, K));
+			if (K > rep.earliestInput)
+				rep.earliestInput = K;
 
-		int nEXV = file;
-		int mean = pEFP.getMean(nEXV);
-		int stdDesv = pEFP.getStdDesv(nEXV);
-		double meanWeight = pEFP.getMean(0); //File 0 is the target file
-		double stdDesvWeight = pEFP.getStdDesv(0);
+			int nEXV = file;
+			int mean = pEFP.getMean(nEXV);
+			int stdDesv = pEFP.getStdDesv(nEXV);
+			double meanWeight = pEFP.getMean(0); //File 0 is the target file
+			double stdDesvWeight = pEFP.getStdDesv(0);
 
-		double greater = rg.randG(mean, stdDesv);
-		double lower = rg.randG(mean, stdDesv);
-		double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
-		double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
+			double greater = rg.randG(mean, stdDesv);
+			double lower = rg.randG(mean, stdDesv);
+			double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
+			double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
 
-		vector<double> fuzzyRules;
-		int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
-		fuzzyRules.resize(NCOLUMNATRIBUTES);
-		fuzzyRules[GREATER] = greater;
-		fuzzyRules[GREATER_WEIGHT] = greaterWeight;
-		fuzzyRules[LOWER] = lower;
-		fuzzyRules[LOWER_WEIGHT] = lowerWeight;
-		fuzzyRules[EPSILON] = 1; //TODO TEST FOR TRAPEZOID
-		fuzzyRules[PERTINENCEFUNC] = fuzzyFunction; //PERTINENCE FUNCTION
+			vector<double> fuzzyRules;
+			int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+			fuzzyRules.resize(NCOLUMNATRIBUTES);
+			fuzzyRules[GREATER] = greater;
+			fuzzyRules[GREATER_WEIGHT] = greaterWeight;
+			fuzzyRules[LOWER] = lower;
+			fuzzyRules[LOWER_WEIGHT] = lowerWeight;
+			fuzzyRules[EPSILON] = 1; //TODO TEST FOR TRAPEZOID
+			fuzzyRules[PERTINENCEFUNC] = fuzzyFunction; //PERTINENCE FUNCTION
 
-		rep.singleFuzzyRS.push_back(fuzzyRules);
+			rep.singleFuzzyRS.push_back(fuzzyRules);
+		}
+		{
+			rep.singleIndex.erase(rep.singleIndex.begin() + K);
+			rep.singleFuzzyRS.erase(rep.singleFuzzyRS.begin() + K);
+		}
 		return new MoveNEIGHAddSingleInput(file, K, !reverse, pEFP, rg);
 	}
 

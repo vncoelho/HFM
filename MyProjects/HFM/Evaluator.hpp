@@ -27,7 +27,8 @@ const int RMSE_INDEX = 3;
 const int PINBALL_ERROR_INDEX = 4;
 const int SMAPE_INDEX = 5;
 const int WMAPE_INDEX = 6;
-const int NMETRICS = 7;
+const int MMAPE_INDEX = 7;
+const int NMETRICS = 8;
 
 float sigmoid(float x)
 {
@@ -89,13 +90,16 @@ public:
 	{
 		double value = 0;
 
+//		if ((K == 0) || ((i + pa - K) < 0) || ((i + pa - K) >= int(vForecastings[file].size())) )
 		if ((K == 0) || ((i + pa - K) < 0))
 		{
 			cout << "BUG Evaluator K (function getKValue) = " << K << endl;
+			cout << "BUG Evaluator K (function getKValue): (i + pa - K) = " << i + pa - K << endl;
+			cout << "BUG Evaluator K (function getKValue): vForecastings[file].size() = " << vForecastings[file].size() << endl;
 			getchar();
 		}
 
-		if ((pa >= K) && (file == 0) && (K > 0))
+		if ((pa >= K) && (file == targetFile) && (K > 0))
 		{
 			value = predicteds[pa - K];
 		}
@@ -336,7 +340,6 @@ public:
 		int sizeMP = rep.averageIndex.size();
 		int sizeDP = rep.derivativeIndex.size();
 
-//		int nForTargetFile = int(vForecastings[0].size());
 		int maxLag = problemParam.getMaxLag();
 
 		vector<double> predicteds;
@@ -458,7 +461,7 @@ public:
 
 	vector<double> returnTrainingSetForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings)
 	{
-		int nForTargetFile = vForecastings[0].size();
+		int nForTargetFile = vForecastings[targetFile].size();
 		int maxLag = problemParam.getMaxLag();
 		int nSamples = nForTargetFile - maxLag;
 
@@ -485,7 +488,7 @@ public:
 
 	vector<double> blindForecasting(const RepEFP& rep, const vector<vector<double> >& vForecastings)
 	{
-		vector<double> predicteds = returnForecasts(rep, vForecastings, vForecastings[0].size());
+		vector<double> predicteds = returnForecasts(rep, vForecastings, vForecastings[targetFile].size());
 		return predicteds;
 	}
 
@@ -684,17 +687,17 @@ public:
 		 for (int i = 0; i < foIndicatorStepsAhead.size(); i++)
 		 foIndicatorStepsAhead[i].resize(stepsAhead);*/
 
-		vector<vector<double> > vForecastings = pEFP.getForecastingsVector();
+		vector<vector<double> >& vForecastings = pEFP.getForecastingsVector();
 
 		//validation mode = false | returnforecasts = false
-		vector<double> estimatedValues = returnTrainingSetForecasts(rep, vForecastings);
+		vector<double> predictedValues = returnTrainingSetForecasts(rep, vForecastings);
 
 		int maxLag = problemParam.getMaxLag();
-		vector<double> trainingSetValues;
-		for (int i = maxLag; i < vForecastings[0].size(); i++)
-			trainingSetValues.push_back(vForecastings[0][i]);
+		vector<double> targetValues;
+		for (int i = maxLag; i < vForecastings[targetFile].size(); i++)
+			targetValues.push_back(vForecastings[targetFile][i]);
 
-		foIndicator = getAccuracy(trainingSetValues, estimatedValues, false);
+		foIndicator = getAccuracy(targetValues, predictedValues, false);
 
 		//foIndicator = returnForecastingsFO(rep, vForecastings, false, false);
 
@@ -703,11 +706,11 @@ public:
 		return *new EvaluationEFP(fo);
 	}
 
-	const vector<double> getAccuracy(vector<double> targetValues, vector<double> estimatedValues, bool validationMode)
+	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, bool validationMode)
 	{
 
 		int nSamples = targetValues.size();
-		if (targetValues.size() != estimatedValues.size())
+		if (nSamples != estimatedValues.size())
 		{
 			cout << "ERROR on GetAccuracy! Different sizes!" << endl;
 			cout << "targetValues.size() = " << targetValues.size() << "\t";
@@ -717,16 +720,16 @@ public:
 		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
 
 		double sumTarget = 0;
-
-		if (evalFO == WMAPE_INDEX || validationMode == true)
+		double avgTarget = 0;
+		if (evalFO == WMAPE_INDEX || evalFO == MMAPE_INDEX || validationMode == true)
 		{
-			for (int i = 0; i < int(targetValues.size()); i++)
-			{
+			for (int i = 0; i < nSamples; i++)
 				sumTarget += targetValues[i];
-			}
+
+			avgTarget = sumTarget/ nSamples;
 		}
 
-		for (int i = 0; i < int(targetValues.size()); i++)
+		for (int i = 0; i < nSamples; i++)
 		{
 			double estimation = estimatedValues[i];
 			double forecastingTarget = targetValues[i];
@@ -734,28 +737,23 @@ public:
 			if (forecastingTargetNotNull == 0)
 				forecastingTargetNotNull = 0.0001;
 
-			//MAPE
-			if (evalFO == MAPE_INDEX || validationMode == true)
-			{
-				foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTargetNotNull));
-			}
 
-			//SMAPE
+			double absDiff = abs(estimation - forecastingTarget);
+
+			if (evalFO == MAPE_INDEX || validationMode == true)
+				foIndicator[MAPE_INDEX] += (absDiff / abs(forecastingTargetNotNull));
+
 			if (evalFO == SMAPE_INDEX || validationMode == true)
-			{
-				foIndicator[SMAPE_INDEX] += (abs(estimation - forecastingTarget) / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
-			}
+				foIndicator[SMAPE_INDEX] += (absDiff / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
 
 			if (evalFO == WMAPE_INDEX || validationMode == true)
-			{
-				foIndicator[WMAPE_INDEX] += (abs(estimation - forecastingTarget) / sumTarget);
-				//				if (validationMode)
-				//					cout << "sumTarget:" << sumTarget << endl;
-			}
+				foIndicator[WMAPE_INDEX] += (absDiff / sumTarget);
 
-			//MSE or RMSE
+			if (evalFO == MMAPE_INDEX || validationMode == true)
+				foIndicator[MMAPE_INDEX] += (absDiff / avgTarget);
+
 			if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
-				foIndicator[MSE_INDEX] += pow((estimation - forecastingTarget), 2);
+				foIndicator[MSE_INDEX] += pow(absDiff, 2);
 
 			//PinballFunction
 			if (evalFO == PINBALL_INDEX || validationMode == true)
@@ -799,11 +797,24 @@ public:
 			foIndicator[WMAPE_INDEX] /= nSamples;
 		}
 
-		if (evalFO == MSE_INDEX || validationMode == true)
+		if (evalFO == MMAPE_INDEX || validationMode == true)
+		{
+			foIndicator[MMAPE_INDEX] *= 100;
+			foIndicator[MMAPE_INDEX] /= nSamples;
+		}
+
+		if (evalFO == PINBALL_INDEX || validationMode == true)
+		{
+			foIndicator[PINBALL_INDEX] /= nSamples;
+		}
+
+		if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
+		{
 			foIndicator[MSE_INDEX] /= nSamples;
 
-		if (evalFO == RMSE_INDEX || validationMode == true)
-			foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
+			if (evalFO == RMSE_INDEX || validationMode == true)
+				foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
+		}
 
 		// ===================  MAPE FOR EACH STEP AHEAD ========================
 		/*for (int mp = 0; mp < stepsAhead; mp++)
@@ -817,10 +828,7 @@ public:
 		//cout << foIndicator[MAPE_INDEX] << endl;
 		//MSE AND RSME FINAL CALC
 		//PINBALL FINAL CALC
-		if (evalFO == PINBALL_INDEX || validationMode == true)
-		{
-			foIndicator[PINBALL_INDEX] /= nSamples;
-		}
+
 		/*
 		 double minPinball = 1000000;
 		 double pinbalError;
@@ -864,8 +872,7 @@ public:
 		return idComponent();
 	}
 
-}
-;
+};
 
 }
 

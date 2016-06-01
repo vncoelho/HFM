@@ -251,13 +251,11 @@ public:
 
 			if (vectorType == 0)
 			{
-
 				if (rep.singleFuzzyRS.size() > 0)
 				{
 					o = rg.rand(rep.singleFuzzyRS.size()); //rep.size() options
 					r = rg.rand(rep.singleFuzzyRS[0].size());
 				}
-
 			}
 
 			if (vectorType == 1)
@@ -286,39 +284,25 @@ public:
 			return *new MoveNEIGHModifyRule(-1, -1, -1, -1, -1); // return a random move
 		}
 
-		int construtive = 1;
-
-		bool sign = rg.rand(2);
-
-		int nApplyValues = 11;
-		int applyRand = rg.rand(nApplyValues);
-		double applyValue = 1;
-
-		if (applyRand == 0)
-			applyValue = 0.01;
-		if (applyRand == 1)
-			applyValue = 0.1;
-		if (applyRand == 2)
-			applyValue = 1;
 
 		double mean = pEFP.getMean(0); //TODO mean from the targetfile
 
-		if (applyRand == 3)
-			applyValue = mean / 30;
-		if (applyRand == 4)
-			applyValue = mean / 15;
-		if (applyRand == 5)
-			applyValue = mean / 6;
-		if (applyRand == 6)
-			applyValue = mean;
-		if (applyRand == 7)
-			applyValue = mean * 2;
-		if (applyRand == 8)
-			applyValue = mean * 5;
-		if (applyRand == 9)
-			applyValue = mean * 100;
-		if (applyRand == 10)
-			applyValue = mean / 2;
+		vector<double> changeValuesX;
+		changeValuesX.push_back(0.01);
+		changeValuesX.push_back(0.1);
+		changeValuesX.push_back(1);
+		changeValuesX.push_back(mean / 30);
+		changeValuesX.push_back(mean / 15);
+		changeValuesX.push_back(mean / 6);
+		changeValuesX.push_back(mean / 2);
+		changeValuesX.push_back(mean);
+		changeValuesX.push_back(mean * 2);
+		changeValuesX.push_back(mean * 5);
+		changeValuesX.push_back(mean * 100);
+
+		int applyRand = rg.rand(changeValuesX.size());
+		double applyValue = changeValuesX[applyRand];
+		bool sign = rg.rand(2);
 
 		return *new MoveNEIGHModifyRule(r, o, applyValue, sign, vectorType); // return a random move
 	}

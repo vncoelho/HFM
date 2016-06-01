@@ -293,14 +293,14 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int _sa)
 {
 
+	int evalFOMinimizer = evalFO;
+	int nSA = _sa;
 	int mu = 100;
 	int lambda = mu * 6;
-	int evalFOMinimizer = evalFO;
 	int contructiveNumberOfRules = 100;
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
-	int nSA = _sa;
 
 	// ============ END FORCES ======================
 
@@ -351,6 +351,7 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 	int maxLag = problemParam.getMaxLag();
 
 	//If maxUpperLag is greater than 0 model uses predicted data
+	problemParam.setMaxUpperLag(-maxLag);
 	problemParam.setMaxUpperLag(0);
 	//int maxUpperLag = problemParam.getMaxUpperLag();
 	//=================================================
@@ -462,19 +463,14 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);
-	//int maxUpperLag = problemParam.getMaxUpperLag();
+
 	//=================================================
-	vector<double> foIndicators;
-	//this is a problem due to the difference between the size using argvMaxLagRate
 
 	vector<vector<double> > validationSet = tFValidation.getTS();
-//	validationSet.push_back(tFValidation.getPartsForecastsEndToBegin(0, 0, nTotalForecastingsTrainningSet));
-//cout<<validationSet<<endl;
-//getchar();
 
 	ForecastClass forecastObject(validationSet, problemParam, rg, methodParam);
-
 	vector<double> errors = forecastObject.returnErrors(sol, validationSet);
+
 	return errors;
 }
 
@@ -506,7 +502,7 @@ int EEGBiometricSystem(int argc, char **argv)
 	//Forcing some values TODO
 	argEXP = 1;
 	argvFH = 80;
-	maxNM = 60;
+	maxNM = 10;
 	argvTimeES = 10;
 	nVolunters = 4;
 	int argvMaxLagRate = 3; // percentage of ts to be used
@@ -518,14 +514,14 @@ int EEGBiometricSystem(int argc, char **argv)
 
 	double trainingSetPercentage = 0.7;
 	double validationSetPercentage = 1 - trainingSetPercentage;
-	trainingSetPercentage = 1;
-	validationSetPercentage = 1;
+	trainingSetPercentage = 0.3;
+	validationSetPercentage = 0.3;
 
 	//Training experiment - 1 to 14
 	int expT = 1;
-	int expV = 1;
-	expT = argEXP;
-	expV = argEXP + 1;
+	int expV = 2;
+//	expT = argEXP;
+//	expV = argEXP + 1;
 
 	//Channel to be trained and channel to be validated
 //	int fixedChannelT = 30;
@@ -588,7 +584,6 @@ int EEGBiometricSystem(int argc, char **argv)
 
 	for (int v = 0; v < nVolunters; v++)
 	{
-
 		for (int nM = 0; nM < maxNM; nM++)
 		{
 			int variableChannelT = channelsToBeLearned[nM];
@@ -694,28 +689,30 @@ int EEGBiometricSystem(int argc, char **argv)
 			int variableChannelV = setOfHFMLearningModels[nM]->channel;
 			int modelV = setOfHFMLearningModels[nM]->v;
 
-			stringstream checkError;
-			stringstream sName;
-			stringstream expName;
+			stringstream validationTSFile;
+			stringstream sVName;
+			stringstream expVName;
 			if (hiddenV + 1 <= 9)
-				sName << "S00" << hiddenV + 1;
+				sVName << "S00" << hiddenV + 1;
 			else if (hiddenV + 1 <= 99)
-				sName << "S0" << hiddenV + 1;
+				sVName << "S0" << hiddenV + 1;
 			else
-				sName << "S" << hiddenV + 1;
-			if (expT <= 9)
-				expName << "R0" << expV;
+				sVName << "S" << hiddenV + 1;
+
+			if (expV <= 9)
+				expVName << "R0" << expV;
 			else
-				expName << "R" << expV;
-			checkError << "./MyProjects/HFM/Instance/Physionet/" << sName.str() << expName.str() << "/Channel-" << variableChannelV;
+				expVName << "R" << expV;
+			validationTSFile << "./MyProjects/HFM/Instance/Physionet/" << sVName.str() << expVName.str() << "/Channel-" << variableChannelV;
 
 			vector<string> validationExplanotoryVariables;
-			validationExplanotoryVariables.push_back(checkError.str());
+			validationExplanotoryVariables.push_back(validationTSFile.str());
 //				cout << "checking performance on " << checkError.str() << endl;
 
 			treatForecasts tFValidation(validationExplanotoryVariables);
 			tFValidation.setTSFile(tFValidation.getPercentageFromEndToBegin(0, 0, validationSetPercentage), 0);
-
+//			cout << HFMmodel->first.getR() << endl;
+//			getchar();
 			vector<double> allErrors = checkLearningAbility(tFValidation, HFMmodel, rg, modelFH);
 			vector<double> currentErrors;
 

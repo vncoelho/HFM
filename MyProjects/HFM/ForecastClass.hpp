@@ -138,7 +138,7 @@ public:
 //		vNSeq.push_back(nsAddMeanM2);
 //		vNSeq.push_back(nsAddMeanM5);
 //		vNSeq.push_back(nsAddMeanBigM);
-		vNSeq.push_back(nsVAlpha);
+//		vNSeq.push_back(nsVAlpha);
 		vNSeq.push_back(nsModifyFuzzyRules);
 
 		//TODO check why ES goes more generations some time when we do not have improvements.
@@ -301,20 +301,44 @@ public:
 		vector<double> estimatedValues = eval->returnTrainingSetForecasts(sol->first.getR(), vForecastingsValidation);
 
 		int maxLag = problemParam.getMaxLag();
-		vector<double> validationSetValues;
-//		for (int i = (vForecastingsValidation[0].size() - problemParam.getStepsAhead()); i < vForecastingsValidation[0].size(); i++)
-//			validationSetValues.push_back(vForecastingsValidation[0][i]);
+		vector<double> targetValues;
 
 		for (int i = maxLag; i < vForecastingsValidation[0].size(); i++)
-			validationSetValues.push_back(vForecastingsValidation[0][i]);
+			targetValues.push_back(vForecastingsValidation[0][i]);
 
 //		cout << validationSetValues << endl;
 //		getchar();
-		foIndicatorNew = eval->getAccuracy(validationSetValues, estimatedValues, true);
+		foIndicatorNew = eval->getAccuracy(targetValues, estimatedValues, true);
 //		cout << "insideForecastClassNew" << endl;
 //		cout << foIndicatorNew << endl;
 
 		return foIndicatorNew;
+	}
+
+	vector<double> returnErrorsCallGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
+	{
+		return eval->getAccuracy(targetValues, estimatedValues, true);
+	}
+
+	vector<double> returnErrorsPersistance(vector<double> targetValues, int fH)
+	{
+
+		vector<double> estimatedValues;
+		int nSamples = targetValues.size();
+		for (int s = 1; s < nSamples; s += fH)
+			for (int k = 0; k < fH; k++)
+			{
+				if (s + k < nSamples)
+					estimatedValues.push_back(targetValues[s - 1]);
+			}
+
+//		cout<<targetValues<<endl;
+		targetValues.erase(targetValues.begin());
+//		cout << estimatedValues << endl;
+//		cout << targetValues << endl;
+//		getchar();
+
+		return eval->getAccuracy(targetValues,estimatedValues, true);
 	}
 
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)

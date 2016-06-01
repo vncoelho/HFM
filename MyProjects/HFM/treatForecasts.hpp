@@ -67,7 +67,8 @@ public:
 			Scanner scanner = *scannerFiles[exVar];
 
 			nForecastings[exVar] = scanner.nextInt();
-			//cout << "nForecastings[" << exVar << "]: " << nForecastings[exVar] << endl;
+//			cout << "nForecastings[" << exVar << "]: " << nForecastings[exVar] << endl;
+
 
 			for (int i = 0; i < nForecastings[exVar]; i++)
 			{
@@ -77,6 +78,7 @@ public:
 
 				forecastings[exVar].push_back(input);
 			}
+
 
 			delete scannerFiles[exVar];
 		}
@@ -193,22 +195,22 @@ public:
 
 		return partsOfForecasts;
 	}
-	vector<double> getLastForecasts(int file, int lasts)
+	vector<double> getLastForecasts(int file, int nPoints)
 	{
-		vector<double> partsOfForecasts(forecastings[file].end() - lasts, forecastings[file].end());
+		vector<double> partsOfForecasts = getPartsForecastsEndToBegin(file, 0, nPoints);
 
 		return partsOfForecasts;
 	}
 
-	vector<double> getLastForecasts(vector<double> forecasts, int lasts)
+	vector<double> getLastForecasts(vector<double> forecasts, int nPoints)
 	{
-		vector<double> partsOfForecasts(forecasts.end() - lasts, forecasts.end());
+		vector<double> partsOfForecasts = getPartsForecastsEndToBegin(forecasts, 0, nPoints);
 
 		return partsOfForecasts;
 	}
-	vector<double> getFirstForecasts(int file, int firsts)
+	vector<double> getFirstForecasts(int file, int nPoints)
 	{
-		vector<double> partsOfForecasts(forecastings[file].begin(), forecastings[file].begin() + firsts);
+		vector<double> partsOfForecasts = getPartsForecastsBeginToEnd(file, 0, nPoints);;
 
 		return partsOfForecasts;
 	}

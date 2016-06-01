@@ -69,7 +69,6 @@ public:
 			for (int i = 0; i < nForecastings[exVar]; i++)
 			{
 				means[exVar] += getForecastings(exVar, i);
-
 			}
 
 			means[exVar] = means[exVar] / nForecastings[exVar];
@@ -144,7 +143,7 @@ public:
 		return forecastings.size();
 	}
 
-	inline vector<vector<double> > getForecastingsVector()
+	inline vector<vector<double> >& getForecastingsVector()
 	{
 		return forecastings;
 	}
