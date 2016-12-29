@@ -16,6 +16,7 @@
 #include "treatForecasts.hpp"
 
 #define EPSILON_EFP 0.0001
+extern int nThreads;
 
 namespace EFP
 {
@@ -63,8 +64,9 @@ private:
 	int evalFO;
 
 	int aprox;
-
+	int nEvalForSpeedUp;
 	bool roundToZero;
+	double timeInMS;
 public:
 
 	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _evalFO, int _aprox) : // If necessary, add more parameters
@@ -77,6 +79,8 @@ public:
 
 		nForecastings = pEFP.getForecatingsSizeFile(0); //all files have the same size
 
+		nEvalForSpeedUp = 0;
+		timeInMS=0;
 		//calculating the oldest step used as input of the model
 
 	}
@@ -467,14 +471,82 @@ public:
 
 		vector<double> allForecasts;
 
-		//for (int begin = maxLag; begin < nForTargetFile; begin ++) // main loop that varries all the time series
-		for (int begin = maxLag; begin < nForTargetFile; begin += stepsAhead) // main loop that varries all the time series
-		{
-			vector<double> predicteds = returnForecasts(rep, vForecastings, begin);
 
-			for (int f = 0; f < predicteds.size(); f++)
-				allForecasts.push_back(predicteds[f]);
+		double effectNumberSamples = (nForTargetFile-maxLag);
+		vector<vector<double> > allForecastsVectors(ceil(effectNumberSamples/stepsAhead));
+
+		Timer t;
+
+		//for (int begin = maxLag; begin < nForTargetFile; begin ++) // main loop that varries all the time series
+		int beginParallel, fParallel;
+//		omp_set_num_threads(4);
+		//			int np = omp_get_num_threads();
+		//					cout << "number of threads: " << np << endl;
+		//							getchar();
+
+
+////		#pragma omp parallel for ordered
+//		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
+//		{
+////			omp_set_dynamic(0);     // Explicitly disable dynamic teams
+////			omp_set_num_threads(4); // Use 4 threads for all consecutive parallel regions
+//
+//			vector<double> predicteds = returnForecasts(rep, vForecastings, beginParallel);
+//
+////			#pragma omp ordered
+//			allForecasts.insert(allForecasts.end(), predicteds.begin(), predicteds.end());
+//
+//
+//
+////			for (fParallel = 0; fParallel < predicteds.size(); fParallel++)
+////			{
+////				allForecasts.push_back(predicteds[fParallel]);
+////			}
+//		}
+
+//		cout<<"nThreads:"<<nThreads<<endl;
+//		getchar();
+
+		#pragma omp parallel for num_threads(nThreads)
+		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
+		{
+			//			omp_set_dynamic(0);     // Explicitly disable dynamic teams
+			//			omp_set_num_threads(4); // Use 4 threads for all consecutive parallel regions
+
+			//vector<double> predicteds = returnForecasts(rep, vForecastings, beginParallel);
+
+			//			#pragma omp ordered
+
+			int index = (beginParallel-maxLag)/stepsAhead;
+
+			allForecastsVectors[index] = std::move(returnForecasts(rep, vForecastings, beginParallel));//predicteds;
+//			allForecasts[beginParallel-maxLag]
+//			allForecasts.insert(allForecasts.end(), predicteds.begin(), predicteds.end());
+
+			//			for (fParallel = 0; fParallel < predicteds.size(); fParallel++)
+			//			{
+			//				allForecasts.push_back(predicteds[fParallel]);
+			//			}
 		}
+
+		timeInMS += t.inMilliSecs();
+
+		for(int aV=0;aV<allForecastsVectors.size();aV++)
+			for (int k = 0; k < stepsAhead; k++)
+				allForecasts.push_back(allForecastsVectors[aV][k]);
+
+		nEvalForSpeedUp++;
+		if(nEvalForSpeedUp == 1000){
+			cout<<"Total time: " << timeInMS / 1000 << endl;
+
+			string speedUpFile = "./apen_SI_speedUpFile";
+			FILE* fResults = fopen(speedUpFile.c_str(), "a");
+			fprintf(fResults, "%.3f\n", timeInMS / 1000);
+			fclose(fResults);
+
+			exit(1);
+		}
+
 
 		//TODO do it in a better style
 		if (allForecasts.size() > nSamples)

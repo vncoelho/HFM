@@ -25,6 +25,7 @@
 #include "./HFM/mainForecastingCodes/EEGLearning.hpp"
 #include "./HFM/mainForecastingCodes/hosseinData.hpp"
 #include "./HFM/mainForecastingCodes/MokokoWind.hpp"
+#include "./HFM/mainForecastingCodes/REW2016_REED.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -78,13 +79,23 @@ int main(int argc, char **argv)
 	type = 1111111;
 //	type = 69;
 	type = 33333;
-	type = 692;
+	type = 1000;
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
 
 	switch (type)
 	{
+
+	case 1000:
+
+//		r = APEN_SI_DemandForecasting(argc, argv);
+		r = APEN_SI_SpeedUp_DemandForecasting(argc, argv);
+
+		cout << "Program ended successfully in MG Mode" << endl;
+		return r;
+		break;
+
 	case 0: //Eletricity Price Competition Mode
 		if (trainningMode == 0)
 			r = priceCompetitionBlind(argc, argv);

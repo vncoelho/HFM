@@ -8,7 +8,7 @@ CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include
 
 #-Wall 
 gfp:
-	g++ ./MyProjects/mainHFM.cpp ./OptFrame/Scanner++/Scanner.cpp --std=c++11 -Ofast -o ./MyProjects/app_HFM
+	g++ ./MyProjects/mainHFM.cpp ./OptFrame/Scanner++/Scanner.cpp --std=c++11 -fopenmp -lpthread -Ofast -o ./MyProjects/app_HFM
 	#g++ ./MyProjects/mainEFP.cpp ./OptFrame/Scanner++/Scanner.cpp -O0 -g -o MyProjects/mainEFP
 	
 	
