@@ -80,7 +80,7 @@ public:
 		nForecastings = pEFP.getForecatingsSizeFile(0); //all files have the same size
 
 		nEvalForSpeedUp = 0;
-		timeInMS=0;
+		timeInMS = 0;
 		//calculating the oldest step used as input of the model
 
 	}
@@ -471,9 +471,8 @@ public:
 
 		vector<double> allForecasts;
 
-
-		double effectNumberSamples = (nForTargetFile-maxLag);
-		vector<vector<double> > allForecastsVectors(ceil(effectNumberSamples/stepsAhead));
+		double effectNumberSamples = (nForTargetFile - maxLag);
+		vector<vector<double> > allForecastsVectors(ceil(effectNumberSamples / stepsAhead));
 
 		Timer t;
 
@@ -483,7 +482,6 @@ public:
 		//			int np = omp_get_num_threads();
 		//					cout << "number of threads: " << np << endl;
 		//							getchar();
-
 
 ////		#pragma omp parallel for ordered
 //		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
@@ -507,7 +505,7 @@ public:
 //		cout<<"nThreads:"<<nThreads<<endl;
 //		getchar();
 
-		#pragma omp parallel for num_threads(nThreads)
+		//#pragma omp parallel for num_threads(nThreads)
 		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
 		{
 			//			omp_set_dynamic(0);     // Explicitly disable dynamic teams
@@ -517,9 +515,9 @@ public:
 
 			//			#pragma omp ordered
 
-			int index = (beginParallel-maxLag)/stepsAhead;
+			int index = (beginParallel - maxLag) / stepsAhead;
 
-			allForecastsVectors[index] = std::move(returnForecasts(rep, vForecastings, beginParallel));//predicteds;
+			allForecastsVectors[index] = std::move(returnForecasts(rep, vForecastings, beginParallel));			//predicteds;
 //			allForecasts[beginParallel-maxLag]
 //			allForecasts.insert(allForecasts.end(), predicteds.begin(), predicteds.end());
 
@@ -531,13 +529,17 @@ public:
 
 		timeInMS += t.inMilliSecs();
 
-		for(int aV=0;aV<allForecastsVectors.size();aV++)
+		for (int aV = 0; aV < allForecastsVectors.size(); aV++)
 			for (int k = 0; k < stepsAhead; k++)
 				allForecasts.push_back(allForecastsVectors[aV][k]);
 
+
+		//TODO - Parallel Test and report values
+		/*
 		nEvalForSpeedUp++;
-		if(nEvalForSpeedUp == 1000){
-			cout<<"Total time: " << timeInMS / 1000 << endl;
+		if (nEvalForSpeedUp == 1000)
+		{
+			cout << "Total time: " << timeInMS / 1000 << endl;
 
 			string speedUpFile = "./apen_SI_speedUpFile";
 			FILE* fResults = fopen(speedUpFile.c_str(), "a");
@@ -546,7 +548,7 @@ public:
 
 			exit(1);
 		}
-
+		*/
 
 		//TODO do it in a better style
 		if (allForecasts.size() > nSamples)
@@ -798,7 +800,7 @@ public:
 			for (int i = 0; i < nSamples; i++)
 				sumTarget += targetValues[i];
 
-			avgTarget = sumTarget/ nSamples;
+			avgTarget = sumTarget / nSamples;
 		}
 
 		for (int i = 0; i < nSamples; i++)
@@ -808,7 +810,6 @@ public:
 			double forecastingTargetNotNull = forecastingTarget;
 			if (forecastingTargetNotNull == 0)
 				forecastingTargetNotNull = 0.0001;
-
 
 			double absDiff = abs(estimation - forecastingTarget);
 
@@ -900,7 +901,6 @@ public:
 		//cout << foIndicator[MAPE_INDEX] << endl;
 		//MSE AND RSME FINAL CALC
 		//PINBALL FINAL CALC
-
 		/*
 		 double minPinball = 1000000;
 		 double pinbalError;

@@ -26,6 +26,7 @@
 #include "./HFM/mainForecastingCodes/hosseinData.hpp"
 #include "./HFM/mainForecastingCodes/MokokoWind.hpp"
 #include "./HFM/mainForecastingCodes/REW2016_REED.hpp"
+#include "./HFM/mainForecastingCodes/bovespa.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -79,7 +80,7 @@ int main(int argc, char **argv)
 	type = 1111111;
 //	type = 69;
 	type = 33333;
-	type = 1000;
+	type = 999999;
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
@@ -195,6 +196,11 @@ int main(int argc, char **argv)
 		return r;
 		break;
 
+	case 999999: //James Taylor 2007
+		r = stockMarketForecasting(argc, argv);
+		cout << "Parabens! Previsao da bolsa terminada" << endl;
+		return r;
+		break;
 
 
 	default:

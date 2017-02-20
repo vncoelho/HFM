@@ -20,6 +20,6 @@
 #include "./HFM/HFMESContinous.hpp"
 #include "./HFM/treatForecasts.hpp"
 #include "./HFM/ForecastClass.hpp"
-#include "./HFM/alexandreTreatReed.hpp"
+#include "./HFM/treatREDD.hpp"
 
 #endif /*HFM_H_*/

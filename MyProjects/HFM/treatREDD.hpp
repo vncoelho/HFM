@@ -1,12 +1,5 @@
-/*
- * alexandreTreatReed.hpp
- *
- *  Created on: Mar 11, 2016
- *      Author: vitor
- */
-
-#ifndef ALEXANDRETREATREED_HPP_
-#define ALEXANDRETREATREED_HPP_
+#ifndef TREATREEDATASET_HPP_
+#define TREATREEDATASET_HPP_
 
 #include <vector>   // vector
 #include<cmath>     // abs
@@ -30,8 +23,6 @@ public:
 	{
 		ofstream output;
 
-
-		//oi
 		output.open(outputName.c_str());
 
 		output << data.size() << endl;
@@ -215,4 +206,4 @@ public:
 
 }
 
-#endif /* ALEXANDRETREATREED_HPP_ */
+#endif /* TREATREEDATASET_HPP_ */
