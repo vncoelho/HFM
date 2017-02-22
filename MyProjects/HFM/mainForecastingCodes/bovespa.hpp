@@ -14,14 +14,17 @@
 using namespace std;
 using namespace optframe;
 using namespace EFP;
+extern int nThreads;
+
 
 int stockMarketForecasting(int argc, char **argv)
 {
+	nThreads = 7;
 	cout << "Welcome to stock market forecasting!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	//seed = 9;
+	seed = 9;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
@@ -54,7 +57,7 @@ int stockMarketForecasting(int argc, char **argv)
 	//Parametros do metodo
 	int mu = 100;
 	int lambda = mu * 6;
-	int evalFOMinimizer = SMAPE_INDEX;
+	int evalFOMinimizer = MAPE_INDEX;
 	int contructiveNumberOfRules = 100;
 	int evalAprox = 0;
 	double alphaACF = -1;
@@ -127,7 +130,11 @@ int stockMarketForecasting(int argc, char **argv)
 //		forecastObject.runMultiObjSearch();
 //		getchar();
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
-	sol = forecastObject.run(timeES, 0, 0);
+
+
+	sol = forecastObject.run(240, 0, 0);
+
+	forecastObject.runMultiObjSearch(&sol->first);
 
 
 	//Validacao
@@ -158,6 +165,7 @@ int stockMarketForecasting(int argc, char **argv)
 	cout<<sol->first.getR()<<endl;
 
 
+	cout<<"Stock market forecasting finished!"<<endl;
 	return 0;
 }
 

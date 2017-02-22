@@ -23,6 +23,8 @@
 
 #include <float.h>
 #include <limits>
+#include <iostream>
+#include <assert.h>
 
 #include "Solution.hpp"
 #include "ADSManager.hpp"
@@ -30,7 +32,6 @@
 #include "Move.hpp"
 #include "MoveCost.hpp"
 
-#include <iostream>
 
 #include "Component.hpp"
 #include "Action.hpp"
@@ -43,7 +44,15 @@ namespace optframe
 
 class Direction: public Component
 {
+protected:
+	MoveCost nullCost;
+
 public:
+
+	Direction() :
+			nullCost(MoveCost(0))
+	{
+	}
 
 	virtual ~Direction()
 	{
@@ -59,21 +68,28 @@ public:
 	 - for minimization problems, returns a < b;
 	 - for maximization problems, returns a > b.
 	 */
-	virtual bool betterThan(double a, double b) = 0;
+	//virtual bool betterThan(evtype a, evtype b) = 0;
 
 	// true if 'mc1' is better than 'mc2'
 	virtual inline bool betterThan(const MoveCost& mc1, const MoveCost& mc2)
 	{
-		return betterThan(mc1.cost(), mc2.cost());
+		if(isMinimization())
+			return mc1.cost() < (mc2.cost() - OPTFRAME_EPSILON);
+		else
+			return mc1.cost() > (mc2.cost() + OPTFRAME_EPSILON);
 	}
 
 	// true if 'e1' is better than 'e2'
 	virtual inline bool betterThan(const Evaluation& e1, const Evaluation& e2)
 	{
-		return betterThan(e1.evaluation(), e2.evaluation());
+		if(isMinimization())
+			return e1.evaluation() < (e2.evaluation() - OPTFRAME_EPSILON);
+		else
+			return e1.evaluation() > (e2.evaluation() + OPTFRAME_EPSILON);
 	}
 
-	virtual inline bool betterThan(const vector<pair<double, double> >& altCosts1, const vector<pair<double, double> >& altCosts2)
+	/*
+	virtual inline bool betterThan(const vector<pair<evtype, evtype> >& altCosts1, const vector<pair<evtype, evtype> >& altCosts2)
 	{
 		if(altCosts1.size() != altCosts2.size())
 			return false;
@@ -82,13 +98,16 @@ public:
 				return false;
 		return true;
 	}
+	*/
 
 	// ============ betterOrEquals ===========
 
-	inline bool betterOrEquals(const vector<pair<double, double> >& altCosts1, const vector<pair<double, double> >& altCosts2)
+	/*
+	inline bool betterOrEquals(const vector<pair<evtype, evtype> >& altCosts1, const vector<pair<evtype, evtype> >& altCosts2)
 	{
 		return betterThan(altCosts1, altCosts2) || equals(altCosts1, altCosts2);
 	}
+	*/
 
 	inline bool betterOrEquals(const MoveCost& mc1, const MoveCost& mc2)
 	{
@@ -100,78 +119,65 @@ public:
 		return betterThan(e1, e2) || equals(e1, e2);
 	}
 
-	inline bool betterOrEquals(double a, double b)
+	/*
+	inline bool betterOrEquals(evtype a, evtype b)
 	{
 		return betterThan(a, b) || equals(a, b);
 	}
+	*/
 
 	// ============ equals ============
 
-	virtual inline bool equals(const vector<pair<double, double> >& altCosts1, const vector<pair<double, double> >& altCosts2)
+protected:
+	virtual inline bool equals(const evtype& t1, const evtype& t2, const vector<pair<evtype, evtype> >& altCosts1, const vector<pair<evtype, evtype> >& altCosts2)
 	{
+		if(t1 != t2)
+			return false;
 		if(altCosts1.size() != altCosts2.size())
 			return false;
 		for(unsigned i = 0; i < altCosts1.size(); i++)
-			if(!equals(altCosts1[i].first + altCosts1[i].second, altCosts2[i].first + altCosts2[i].second))
+			if((altCosts1[i].first + altCosts1[i].second) != (altCosts2[i].first + altCosts2[i].second))
 				return false;
 		return true;
 	}
 
+public:
 	virtual inline bool equals(const MoveCost& mc1, const MoveCost& mc2)
 	{
-		return equals(mc1.cost(), mc2.cost());
+		return equals(mc1.cost(), mc2.cost(), mc1.getAlternativeCosts(), mc2.getAlternativeCosts());
 	}
 
 	virtual inline bool equals(const Evaluation& e1, const Evaluation& e2)
 	{
-		return equals(e1.evaluation(), e2.evaluation());
+		return equals(e1.evaluation(), e2.evaluation(), e1.getAlternativeCosts(), e2.getAlternativeCosts());
 	}
 
-	virtual inline bool equals(double a, double b)
+	/*
+	virtual inline bool equals(evtype a, evtype b)
 	{
-		return (abs(a - b) < OPTFRAME_EPSILON);
+		return (::abs(a - b) < OPTFRAME_EPSILON);
 	}
+	*/
 
 	// ============= improvement =============
 
 	virtual bool isImprovement(const MoveCost& mc, const Evaluation& e1, const Evaluation& e2)
 	{
-		double ec1 = mc.cost() + e1.evaluation();
-		if(betterThan(ec1, e2.evaluation()))
+		evtype ec1 = mc.cost() + e1.evaluation();
+
+		if(isMinimization() && ec1 < (e2.evaluation() - OPTFRAME_EPSILON))
 			return true;
-		else if(equals(ec1, e2.evaluation()))
-		{
-			if(e1.getAlternativeCosts().size() != e2.getAlternativeCosts().size())
-			{
-				cout << "Evaluator Error: |e1.alternatives|=" << e1.getAlternativeCosts().size() << " |e2.alternatives|=" << e2.getAlternativeCosts().size();
-				cout << endl;
-				exit(1);
-				return false;
-			}
 
-			if(mc.getAlternativeCosts().size() != e1.getAlternativeCosts().size())
-			{
-				cout << "Evaluator Error: |mc.alternatives|=" << mc.getAlternativeCosts().size() << " |e1.alternatives|=" << e1.getAlternativeCosts().size();
-				cout << endl;
-				exit(1);
-				return false;
-			}
+		if(!isMinimization() && ec1 > (e2.evaluation() + OPTFRAME_EPSILON))
+			return true;
 
-			vector<pair<double, double> > altCosts1(e1.getAlternativeCosts());
-			for(unsigned i = 0; i < altCosts1.size(); i++)
-			{
-				altCosts1[i].first += mc.getAlternativeCosts()[i].first;
-				altCosts1[i].second += mc.getAlternativeCosts()[i].second;
-			}
-			return betterThan(altCosts1, e2.getAlternativeCosts());
-		}
-		else
-			return false;
+		return false;
 	}
+
 
 	virtual inline bool isImprovement(const MoveCost& mc)
 	{
-		return betterThan(mc.cost(), 0);
+		return betterThan(mc, nullCost);
 	}
 
 	// ============= direction ==============
@@ -185,7 +191,7 @@ public:
 
 	// ============ estimation =============
 
-	inline double worst()
+	inline evtype worst()
 	{
 		if(isMinimization())
 			return max();
@@ -194,25 +200,25 @@ public:
 	}
 
 	// bad approximation!
-	virtual inline double min()
+	virtual inline evtype min()
 	{
 		////return -DBL_MAX;
 
-		if(numeric_limits<double>::has_infinity)
-			return -numeric_limits<double>::infinity();
+		if(numeric_limits<evtype>::has_infinity)
+			return -numeric_limits<evtype>::infinity();
 		else
-			return -numeric_limits<double>::max();
+			return -numeric_limits<evtype>::max();
 	}
 
 	// bad approximation!
-	virtual inline double max()
+	virtual inline evtype max()
 	{
 		////return DBL_MAX;
 
-		if(numeric_limits<double>::has_infinity)
-			return numeric_limits<double>::infinity();
+		if(numeric_limits<evtype>::has_infinity)
+			return numeric_limits<evtype>::infinity();
 		else
-			return numeric_limits<double>::max();
+			return numeric_limits<evtype>::max();
 	}
 
 	// ============= Component ===============
@@ -257,11 +263,12 @@ public:
 	{
 	}
 
-	inline bool betterThan(double f1, double f2)
+	/*
+	inline bool betterThan(evtype f1, evtype f2)
 	{
 		// MINIMIZATION
 		return (f1 < (f2 - OPTFRAME_EPSILON));
-	}
+	}*/
 
 	inline bool isMinimization() const
 	{
@@ -277,11 +284,12 @@ public:
 	{
 	}
 
-	inline bool betterThan(double f1, double f2)
+	/*
+	inline bool betterThan(evtype f1, evtype f2)
 	{
 		// MAXIMIZATION
 		return (f1 > (f2 + OPTFRAME_EPSILON));
-	}
+	}*/
 
 	inline bool isMinimization() const
 	{

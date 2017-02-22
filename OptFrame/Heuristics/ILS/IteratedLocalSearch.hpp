@@ -34,7 +34,7 @@
 namespace optframe
 {
 
-template<class H, class R, class ADS = OPTFRAME_DEFAULT_ADS, class DS = OPTFRAME_DEFAULT_DS>
+template<class H, class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class IteratedLocalSearch: public ILS, public SingleObjSearch<R, ADS>
 {
 protected:
@@ -76,7 +76,11 @@ public:
         // 's0' <- GenerateSolution
         // 's*' <- localSearch 's'
 
+        if(Component::information)
+        	cout << "ILS::performing first local search" << endl;
         localSearch(s, e, (timelimit - (tnow.now())), target_f);
+        if(Component::information)
+            cout << "ILS::finished first local search" << endl;
 
         Solution<R, ADS>* sStar = &s.clone();
         Evaluation* eStar = &e.clone();

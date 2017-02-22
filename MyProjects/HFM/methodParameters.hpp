@@ -36,6 +36,7 @@ public:
 		vAlphaACFlimits.push_back(-1);
 	}
 
+	//To be used by the Continous ES
 	void setESMaxG(int _esMaxG)
 	{
 		esMaxG = _esMaxG;
@@ -45,6 +46,8 @@ public:
 	{
 		return esMaxG;
 	}
+
+	//END
 
 	void setESMU(int _esMU)
 	{

@@ -65,6 +65,9 @@ public:
 
 	virtual void exec(Solution<R, ADS>& s, Evaluation& e, double timelimit, double target_f)
 	{
+		if(Component::information)
+			cout << "BI::starts for " << nsSeq.toString() << endl;
+
 		num_calls++;
 		Timer t;
 
@@ -237,7 +240,7 @@ public:
 };
 
 
-template<class R, class ADS = OPTFRAME_DEFAULT_ADS, class DS = OPTFRAME_DEFAULT_DS>
+template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class BestImprovementBuilder : public LocalSearchBuilder<R, ADS>
 {
 public:

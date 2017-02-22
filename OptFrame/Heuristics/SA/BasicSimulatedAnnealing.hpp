@@ -118,7 +118,7 @@ public:
 				else
 				{
 					double x = rg.rand01();
-					double delta = fabs(eCurrent->evaluation() - e.evaluation());
+					double delta = ::fabs(eCurrent->evaluation() - e.evaluation());
 
 					if (x < exp(-delta / T))
 					{
@@ -164,7 +164,7 @@ public:
 
 };
 
-template<class R, class ADS = OPTFRAME_DEFAULT_ADS, class DS = OPTFRAME_DEFAULT_DS>
+template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class BasicSimulatedAnnealingBuilder: public SA, public SingleObjSearchBuilder<R, ADS>
 {
 public:

@@ -27,6 +27,9 @@
 
 #include "Component.hpp"
 
+#include "MultiMoveCost.hpp"
+#include "MultiEvaluation.hpp"
+
 //#include "Action.hpp"
 
 using namespace std;
@@ -70,13 +73,42 @@ public:
 		return apply(e, s.getR(), s.getADS());
 	}
 
+	Move<R, ADS>* apply(MultiEvaluation& mev, Solution<R, ADS>& s)
+	{
+		return apply(mev, s.getR(), s.getADS());
+	}
+
 ////protected:
 	virtual Move<R, ADS>* apply(R& r, ADS& ads) = 0;
 
 	virtual Move<R, ADS>* apply(Evaluation& e, R& r, ADS& ads)
 	{
+		// boolean 'outdated' indicates that Evaluation needs update (after Solution change)
+		// note that even if the reverse move is applied, the Evaluation will continue with
+		// the outdated status set to true. So more efficient approaches may rewrite this
+		// method, or implement efficient re-evaluation by means of the 'cost' method.
+		e.outdated = true;
+		// apply the move to R and ADS, saving the reverse (or undo) move
 		Move<R, ADS>* rev = apply(r, ads);
+		// update neighborhood local optimum status TODO:deprecated
 		updateNeighStatus(ads);
+		// return reverse move (or null)
+		return rev;
+	}
+
+	virtual Move<R, ADS>* apply(MultiEvaluation& mev, R& r, ADS& ads)
+	{
+		// boolean 'outdated' indicates that Evaluation needs update (after Solution change)
+		// note that even if the reverse move is applied, the Evaluation will continue with
+		// the outdated status set to true. So more efficient approaches may rewrite this
+		// method, or implement efficient re-evaluation by means of the 'cost' method.
+		for (int nE = 0; nE < mev.size(); nE++)
+			mev[nE].outdated = true;
+		// apply the move to R and ADS, saving the reverse (or undo) move
+		Move<R, ADS>* rev = apply(r, ads);
+		// update neighborhood local optimum status TODO:deprecated
+		updateNeighStatus(ads);
+		// return reverse move (or null)
 		return rev;
 	}
 
@@ -92,7 +124,7 @@ public:
 
 	// ================== move independence and local search marking
 
-	virtual bool isIndependent(const Move<R, ADS>& m)
+	virtual bool independentOf(const Move<R, ADS>& m)
 	{
 	    // example: in VRP, move1 changes one route and move2 changes another... they are independent.
 	    // move1.isIndependent(move2) should return true.
@@ -101,6 +133,7 @@ public:
 	}
 
 
+	// TODO: rethink!
 	virtual bool isPartialLocalOptimum(const Solution<R, ADS>& s)
 	{
 	    // the idea is to use this flag to ignore moves that are useless,
@@ -111,7 +144,13 @@ public:
 
 	// ================== cost calculation
 
-	virtual MoveCost* cost(const Evaluation& e, const R& r, const ADS& ads)
+	virtual MoveCost* cost(const Evaluation& e, const R& r, const ADS& ads, bool allowEstimated = false)
+	{
+		return NULL;
+	}
+
+	// experiment for multi objective problems
+	virtual MultiMoveCost* cost(const MultiEvaluation& e, const R& r, const ADS& ads, bool allowEstimated = false)
 	{
 		return NULL;
 	}

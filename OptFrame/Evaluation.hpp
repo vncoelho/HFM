@@ -21,29 +21,20 @@
 #ifndef OPTFRAME_EVALUATION_HPP_
 #define OPTFRAME_EVALUATION_HPP_
 
-// TODO: Delta Structure (DS) will be abandoned soon...
-// TODO: use ADS instead.
-typedef int OPTFRAME_DEFAULT_DS;
-
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
 
 #include "Component.hpp"
-#include "Action.hpp"
 
+#ifndef OPTFRAME_EPSILON
 #define OPTFRAME_EPSILON 0.0001
+#endif
 
 using namespace std;
 
 namespace optframe
 {
-
-// GlobalOptimumStatus
-enum GOS
-{
-    gos_yes, gos_no, gos_unknown
-};
 
 //! \english The Evaluation class is a container class for the objective function value and the Memory structure M. \endenglish \portuguese A classe Evaluation é uma classe contêiner para o valor da função objetivo e a estrutura de Memória M. \endportuguese
 
@@ -59,36 +50,70 @@ enum GOS
  \endportuguese
  */
 
+//#include "Util/PackTypes.hpp"
+//#define EVALUATION_TYPE PackTypes
+
+#ifndef EVALUATION_TYPE
+#define EVALUATION_TYPE double
+#endif
+
+typedef EVALUATION_TYPE evtype;
+
+// note: for multi-objective problems with distinct objective space types
+// such as (int, evtype, long long) you can use PackTypes in Utils or overload
+// manually each of the numeric operators +, -, *
+
 class Evaluation: public Component
 {
 protected:
-	// pair<double,double>: OST (Objective Space Type)
-	double objFunction;
-	double infMeasure;
+	// ==== Objective Space type: pair<evtype, evtype> ====
+	// objective function value (default = double)
+	evtype objFunction;
+	// infeasibility measure value (default = double)
+	evtype infMeasure;
+	// for lexicographic approaches, use these extra evaluation values
+	vector<pair<evtype, evtype> > alternatives;
 
-	// map<string, bool> localStatus; // mapping 'move.id()' to 'NeighborhoodStatus' TODO: REMOVE!
-	GOS gos;            // for exact methods only
-
-	vector<pair<double, double> > alternatives; // for lexicographic approaches
+	// ==== Objective Space auxiliary information ====
+	// LocalOptimum Status: mapping 'move.id()' to 'NeighborhoodStatus'
+	// map<string, bool> localStatus; // TODO: REMOVE!
+	// GlobalOptimumStatus (for exact methods only)
+	enum GOS
+	{
+		gos_yes, gos_no, gos_unknown
+	} gos;
 
 public:
-	Evaluation(double obj, double inf) :
+	// boolean field to indicate if Evaluation needs an update
+	bool outdated;
+	// boolean field to indicate if Evaluation value is an estimation (not exact)
+	bool estimated;
+
+	// ======================================
+	// begin canonical part
+
+	Evaluation(const evtype& obj, const evtype& inf) :
 			objFunction(obj), infMeasure(inf)
 	{
 		gos = gos_unknown;
+		outdated = false;
+		estimated = false;
 	}
 
-	Evaluation(double obj)
+	Evaluation(const evtype& obj) :
+		objFunction(obj)
 	{
-		objFunction = obj;
 		infMeasure = 0;
 
 		gos = gos_unknown;
+		outdated = false;
+		estimated = false;
 	}
 
 
 	Evaluation(const Evaluation& e) :
-			objFunction(e.objFunction), infMeasure(e.infMeasure), gos(e.gos), alternatives(e.alternatives)
+			objFunction(e.objFunction), infMeasure(e.infMeasure), alternatives(e.alternatives),
+			gos(e.gos), outdated(e.outdated), estimated(e.estimated)
 	{
 	}
 
@@ -97,37 +122,62 @@ public:
 	{
 	}
 
-	double getObjFunction() const
+
+	virtual Evaluation& operator=(const Evaluation& e)
+	{
+		if (&e == this) // auto ref check
+			return *this;
+
+		objFunction  = e.objFunction;
+		infMeasure   = e.infMeasure;
+		outdated     = e.outdated;
+		estimated    = e.estimated;
+		alternatives = e.alternatives;
+		gos          = e.gos;
+
+		return *this;
+	}
+
+	virtual Evaluation& clone() const
+	{
+		return *new Evaluation(*this);
+	}
+
+	// end canonical part
+	// ======================================
+	// begin Evaluation methods
+
+	evtype getObjFunction() const
 	{
 		return objFunction;
 	}
 
-	double getInfMeasure() const
+	evtype getInfMeasure() const
 	{
 		return infMeasure;
 	}
 
-	const vector<pair<double, double> >& getAlternativeCosts() const
+	const vector<pair<evtype, evtype> >& getAlternativeCosts() const
 	{
 		return alternatives;
 	}
 
-	void setObjFunction(double obj)
+	void setObjFunction(evtype obj)
 	{
 		objFunction = obj;
 	}
 
-	void setInfMeasure(double inf)
+	void setInfMeasure(evtype inf)
 	{
 		infMeasure = inf;
 	}
 
-	void addAlternativeCost(const pair<double, double>& alternativeCost)
+	void addAlternativeCost(const pair<evtype, evtype>& alternativeCost)
 	{
 		alternatives.push_back(alternativeCost);
 	}
 
-	void setAlternativeCosts(const vector<pair<double, double> >& alternativeCosts)
+	void setAlternativeCosts(const vector<pair<evtype, evtype> >& alternativeCosts)
 	{
 		alternatives = alternativeCosts;
 	}
@@ -164,16 +214,20 @@ public:
 	}
 
 	// evaluation = objFunction + infMeasure
-	double evaluation() const
+	evtype evaluation() const
 	{
 		return objFunction + infMeasure;
 	}
 
-	// leave option to rewrite tolerance
+	// leave option to rewrite tolerance (or consider lexicographic values)
 	virtual bool isFeasible() const
 	{
-		return (abs(infMeasure) < 0.0001);
+		return (::abs(infMeasure) < 0.0001);
 	}
+
+	// ======================
+	// Object specific part
+	// ======================
 
 	static string idComponent()
 	{
@@ -199,6 +253,8 @@ public:
 		ss << fixed; // disable scientific notation
 		ss << "Evaluation function value = " << evaluation();
 		ss << (isFeasible() ? " " : " (not feasible) ");
+		ss << (outdated ? " OUTDATED " : " ");
+		ss << (estimated ? " ESTIMATED " : " ");
 		if(alternatives.size() > 0)
 		{
 			ss << " alternative costs: ";
@@ -207,29 +263,7 @@ public:
 		}
 		// ss << endl;
 
-		// default - not printing ememory
-		// ss << m << endl;
-
 		return ss.str();
-	}
-
-	virtual Evaluation& operator=(const Evaluation& e)
-	{
-		if (&e == this) // auto ref check
-			return *this;
-
-		objFunction = e.objFunction;
-		infMeasure = e.infMeasure;
-		alternatives = e.alternatives;
-
-		gos = e.gos;
-
-		return *this;
-	}
-
-	virtual Evaluation& clone() const
-	{
-		return *new Evaluation(*this);
 	}
 };
 

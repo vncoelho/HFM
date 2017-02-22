@@ -84,28 +84,25 @@ template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class ES: public SingleObjSearch<R, ADS>
 {
 private:
+	string path, outputFile;
+	int batch;
+	Solution<R, ADS>* sStar;
+	Evaluation* eStar;
 	Evaluator<R, ADS>& eval;
 	Constructive<R, ADS>& constructive;
 	vector<NSSeq<R, ADS>*> vNS;
 	vector<int> vNSeqMaxApplication;
 	LocalSearch<R, ADS>& ls;
-	int selectionMethod;
-	double mutationRate;
 	RandGen& rg;
+
+	int nNS;
 	const int mi;
 	const int lambda;
 	const int gMaxWithoutImprovement;
-	string outputFile;
-	int batch;
-	string path;
-	Solution<R, ADS>* sStar;
-	Evaluation* eStar;
-	int nNS;
-
 	int iterWithoutImprovement;
 	int gAtual;
-
-
+	int selectionMethod;
+	double mutationRate;
 
 	typedef vector<IndividuoES<R, ADS> > Populacao;
 

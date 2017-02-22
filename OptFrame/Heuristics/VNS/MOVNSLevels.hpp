@@ -46,6 +46,7 @@ private:
 	RandGen& rg;
 	int levelMax;
 	int iterMax;
+	Pareto<R, ADS> pfMethod;
 
 public:
 	//using HTrajectory<R, ADS>::exec; // prevents name hiding
@@ -53,8 +54,6 @@ public:
 	MOVNSLevels(vector<Evaluator<R, ADS>*> _v_e, InitialPopulation<R, ADS>& _init_pop, int _init_pop_size, vector<NSSeq<R, ADS>*> _neighbors, RandGen& _rg, int _iterMax, int _levelMax) :
 			v_e(_v_e), init_pop(_init_pop), init_pop_size(_init_pop_size), neighbors(_neighbors), rg(_rg), pDominance(ParetoDominance<R, ADS>(_v_e)), pDominanceWeak(ParetoDominanceWeak<R, ADS>(_v_e))
 	{
-		////pDominance.insertEvaluators(_v_e);
-		////pDominanceWeak.insertEvaluators(_v_e);
 		levelMax = _levelMax;
 		iterMax = _iterMax;
 	}
@@ -84,21 +83,35 @@ public:
 	virtual Pareto<R, ADS>* search(double timelimit = 100000000, double target_f = 0, Pareto<R, ADS>* _pf = NULL)
 	{
 		Timer tnow;
-		cout << "exec: MOVNS " << endl;
+		cout << "exec: MOVNS (tL:" << timelimit << ")" << endl;
 		int r = neighbors.size();
 
-		Population<R, ADS> p_0 = init_pop.generatePopulation(init_pop_size);
+		Population<R, ADS> p_0;
 
-		cout << "population generated" << endl;
+		if (_pf == NULL)
+		{
+			cout << "Creating initial population using a constructive method..." << endl;
+			p_0 = init_pop.generatePopulation(init_pop_size);
+			cout << "Population generated with " << p_0.size() << " individuals" << endl;
+		}
+		else
+		{
+			cout << "Extracting Pareto _pf ..." << endl;
+			vector<Solution<R, ADS>*> tempPop = _pf->getParetoSet();
+			for (int i = 0; i < tempPop.size(); i++)
+				p_0.push_back(tempPop[i]);
+			cout << "Population extracted with " << p_0.size() << " individuals" << endl;
+		}
 
 		Population<R, ADS> D;
 		for (int ind = 0; ind < p_0.size(); ind++)
 		{
 			Solution<R, ADS>& s = p_0.at(ind).clone();
-			if (!addSolution(D, s))
+			if (!pfMethod.addSolution(pDominance, pDominanceWeak, D, s))
 				delete &s;
 		}
 		cout << "Initial efficient set size = " << D.size() << endl;
+
 		vector<bool> visited;
 		for (int ind = 0; ind < D.size(); ind++)
 			visited.push_back(false);
@@ -165,15 +178,14 @@ public:
 				{
 					nMoves++;
 					if ((nMoves % 50000) == 0)
-					{
-						cout << "Iterator Moves = " << nMoves << endl;
-					}
+						cout << "Neigh: " << neigh << " has already generated " << nMoves << " iterator moves " << endl;
+
 					Solution<R, ADS>& s2 = s1.clone();
 					Move<R, ADS>* mov_rev = move->apply(s2);
 					delete mov_rev;
 					delete move;
 
-					bool added = addSolution(D, s2);
+					bool added = pfMethod.addSolution(pDominance, pDominanceWeak, D, s2);
 					if (added)
 					{
 						cout << "New solution added to the pareto front! \t ";
@@ -227,16 +239,21 @@ public:
 		for (unsigned i = 0; i < p_0.size(); i++)
 		{
 			Solution<R, ADS>* s = &p_0.at(i);
-			vector<Evaluation*> e;
+			vector<Evaluation*> vev;
 			for (unsigned ev = 0; ev < v_e.size(); ev++)
 			{
 				Evaluator<R, ADS>* evtr = v_e[ev];
-				//evtr->evaluate(s);
 				Evaluation& e1 = evtr->evaluate(*s);
-				e.push_back(&e1);
+				vev.push_back(&e1);
+
 			}
-			pf->push_back(*s, e);
+
+			MultiEvaluation* e = new MultiEvaluation(vev);
+
+			pf->push_back(s, e);
+
 		}
+
 		return pf;
 	}
 
@@ -264,48 +281,6 @@ public:
 		}
 
 		return move;
-	}
-
-	bool addSolution(Population<R, ADS>& p, Solution<R, ADS>& s)
-	{
-		vector<double> fitnessNewInd;
-
-		for (int evalIndex = 0; evalIndex < v_e.size(); evalIndex++)
-		{
-			Evaluation &e = v_e[evalIndex]->evaluate(s);
-
-			if (!e.isFeasible())
-			{
-				delete &e;
-				return false;
-			}
-
-			fitnessNewInd.push_back(e.evaluation());
-			delete &e;
-		}
-
-		bool added = true;
-		for (int ind = 0; ind < p.size(); ind++)
-		{
-
-			vector<double> popIndFitness = p.getFitness(ind);
-			if (pDominanceWeak.dominates(popIndFitness, fitnessNewInd))
-				return false;
-
-			if (pDominance.dominates(fitnessNewInd, popIndFitness))
-				delete &p.remove(ind);
-
-//			if (pDominanceWeak.dominates(p.at(ind), s))
-//				return false;
-//
-//			if (pDominance.dominates(s, p.at(ind)))
-//				delete &p.remove(ind);
-
-		}
-		if (added == true)
-			p.push_back(s, fitnessNewInd);
-
-		return added;
 	}
 
 };

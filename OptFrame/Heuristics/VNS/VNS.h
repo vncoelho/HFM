@@ -25,6 +25,9 @@
 
 using namespace std;
 
+namespace optframe
+{
+
 class VNS
 {
 public:
@@ -37,5 +40,7 @@ public:
 	{
 	}
 };
+
+}
 
 #endif /*OPTFRAME_VNS_FAMILY_H_*/

@@ -36,79 +36,176 @@ namespace optframe
 //! \english The Solution class is a container class for the Representation structure R. \endenglish \portuguese A classe Solution é uma classe contêiner para a Representação R. \endportuguese
 
 /*!
-  \english
-  In the constructor, a copy of R is stored inside the Solution class.
-  The getR() method returns a reference to the stored Representation R.
-  \endenglish
+ \english
+ In the constructor, a copy of R is stored inside the Solution class.
+ The getR() method returns a reference to the stored Representation R.
+ \endenglish
 
-  \portuguese
-  No construtor, uma cópia de R é armazenada dentro da classe Solution.
-  O método getR() retorna uma referência à Representação R armazenada.
-  \endportuguese
+ \portuguese
+ No construtor, uma cópia de R é armazenada dentro da classe Solution.
+ O método getR() retorna uma referência à Representação R armazenada.
+ \endportuguese
  */
 
 template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
-class Solution : public Component
+class Solution: public Component
 {
 protected:
-	R* r;     // representation
+	R r;     // representation
 	ADS* ads; // auxiliary data structure
 
 public:
-	Solution(R& _r, ADS& _ads):
-		r(new R(_r)), ads(new ADS(_ads))
+
+	Solution(const R& _r) :
+			r(_r), ads(nullptr)
 	{
 	}
 
-	explicit Solution(R& _r) :
-				r(new R(_r)), ads(new ADS)
+	Solution(R&& _r) noexcept :
+			r(std::move(_r)), ads(nullptr)
 	{
 	}
 
-	Solution(const Solution<R, ADS>& s):
-		r(new R(*s.r)), ads(new ADS(*s.ads))
+
+	Solution(const R& _r, const ADS& _ads) :
+			r(_r), ads(new ADS(_ads))
 	{
+	}
+
+	Solution(R&& _r, ADS&& _ads) noexcept :
+			r(_r), ads(new ADS(std::move(_ads)))
+	{
+	}
+
+	Solution(const Solution<R, ADS>& s) :
+			r(s.r)
+	{
+		//cout << __PRETTY_FUNCTION__ << endl;
+		if (s.ads)
+			ads = new ADS(*s.ads);
+		else
+			ads = nullptr;
+	}
+
+	//! move constructor
+	/*!
+	 Solution move constructor will steal the pointers from the object to itself
+	 and set them to null in the object
+	 */
+	Solution(Solution<R, ADS> && s) noexcept :
+			r(std::move(s.r)), ads(s.ads)
+	{
+		s.ads = nullptr;
+	}
+
+	// leave option to rewrite with clone()
+	virtual Solution<R, ADS>& operator=(const Solution<R, ADS>& s)
+	{
+		if (&s == this) // auto ref check
+			return *this;
+
+		r = s.r;
+		if (ads)
+			(*ads) = (*s.ads);
+		else
+			ads = nullptr;
+
+		return *this;
+	}
+
+	//! move operator
+	/*!
+	 Solution move operator will steal the pointers from the object to itself
+	 and set them to null in the object
+	 */
+	virtual Solution<R, ADS>& operator=(Solution<R, ADS> && s) noexcept
+	{
+		// transform s in a rhs
+		r = std::move(s.r);
+		// steal pointer from s
+		ads = s.ads;
+		// make sure s forgets about its ads (if it existed before)
+		s.ads = nullptr;
+
+		return *this;
 	}
 
 	virtual ~Solution()
 	{
-		delete r;
-		delete ads;
+		// if ads not null
+		if (ads)
+			delete ads;
+	}
+
+	// ==================
+	// end canonical part
+	// ==================
+
+	virtual Solution<R, ADS>& clone() const
+	{
+		// if ads not null
+		if (ads)
+			return *new Solution<R, ADS>(r, *ads);
+		else
+			return *new Solution<R, ADS>(r);
 	}
 
 	// leave option to rewrite with clone()
 	virtual void setR(const R& _r)
 	{
-		delete r;
-		r = new R(_r);
+		// shallow copy
+		r = _r;
+	}
+
+	// leave option to rewrite with clone()
+	virtual void setR(const R&& _r)
+	{
+		// move content from rhs param _r
+		r = std::move(_r);
 	}
 
 	// leave option to rewrite with clone()
 	virtual void setADS(const ADS& _ads)
 	{
-		delete ads;
+		// if ads not null, destroy it
+		if (ads)
+			delete ads;
+		// store a new copy of _ads
 		ads = new ADS(_ads);
 	}
 
-	const R& getR() const
+	bool hasADS() const
 	{
-		return *r;
+		return ads != nullptr;
 	}
 
+	// get const reference of r
+	const R& getR() const
+	{
+		return r;
+	}
+
+	// get ADS (depends on hasADS() positive result)
 	const ADS& getADS() const
 	{
 		return *ads;
 	}
 
+	// get reference of r
 	R& getR()
 	{
-		return *r;
+		return r;
 	}
 
+	// get ADS (depends on hasADS() positive result)
 	ADS& getADS()
 	{
 		return *ads;
 	}
+
+	// =================
+	// begin Object part
+	// =================
 
 	static string idComponent()
 	{
@@ -125,27 +222,11 @@ public:
 	virtual string toString() const
 	{
 		stringstream ss;
-		ss << "Solution: "<< (*r);
+		ss << "Solution: " << r;
 		//ss << "ADS: "<< ads;
 		return ss.str();
 	}
 
-	// leave option to rewrite with clone()
-	virtual Solution<R, ADS>& operator= (const Solution<R, ADS>& s)
-	{
-		if(&s == this) // auto ref check
-			return *this;
-
-		(*r) = (*s.r);
-		(*ads) = (*s.ads);
-
-		return *this;
-	}
-
-	virtual Solution<R, ADS>& clone() const
-	{
-		return * new Solution<R, ADS>(*this);
-	}
 };
 
 }

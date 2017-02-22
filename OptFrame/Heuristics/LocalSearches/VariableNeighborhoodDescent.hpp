@@ -56,6 +56,9 @@ public:
 
 	virtual void exec(Solution<R, ADS>& s, Evaluation& e, double timelimit, double target_f)
 	{
+		if(Component::information)
+			cout << "VND::starts" << endl;
+
 		long tini = time(NULL);
 
 		int r = lsList.size();
@@ -82,6 +85,9 @@ public:
 				delete s0;
 				delete e0;
 				k = k + 1;
+
+				if(Component::information)
+					cout << "VND::k=" << k << endl;
 			}
 			ev.evaluate(e, s);
 
@@ -128,7 +134,7 @@ private:
 };
 
 
-template<class R, class ADS = OPTFRAME_DEFAULT_ADS, class DS = OPTFRAME_DEFAULT_DS>
+template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class VariableNeighborhoodDescentBuilder : public LocalSearchBuilder<R, ADS>
 {
 public:

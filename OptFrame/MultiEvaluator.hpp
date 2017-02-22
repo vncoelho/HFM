@@ -69,6 +69,10 @@ public:
 		nObjectives = vDir.size();
 	}
 
+	unsigned size()
+	{
+		return sngEvaluators.size();
+	}
 	virtual ~MultiEvaluator()
 	{
 	}
@@ -86,6 +90,26 @@ public:
 		}
 		else
 			return NULL;
+	}
+
+	Evaluator<R, ADS>& at(unsigned index)
+	{
+		return *sngEvaluators.at(index);
+	}
+
+	const Evaluator<R, ADS>& at(unsigned index) const
+	{
+		return *sngEvaluators.at(index);
+	}
+
+	Evaluator<R, ADS>& operator[](unsigned index)
+	{
+		return *sngEvaluators[index];
+	}
+
+	const Evaluator<R, ADS>& operator[](unsigned index) const
+	{
+		return *sngEvaluators[index];
 	}
 
 	// TODO: check
@@ -108,35 +132,39 @@ public:
 	// TODO: make virtual "= 0"
 	virtual MultiEvaluation& evaluate(const R& r)
 	{
-		vector<Evaluation*> nev;
+		MultiEvaluation* nev = new MultiEvaluation;
+
 		for (unsigned i = 0; i < sngEvaluators.size(); i++)
-			nev.push_back(&sngEvaluators[i]->evaluate(r));
-		return *new MultiEvaluation(nev);
+			nev->addEvaluation(sngEvaluators[i]->evaluate(r));
+
+		return *nev;
 	}
 
-	virtual MultiEvaluation& evaluate(const R& r, const ADS&)
+	virtual MultiEvaluation& evaluate(const R& r, const ADS& ads)
 	{
-		return evaluate(r);
+		MultiEvaluation* nev = new MultiEvaluation;
+
+		for (unsigned i = 0; i < sngEvaluators.size(); i++)
+			nev->addEvaluation(sngEvaluators[i]->evaluate(r, ads));
+
+		return *nev;
 	}
 
-public:
 	void evaluate(MultiEvaluation& mev, const Solution<R, ADS>& s)
 	{
 		evaluate(mev, s.getR(), s.getADS());
 	}
 
-protected:
 	virtual void evaluate(MultiEvaluation& mev, const R& r, const ADS& ads)
 	{
-		MultiEvaluation& ve1 = evaluate(r, ads);
-
-		for (unsigned i = 0; i < ve1.size(); i++)
+		for (unsigned i = 0; i < sngEvaluators.size(); i++)
 		{
-			mev.at(i) = ve1.at(i);
+			sngEvaluators[i]->evaluate(mev[i], r, ads);
 		}
 
-		delete &ve1;
 	}
+
+protected:
 
 	// ============= Component ===============
 	virtual bool compatible(string s)
@@ -158,7 +186,7 @@ protected:
 
 };
 
-template<class R, class ADS = OPTFRAME_DEFAULT_ADS, class DS = OPTFRAME_DEFAULT_DS>
+template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class MultiEvaluatorAction: public Action<R, ADS>
 {
 public:

@@ -28,6 +28,10 @@
 #include "../../OptFrame/MultiObjSearch.hpp"
 #include "../../OptFrame/Util/UnionNDSets.hpp"
 
+#include "../../OptFrame/Heuristics/MOLocalSearches/MOBestImprovement.hpp"
+#include "../../OptFrame/Heuristics/MOLocalSearches/MORandomImprovement.hpp"
+#include "../../OptFrame/Heuristics/MOLocalSearches/GPLS.hpp"
+
 namespace EFP
 {
 
@@ -149,6 +153,9 @@ public:
 		string outputFile = "LogPopFOPlus";
 		es = new ES<RepEFP>(*eval, *c, vNSeq, vNSeqMax, emptyLS, selectionType, mutationRate, rg, mu, lambda, esMaxG, outputFile, 0);
 		es->setMessageLevel(3);
+
+		//MO
+
 	}
 
 	virtual ~ForecastClass()
@@ -175,37 +182,74 @@ public:
 
 	}
 
-	void runMultiObjSearch()
+	void runMultiObjSearch(Solution<RepEFP>* s = NULL, Pareto<RepEFP>* pf = NULL)
 	{
-		GRInitialPopulation<RepEFP> bip(*c, rg, 0.2);
+		int timeG2PLS = 120;
 
 		vector<Evaluator<RepEFP>*> v_e;
-		v_e.push_back(new EFPEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), MAPE_INDEX));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), RMSE_INDEX));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
 
 		MultiEvaluator<RepEFP> mev(v_e);
-		int initial_population_size = 10;
 
+		if (s != NULL)
+		{
+			if (pf == NULL)
+			{
+				pf = new Pareto<RepEFP>();
+				pf->push_back(s, mev);
+			}
+			else
+			{
+				pf->push_back(s, mev);
+			}
+		}
+
+		int initial_population_size = 10;
+		GRInitialPopulation<RepEFP> bip(*c, rg, 1);
 		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 		TwoPhaseParetoLocalSearch<RepEFP> paretoSearch(mev, bip, initial_population_size, vNSeq);
 
-		Pareto<RepEFP>* pf;
-		//pf = paretoSearch.search(120, 0);
-		pf = multiobjectvns.search(20, 0);
+		GRInitialPareto<RepEFP> grIP(*c, rg, 1, mev);
+		MORandomImprovement<RepEFP> moriCSI(mev, *vNSeq[0], 1000);
+		MORandomImprovement<RepEFP> moriRSI(mev, *vNSeq[1], 1000);
+		MORandomImprovement<RepEFP> moriASI(mev, *vNSeq[2], 1000);
+		MORandomImprovement<RepEFP> moriMFR(mev, *vNSeq[3], 1000);
+		vector<MOLocalSearch<RepEFP>*> vMOLS;
+		vMOLS.push_back(&moriCSI);
+		vMOLS.push_back(&moriRSI);
+//		vMOLS.push_back(&moriASI); //Todo -- CHECK THIS NS -- IT IS PRODUCING ERRORS INSIDE G2PPLS
+		vMOLS.push_back(&moriMFR);
 
-		vector<vector<EvaluationEFP*> > vEval = pf->getParetoFront();
+		GeneralParetoLocalSearch<RepEFP> generalPLS(mev, grIP, initial_population_size, vMOLS);
+		if (pf == NULL)
+		{
+			pf = generalPLS.search(timeG2PLS, 0);
+		}
+		else
+		{
+			pf = generalPLS.search(timeG2PLS, 0, pf);
+		}
+
+
+//		pf = paretoSearch.search(120, 0);
+		//pf = multiobjectvns.search(20, 0);
+
+		cout << "finished" << endl;
+		vector<MultiEvaluation*> vEval = pf->getParetoFront();
 		vector<Solution<RepEFP>*> vSolPf = pf->getParetoSet();
 
 		int nObtainedParetoSol = vEval.size();
 		for (int i = 0; i < nObtainedParetoSol; i++)
 		{
-			vector<double> solEvaluations;
-			double foProfit = vEval[i][0]->getObjFunction();
-			double foVolatility = vEval[i][1]->getObjFunction();
-			solEvaluations.push_back(foProfit);
-			solEvaluations.push_back(foVolatility);
+			//vector<double> solEvaluations;
+			for (int e = 0; e < vEval[i]->size(); e++)
+				cout << vEval[i]->at(e).getObjFunction() << "\t";
+			cout << endl;
 
-			cout << foProfit << "\t" << foVolatility << "\t";
 		}
 		getchar();
 	}
@@ -338,7 +382,7 @@ public:
 //		cout << targetValues << endl;
 //		getchar();
 
-		return eval->getAccuracy(targetValues,estimatedValues, true);
+		return eval->getAccuracy(targetValues, estimatedValues, true);
 	}
 
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
