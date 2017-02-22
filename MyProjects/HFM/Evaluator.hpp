@@ -466,7 +466,8 @@ public:
 		return predicteds;
 	}
 
-	vector<double> generateForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings)
+	//generate sliding window, with FH steps, multi round forecasts
+	vector<double> generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings)
 	{
 		int nForTargetFile = vForecastings[targetFile].size();
 		int maxLag = problemParam.getMaxLag();
@@ -557,6 +558,16 @@ public:
 	EvaluationEFP& evaluate(const RepEFP& rep)
 	{
 		//Fo vector with different metrics calculations
+		vector<double> foIndicator = evaluateAll(rep, evalFO);
+
+		double fo = foIndicator[evalFO];		// Evaluation Function Value
+
+		return *new EvaluationEFP(fo);
+	}
+
+	vector<double> evaluateAll(const RepEFP& rep, int accIndicator)
+	{
+		//Fo vector with different metrics calculations
 		vector<double> foIndicator(NMETRICS + 1, 0); //nMetrics + ErrorPinball
 
 		/*
@@ -567,23 +578,21 @@ public:
 		vector<vector<double> >& vForecastings = pEFP.getForecastingsVector();
 
 		//validation mode = false | returnforecasts = false
-		vector<double> predictedValues = generateForecasts(rep, vForecastings);
+		vector<double> predictedValues = generateSWMultiRoundForecasts(rep, vForecastings);
 
 		int maxLag = problemParam.getMaxLag();
 		vector<double> targetValues;
 		for (int i = maxLag; i < vForecastings[targetFile].size(); i++)
 			targetValues.push_back(vForecastings[targetFile][i]);
 
-		foIndicator = getAccuracy(targetValues, predictedValues, false);
+		foIndicator = getAccuracy(targetValues, predictedValues, evalFO);
 
-		//foIndicator = returnForecastingsFO(rep, vForecastings, false, false);
-
-		double fo = foIndicator[evalFO];		// Evaluation Function Value
-
-		return *new EvaluationEFP(fo);
+		return foIndicator;
 	}
 
-	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, bool validationMode)
+	//return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
+	//if equals to -1 it calls all indicators calculus
+	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, int accIndicator)
 	{
 
 		int nSamples = targetValues.size();
@@ -598,7 +607,7 @@ public:
 
 		double sumTarget = 0;
 		double avgTarget = 0;
-		if (evalFO == WMAPE_INDEX || evalFO == MMAPE_INDEX || validationMode == true)
+		if (accIndicator == WMAPE_INDEX || accIndicator == MMAPE_INDEX || accIndicator == -1)
 		{
 			for (int i = 0; i < nSamples; i++)
 				sumTarget += targetValues[i];
@@ -616,23 +625,23 @@ public:
 
 			double absDiff = abs(estimation - forecastingTarget);
 
-			if (evalFO == MAPE_INDEX || validationMode == true)
+			if (accIndicator == MAPE_INDEX || accIndicator == -1)
 				foIndicator[MAPE_INDEX] += (absDiff / abs(forecastingTargetNotNull));
 
-			if (evalFO == SMAPE_INDEX || validationMode == true)
+			if (accIndicator == SMAPE_INDEX || accIndicator == -1)
 				foIndicator[SMAPE_INDEX] += (absDiff / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
 
-			if (evalFO == WMAPE_INDEX || validationMode == true)
+			if (accIndicator == WMAPE_INDEX || accIndicator == -1)
 				foIndicator[WMAPE_INDEX] += (absDiff / sumTarget);
 
-			if (evalFO == MMAPE_INDEX || validationMode == true)
+			if (accIndicator == MMAPE_INDEX || accIndicator == -1)
 				foIndicator[MMAPE_INDEX] += (absDiff / avgTarget);
 
-			if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
+			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == -1)
 				foIndicator[MSE_INDEX] += pow(absDiff, 2);
 
 			//PinballFunction
-			if (evalFO == PINBALL_INDEX || validationMode == true)
+			if (accIndicator == PINBALL_INDEX || accIndicator == -1)
 			{
 				double quantilError = 0.5;
 				double pinballFunctionQuantils = 0;
@@ -655,40 +664,40 @@ public:
 		}
 
 		//MAPE FINAL CALC
-		if (evalFO == MAPE_INDEX || validationMode == true)
+		if (accIndicator == MAPE_INDEX || accIndicator == -1)
 		{
 			foIndicator[MAPE_INDEX] *= 100;
 			foIndicator[MAPE_INDEX] /= nSamples;
 		}
 
-		if (evalFO == SMAPE_INDEX || validationMode == true)
+		if (accIndicator == SMAPE_INDEX || accIndicator == -1)
 		{
 			foIndicator[SMAPE_INDEX] *= 100;
 			foIndicator[SMAPE_INDEX] /= nSamples;
 		}
 
-		if (evalFO == WMAPE_INDEX || validationMode == true)
+		if (accIndicator == WMAPE_INDEX || accIndicator == -1)
 		{
 			foIndicator[WMAPE_INDEX] *= 100;
 			foIndicator[WMAPE_INDEX] /= nSamples;
 		}
 
-		if (evalFO == MMAPE_INDEX || validationMode == true)
+		if (accIndicator == MMAPE_INDEX || accIndicator == -1)
 		{
 			foIndicator[MMAPE_INDEX] *= 100;
 			foIndicator[MMAPE_INDEX] /= nSamples;
 		}
 
-		if (evalFO == PINBALL_INDEX || validationMode == true)
+		if (accIndicator == PINBALL_INDEX || accIndicator == -1)
 		{
 			foIndicator[PINBALL_INDEX] /= nSamples;
 		}
 
-		if (evalFO == MSE_INDEX || evalFO == RMSE_INDEX || validationMode == true)
+		if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == -1)
 		{
 			foIndicator[MSE_INDEX] /= nSamples;
 
-			if (evalFO == RMSE_INDEX || validationMode == true)
+			if (accIndicator == RMSE_INDEX || accIndicator == -1)
 				foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
 		}
 

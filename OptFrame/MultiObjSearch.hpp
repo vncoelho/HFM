@@ -93,7 +93,7 @@ public:
 			mev.addEvaluation(ev);
 		}
 
-		push_back(s,&mev);
+		push_back(s, &mev);
 
 		mev.clear();
 	}
@@ -220,8 +220,23 @@ public:
 		return nonDom;
 	}
 
-	// T. Lust et al (method addSolution)
+	static vector<pair<Solution<R>*, MultiEvaluation*> > filterDominated(vector<Direction*>& vdir, const vector<pair<Solution<R>*, MultiEvaluation*> >& candidates)
+	{
+		vector<pair<Solution<R>*, MultiEvaluation*> > nonDom;
 
+		ParetoDominance<R, ADS> pDom(vdir);
+		ParetoDominanceWeak<R, ADS> pDomWeak(vdir);
+
+		for (unsigned i = 0; i < candidates.size(); i++)
+			addSolution(pDom, pDomWeak, nonDom, candidates[i]);
+
+		return nonDom;
+	}
+
+	//====================STILL USED BY 2PPLS OR MOVNS ======================
+	// SOON IT SHOULD BE DELETED --- 2PPLS WILL BECOME G2PPLS -- MOVNS UPDATED TO A MORE GENERIC VERSION
+
+	// T. Lust et al (method addSolution)
 	// class T must be handled by ParetoDominance operators (candidate: vector<double>, vector<Evaluation*>, MultiEvaluation*)
 
 	template<class T>
@@ -466,19 +481,6 @@ public:
 		return added;
 	}
 
-	static vector<pair<Solution<R>*, MultiEvaluation*> > filterDominated(vector<Direction*>& vdir, const vector<pair<Solution<R>*, MultiEvaluation*> >& candidates)
-	{
-		vector<pair<Solution<R>*, MultiEvaluation*> > nonDom;
-
-		ParetoDominance<R, ADS> pDom(vdir);
-		ParetoDominanceWeak<R, ADS> pDomWeak(vdir);
-
-		for (unsigned i = 0; i < candidates.size(); i++)
-			addSolution(pDom, pDomWeak, nonDom, candidates[i]);
-
-		return nonDom;
-	}
-
 	static void addSolution(ParetoDominance<R, ADS>& dom, ParetoDominanceWeak<R, ADS>& domWeak, vector<pair<Solution<R>*, MultiEvaluation*> >& nonDom, pair<Solution<R>*, MultiEvaluation*> candidate)
 	{
 		for (int ind = 0; ind < nonDom.size(); ind++)
@@ -495,6 +497,9 @@ public:
 
 		nonDom.push_back(candidate);
 	}
+
+	//====================STILL USED BY 2PPLS OR MOVNS ======================
+	// SOON IT SHOULD BE DELETED --- 2PPLS WILL BECOME G2PPLS -- MOVNS UPDATED TO A MORE GENERIC VERSION
 
 };
 
@@ -523,6 +528,7 @@ public:
 	{
 		return x_e;
 	}
+
 //	MultiEvaluator<R, ADS>& getMultiEvaluator()
 //	{
 //		return multiEval;

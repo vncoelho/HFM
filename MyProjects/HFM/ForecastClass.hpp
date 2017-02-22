@@ -323,26 +323,14 @@ public:
 
 	vector<double> returnBlind(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& validationBlindForecastings)
 	{
-		vector<double> blindResults;
-		blindResults = eval->blindForecasting(sol->first.getR(), validationBlindForecastings);
+		return eval->blindForecasting(sol->first.getR(), validationBlindForecastings);
 
-		return blindResults;
 	}
 
 	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-
-		//OLD CALCULUSS -- TODO CHECK IF THE NEW IS RIGHT
-		//vector<double> foIndicator(NMETRICS + 1, 0); //+1 is for the PinballError TODO
-//		vector<double> foIndicator(NMETRICS, 0); //+1 is for the PinballError TODO
-//		foIndicator = eval->returnForecastingsFO(sol->first.getR(), vForecastingsValidation, true, false);
-//		cout << "insideForecastClass" << endl;
-//		cout << foIndicator << endl;
-//		getchar();
-
-		//TODO CHECK IF THE NEW IS RIGHT
 		vector<double> foIndicatorNew(NMETRICS, 0);
-		vector<double> estimatedValues = eval->returnTrainingSetForecasts(sol->first.getR(), vForecastingsValidation);
+		vector<double> estimatedValues = returnForecasts(sol,vForecastingsValidation);
 
 		int maxLag = problemParam.getMaxLag();
 		vector<double> targetValues;
@@ -352,7 +340,7 @@ public:
 
 //		cout << validationSetValues << endl;
 //		getchar();
-		foIndicatorNew = eval->getAccuracy(targetValues, estimatedValues, true);
+		foIndicatorNew = returnErrorsCallGetAccuracy(targetValues, estimatedValues);
 //		cout << "insideForecastClassNew" << endl;
 //		cout << foIndicatorNew << endl;
 
@@ -361,7 +349,12 @@ public:
 
 	vector<double> returnErrorsCallGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
 	{
-		return eval->getAccuracy(targetValues, estimatedValues, true);
+		return eval->getAccuracy(targetValues, estimatedValues, -1);
+	}
+
+	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
+	{
+		return eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation);
 	}
 
 	vector<double> returnErrorsPersistance(vector<double> targetValues, int fH)
@@ -382,123 +375,8 @@ public:
 //		cout << targetValues << endl;
 //		getchar();
 
-		return eval->getAccuracy(targetValues, estimatedValues, true);
+		return eval->getAccuracy(targetValues, estimatedValues, -1);
 	}
-
-	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
-	{
-		vector<double> estimatedValues = eval->returnTrainingSetForecasts(sol->first.getR(), vForecastingsValidation);
-
-		return estimatedValues;
-	}
-
-//	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
-//	{
-//		vector<double> forecasts = eval->returnForecastingsFO(sol->first.getR(), vForecastingsValidation, true, true);
-//
-//		return forecasts;
-//	}
-
-	/*
-	 vector<double> getFoIndicator(vector<double> vRealValues, vector<double> vForecastings)
-	 {
-	 vector<double> foIndicator;
-	 vector < pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
-
-	 int nSamples = vRealValues.size();
-	 for (int i = 0; i < nSamples; i++) // preve 24 horas a frente
-	 {
-	 double forecastingTarget = vRealValues[i];
-	 double estimation = vForecastings[i];
-
-	 foIndicator[MAPE_INDEX] += (abs(estimation - forecastingTarget) / abs(forecastingTarget));
-
-	 int vQ = 0;
-	 for (double quantilError = 0; quantilError <= 1; quantilError = quantilError + 0.05)
-	 {
-	 double pinballFunctionQuantils = 0;
-	 for (int a = 1; a < 100; a++)
-	 {
-	 double quantilFactor = (50 - a) / 100.0;
-
-	 double qa = estimation - estimation * quantilError * quantilFactor;
-
-	 if (forecastingTarget < qa)
-	 pinballFunctionQuantils += (1 - (a / 100.0)) * (qa - forecastingTarget);
-
-	 if (forecastingTarget >= qa)
-	 pinballFunctionQuantils += (a / 100.0) * (forecastingTarget - qa);
-	 }
-	 pinballFunctionQuantils /= 99;
-	 vPinballFunctions[vQ].first += pinballFunctionQuantils;
-	 vPinballFunctions[vQ].second = quantilError;
-	 vQ++;
-	 }
-	 foIndicator[MSE_INDEX] += pow((estimation - forecastingTarget), 2);
-	 }
-
-	 foIndicator[MAPE_INDEX] *= 100;
-	 foIndicator[MAPE_INDEX] /= nSamples;
-
-	 double minPinball = 1000000;
-	 double pinbalError;
-	 for (int pF = 0; pF < 20; pF++)
-	 {
-	 vPinballFunctions[pF].first /= nSamples;
-	 if (vPinballFunctions[pF].first < minPinball)
-	 {
-	 minPinball = vPinballFunctions[pF].first;
-	 pinbalError = vPinballFunctions[pF].second;
-	 }
-	 }
-
-	 foIndicator[PINBALL_INDEX] = minPinball;
-	 foIndicator[PINBALL_ERROR] = pinbalError;
-	 //foIndicator[PINBALL_INDEX] /= (nForecastingValidations - notUsedForTest);
-
-	 foIndicator[MSE_INDEX] /= nSamples;
-	 foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
-
-	 return foIndicator;
-	 }*/
-
-	/*
-	 void changeMethod(vector<vector<double> >& _tForecastings, ProblemParameters& _problemParam)
-	 {
-	 tForecastings.clear();
-	 delete &problemParam;
-	 delete &tForecastings;
-
-	 tForecastings = _tForecastings;
-
-	 problemParam = _problemParam;
-
-	 delete p;
-	 delete eval;
-	 delete c;
-	 p = new ProblemInstance(tForecastings, problemParam);
-	 eval = new EFPEvaluator(*p, problemParam);
-
-	 if (construtiveMethod == 0)
-	 c = new ConstructiveRandomNorm(*p, problemParam, rg);
-	 else
-	 c = new ConstructiveCalcMeans(*p, problemParam, rg);
-
-
-	 for (int i = 0; i < vLS.size(); i++)
-	 delete vLS[i];
-	 vLS.clear();
-	 FirstImprovement<RepEFP>* fi = new FirstImprovement<RepEFP>(*eval, *ns);
-	 vLS.push_back(fi);
-
-	 delete vnd;
-	 vnd = new VariableNeighborhoodDescent<RepEFP>(*eval, vLS);
-
-	 ils = new IteratedLocalSearchLevels<RepEFP>(*eval, *c, *vnd, *ilsPert, 100, 10);
-
-	 delete EsCOpt;
-	 EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, gmax, rg, initialDesv, mutationDesv);
-	 }*/
 
 };
 
