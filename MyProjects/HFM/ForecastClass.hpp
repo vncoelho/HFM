@@ -321,10 +321,10 @@ public:
 		return finalSol;
 	}
 
-	vector<double> returnBlind(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& validationBlindForecastings)
+	//return blind forecasts for the required steps ahead of problemParam class
+	vector<double> returnBlind(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& vTimeSeries)
 	{
-		return eval->blindForecasting(sol->first.getR(), validationBlindForecastings);
-
+		return  eval->returnForecasts(sol->first.getR(), vTimeSeries, vTimeSeries[eval->getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
 	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
@@ -354,7 +354,8 @@ public:
 
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-		return eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation);
+		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation,problemParam.getStepsAhead());
+		return targetAndForecasts.second;
 	}
 
 	vector<double> returnErrorsPersistance(vector<double> targetValues, int fH)

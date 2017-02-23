@@ -44,7 +44,7 @@ int stockMarketForecasting(int argc, char **argv)
 	cout << "nomeOutput=" << nomeOutput << endl;
 
 	//Numero de passos a frente - Horizonte de previsao
-	int fh = 30;
+	int fh = 15;
 	//O valor mais antigo que pode ser utilizado como entrada do modelo de previsao [100]
 	int argvMaxLagRate = 10;
 
