@@ -21,10 +21,6 @@
 #ifndef HFM_MULTI_EVALUATOR_HPP_
 #define HFM_MULTI_EVALUATOR_HPP_
 
-#include "../Solution.hpp"
-#include "../Evaluator.hpp"
-#include "../MultiEvaluation.hpp"
-#include "../MultiEvaluator.hpp"
 
 #include <iostream>
 
@@ -34,7 +30,7 @@ using namespace scannerpp;
 namespace EFP
 {
 
-class HFMMultiEvaluator: public MultiEvaluator<RepEFP>
+class HFMMultiEvaluator: public MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 	EFPEvaluator& evalEFP;
 public:
@@ -45,18 +41,31 @@ public:
 	}
 
 
-
-public:
-	// protected: not possible because of GeneralizedMultiEvaluator
-
-	// TODO: make virtual "= 0"
-	virtual MultiEvaluation& evaluate(const RepEFP& r)
+	~HFMMultiEvaluator()
 	{
+	}
+
+	MultiEvaluation& evaluate(const RepEFP& r)
+	{
+		cout<<"oi aqui"<<endl;
 		MultiEvaluation* nev = new MultiEvaluation;
 
 		vector<double> foIndicator = evalEFP.evaluateAll(r, -1);
 
+		nev->addEvaluation(*new EvaluationEFP(foIndicator[MAPE_INDEX]));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator[RMSE_INDEX]));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator[WMAPE_INDEX]));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator[SMAPE_INDEX]));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator[MMAPE_INDEX]));
+
+
 		return *nev;
+	}
+
+	MultiEvaluation& evaluate(const RepEFP& r, const OPTFRAME_DEFAULT_ADS&)
+	{
+		cout<<"oi correct"<<endl;
+		return evaluate(r);
 	}
 
 

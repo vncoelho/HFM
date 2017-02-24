@@ -26,7 +26,7 @@
 #include "./HFM/mainForecastingCodes/hosseinData.hpp"
 #include "./HFM/mainForecastingCodes/MokokoWind.hpp"
 #include "./HFM/mainForecastingCodes/REW2016_REED.hpp"
-#include "./HFM/mainForecastingCodes/bovespa.hpp"
+#include "HFM/mainForecastingCodes/stockMarket.hpp"
 
 using namespace std;
 using namespace optframe;

@@ -73,6 +73,7 @@ public:
 	{
 		return sngEvaluators.size();
 	}
+
 	virtual ~MultiEvaluator()
 	{
 	}

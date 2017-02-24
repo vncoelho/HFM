@@ -109,7 +109,6 @@ int stockMarketForecasting(int argc, char **argv)
 	//int maxUpperLag = problemParam.getMaxUpperLag();
 	//=================================================
 
-	int timeES = 10; // online training time
 	vector<double> foIndicators;
 	int beginTrainingSet = 0;
 	cout << std::setprecision(9);
@@ -131,8 +130,8 @@ int stockMarketForecasting(int argc, char **argv)
 //		getchar();
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
 
-
-	sol = forecastObject.run(240, 0, 0);
+	int timeES = 10;
+	sol = forecastObject.run(timeES, 0, 0);
 
 	forecastObject.runMultiObjSearch(&sol->first);
 

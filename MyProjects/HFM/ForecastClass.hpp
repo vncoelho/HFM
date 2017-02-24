@@ -9,6 +9,7 @@
 #define FORECASTCLASS_HPP_
 
 #include "Evaluator.hpp"
+#include "MultiEvaluatorHFM.hpp"
 #include "Evaluation.h"
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
@@ -193,6 +194,8 @@ public:
 		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
 
+//		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+
 		MultiEvaluator<RepEFP> mev(v_e);
 
 		if (s != NULL)
@@ -212,6 +215,7 @@ public:
 		GRInitialPopulation<RepEFP> bip(*c, rg, 1);
 		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 		TwoPhaseParetoLocalSearch<RepEFP> paretoSearch(mev, bip, initial_population_size, vNSeq);
+
 
 		GRInitialPareto<RepEFP> grIP(*c, rg, 1, mev);
 		MORandomImprovement<RepEFP> moriCSI(mev, *vNSeq[0], 1000);
@@ -238,7 +242,6 @@ public:
 //		pf = paretoSearch.search(120, 0);
 		//pf = multiobjectvns.search(20, 0);
 
-		cout << "finished" << endl;
 		vector<MultiEvaluation*> vEval = pf->getParetoFront();
 		vector<Solution<RepEFP>*> vSolPf = pf->getParetoSet();
 

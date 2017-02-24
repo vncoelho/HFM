@@ -106,7 +106,6 @@ public:
 	{
 		double value = 0;
 
-//		if ((K == 0) || ((i + pa - K) < 0) || ((i + pa - K) >= int(vForecastings[file].size())) ) //TODO - REMOVE -- Depracated
 		if ((K == 0) || ((i + pa - K) < 0))
 		{
 			cout << "BUG Evaluator K (function getKValue): K = " << K << endl;
