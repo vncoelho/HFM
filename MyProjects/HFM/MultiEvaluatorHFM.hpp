@@ -47,7 +47,6 @@ public:
 
 	MultiEvaluation& evaluate(const RepEFP& r)
 	{
-		cout<<"oi aqui"<<endl;
 		MultiEvaluation* nev = new MultiEvaluation;
 
 		vector<double> foIndicator = evalEFP.evaluateAll(r, -1);
@@ -58,14 +57,17 @@ public:
 		nev->addEvaluation(*new EvaluationEFP(foIndicator[SMAPE_INDEX]));
 		nev->addEvaluation(*new EvaluationEFP(foIndicator[MMAPE_INDEX]));
 
-
 		return *nev;
 	}
 
 	MultiEvaluation& evaluate(const RepEFP& r, const OPTFRAME_DEFAULT_ADS&)
 	{
-		cout<<"oi correct"<<endl;
 		return evaluate(r);
+	}
+
+	bool betterThan(const Evaluation& ev1, const Evaluation& ev2, int index)
+	{
+		return sngEvaluators[0]->betterThan(ev1, ev2);
 	}
 
 

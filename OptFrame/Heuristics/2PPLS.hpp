@@ -47,7 +47,7 @@ private:
 public:
 
 	TwoPhaseParetoLocalSearch(MultiEvaluator<R, ADS>& _mev, InitialPopulation<R, ADS>& _init_pop, int _init_pop_size, vector<NSSeq<R, ADS>*> _neighbors) :
-			mev(_mev), init_pop(_init_pop), init_pop_size(_init_pop_size), neighbors(_neighbors), pDominance(ParetoDominance<R, ADS>(*_mev.getEvaluators())), pDominanceWeak(ParetoDominanceWeak<R, ADS>(*_mev.getEvaluators()))
+			mev(_mev), init_pop(_init_pop), init_pop_size(_init_pop_size), neighbors(_neighbors), pDominance(ParetoDominance<R, ADS>(_mev)), pDominanceWeak(ParetoDominanceWeak<R, ADS>(_mev))
 	{
 
 	}

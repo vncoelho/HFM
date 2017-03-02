@@ -23,7 +23,7 @@
 #include "../../OptFrame/Heuristics/LocalSearches/RandomDescentMethod.hpp"
 #include "../../OptFrame/Heuristics/ILS/IteratedLocalSearchLevels.hpp"
 #include "../../OptFrame/Heuristics/GRASP/BasicGRASP.hpp"
-#include "../../OptFrame/Heuristics/VNS/MOVNSLevels.hpp"
+//#include "../../OptFrame/Heuristics/VNS/MOVNSLevels.hpp"
 #include "../../OptFrame/Heuristics/2PPLS.hpp"
 #include "../../OptFrame/MultiEvaluator.hpp"
 #include "../../OptFrame/MultiObjSearch.hpp"
@@ -131,6 +131,7 @@ public:
 
 		//olr = new OptimalLinearRegression(*eval, *p);
 
+		vNSeq.push_back(nsModifyFuzzyRules);
 		vNSeq.push_back(nsChangeSingleInput);
 		vNSeq.push_back(nsRemoveSingleInput);
 		vNSeq.push_back(nsAddSingleInput);
@@ -144,7 +145,7 @@ public:
 //		vNSeq.push_back(nsAddMeanM5);
 //		vNSeq.push_back(nsAddMeanBigM);
 //		vNSeq.push_back(nsVAlpha);
-		vNSeq.push_back(nsModifyFuzzyRules);
+
 
 		//TODO check why ES goes more generations some time when we do not have improvements.
 
@@ -183,9 +184,8 @@ public:
 
 	}
 
-	void runMultiObjSearch(Solution<RepEFP>* s = NULL, Pareto<RepEFP>* pf = NULL)
+	void runMultiObjSearch(int timeGPLS, Solution<RepEFP>* s = NULL, Pareto<RepEFP>* pf = NULL)
 	{
-		int timeG2PLS = 120;
 
 		vector<Evaluator<RepEFP>*> v_e;
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
@@ -213,9 +213,8 @@ public:
 
 		int initial_population_size = 10;
 		GRInitialPopulation<RepEFP> bip(*c, rg, 1);
-		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
-		TwoPhaseParetoLocalSearch<RepEFP> paretoSearch(mev, bip, initial_population_size, vNSeq);
-
+//		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
+//		TwoPhaseParetoLocalSearch<RepEFP> paretoSearch(mev, bip, initial_population_size, vNSeq);
 
 		GRInitialPareto<RepEFP> grIP(*c, rg, 1, mev);
 		MORandomImprovement<RepEFP> moriCSI(mev, *vNSeq[0], 1000);
@@ -231,11 +230,11 @@ public:
 		GeneralParetoLocalSearch<RepEFP> generalPLS(mev, grIP, initial_population_size, vMOLS);
 		if (pf == NULL)
 		{
-			pf = generalPLS.search(timeG2PLS, 0);
+			pf = generalPLS.search(timeGPLS, 0);
 		}
 		else
 		{
-			pf = generalPLS.search(timeG2PLS, 0, pf);
+			pf = generalPLS.search(timeGPLS, 0, pf);
 		}
 
 

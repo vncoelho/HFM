@@ -1,0 +1,118 @@
+==16603== Memcheck, a memory error detector
+==16603== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==16603== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==16603== Command: ./MyProjects/app_HFM ./MyProjects/HFM/dadosBovespa/bovespa
+==16603== 
+==16603== 
+==16603== HEAP SUMMARY:
+==16603==     in use at exit: 1,361,296 bytes in 5,783 blocks
+==16603==   total heap usage: 981,989 allocs, 976,206 frees, 170,227,427 bytes allocated
+==16603== 
+==16603== 16 bytes in 1 blocks are definitely lost in loss record 12 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x446300: optframe::ES<RepEFP, int>::search(double, double, optframe::Solution<RepEFP, int> const*, optframe::Evaluation const*) (ES.hpp:621)
+==16603==    by 0x43B4BB: EFP::ForecastClass::run(int, int, int) (ForecastClass.hpp:286)
+==16603==    by 0x424370: stockMarketForecasting(int, char**) (stockMarket.hpp:135)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 120 (56 direct, 64 indirect) bytes in 1 blocks are definitely lost in loss record 32 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x4271E0: optframe::MultiEvaluation::clone() const (MultiEvaluation.hpp:174)
+==16603==    by 0x450551: optframe::Pareto<RepEFP, int>::push_back(optframe::Solution<RepEFP, int> const*, optframe::MultiEvaluation const*) (MultiObjSearch.hpp:94)
+==16603==    by 0x4510CC: optframe::Pareto<RepEFP, int>::operator=(optframe::Pareto<RepEFP, int> const&) (MultiObjSearch.hpp:185)
+==16603==    by 0x443346: GeneralParetoLocalSearch<RepEFP, int>::search(double, double, optframe::Pareto<RepEFP, int>*) (GPLS.hpp:169)
+==16603==    by 0x43B062: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:236)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 120 (56 direct, 64 indirect) bytes in 1 blocks are definitely lost in loss record 33 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x4271E0: optframe::MultiEvaluation::clone() const (MultiEvaluation.hpp:174)
+==16603==    by 0x450551: optframe::Pareto<RepEFP, int>::push_back(optframe::Solution<RepEFP, int> const*, optframe::MultiEvaluation const*) (MultiObjSearch.hpp:94)
+==16603==    by 0x47BDCF: paretoManager2PPLS<RepEFP, int>::addSolution(optframe::Solution<RepEFP, int> const*, optframe::MultiEvaluation const*) (GPLS.hpp:95)
+==16603==    by 0x47C605: optframe::MORandomImprovement<RepEFP, int>::exec(optframe::Solution<RepEFP, int>&, optframe::MultiEvaluation&, optframe::paretoManager<RepEFP, int>&, double, double) (MORandomImprovement.hpp:91)
+==16603==    by 0x443717: GeneralParetoLocalSearch<RepEFP, int>::search(double, double, optframe::Pareto<RepEFP, int>*) (GPLS.hpp:203)
+==16603==    by 0x43B062: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:236)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 192 bytes in 1 blocks are definitely lost in loss record 34 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43AB62: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:190)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 192 bytes in 1 blocks are definitely lost in loss record 35 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43ABBE: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:191)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 192 bytes in 1 blocks are definitely lost in loss record 36 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43AC1A: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:192)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 192 bytes in 1 blocks are definitely lost in loss record 37 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43AC76: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:193)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 192 bytes in 1 blocks are definitely lost in loss record 38 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43ACD2: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:194)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 1,048 (240 direct, 808 indirect) bytes in 1 blocks are definitely lost in loss record 49 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43A490: EFP::ForecastClass::ForecastClass(std::vector<std::vector<double, std::allocator<double> >, std::allocator<std::vector<double, std::allocator<double> > > >&, EFP::ProblemParameters&, optframe::RandGen&, EFP::methodParameters&) (ForecastClass.hpp:155)
+==16603==    by 0x42433D: stockMarketForecasting(int, char**) (stockMarket.hpp:127)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 1,176 (56 direct, 1,120 indirect) bytes in 1 blocks are definitely lost in loss record 51 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x43AD83: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:204)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 1,176 (56 direct, 1,120 indirect) bytes in 1 blocks are definitely lost in loss record 52 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x4439D0: GeneralParetoLocalSearch<RepEFP, int>::search(double, double, optframe::Pareto<RepEFP, int>*) (GPLS.hpp:246)
+==16603==    by 0x43B062: EFP::ForecastClass::runMultiObjSearch(int, optframe::Solution<RepEFP, int>*, optframe::Pareto<RepEFP, int>*) (ForecastClass.hpp:236)
+==16603==    by 0x42439B: stockMarketForecasting(int, char**) (stockMarket.hpp:136)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 499,176 (24 direct, 499,152 indirect) bytes in 1 blocks are definitely lost in loss record 72 of 73
+==16603==    at 0x4C2E0EF: operator new(unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x45F5AD: optframe::ES<RepEFP, int>::competicao(std::vector<optframe::IndividuoES<RepEFP, int>, std::allocator<optframe::IndividuoES<RepEFP, int> > >&, std::vector<optframe::IndividuoES<RepEFP, int>, std::allocator<optframe::IndividuoES<RepEFP, int> > >&) (ES.hpp:310)
+==16603==    by 0x452F94: optframe::ES<RepEFP, int>::highSelectivePression(std::vector<optframe::IndividuoES<RepEFP, int>, std::allocator<optframe::IndividuoES<RepEFP, int> > >&, std::vector<optframe::IndividuoES<RepEFP, int>, std::allocator<optframe::IndividuoES<RepEFP, int> > >&) (ES.hpp:408)
+==16603==    by 0x445D57: optframe::ES<RepEFP, int>::search(double, double, optframe::Solution<RepEFP, int> const*, optframe::Evaluation const*) (ES.hpp:532)
+==16603==    by 0x43B4BB: EFP::ForecastClass::run(int, int, int) (ForecastClass.hpp:286)
+==16603==    by 0x424370: stockMarketForecasting(int, char**) (stockMarket.hpp:135)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== 784,800 bytes in 100 blocks are definitely lost in loss record 73 of 73
+==16603==    at 0x4C2E80F: operator new[](unsigned long) (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+==16603==    by 0x404933: autocorr::ACF(double const*, unsigned long, acorrInfo&) (autocorr.cpp:58)
+==16603==    by 0x4372AD: EFP::ConstructiveACF::returnRLCUsingACF() (ConstructiveRandomACF.hpp:188)
+==16603==    by 0x437741: EFP::ConstructiveACF::generateSolution(float) (ConstructiveRandomACF.hpp:232)
+==16603==    by 0x436F96: EFP::ConstructiveACF::generateSolution() (ConstructiveRandomACF.hpp:159)
+==16603==    by 0x445419: optframe::ES<RepEFP, int>::search(double, double, optframe::Solution<RepEFP, int> const*, optframe::Evaluation const*) (ES.hpp:431)
+==16603==    by 0x43B4BB: EFP::ForecastClass::run(int, int, int) (ForecastClass.hpp:286)
+==16603==    by 0x424370: stockMarketForecasting(int, char**) (stockMarket.hpp:135)
+==16603==    by 0x424F2B: main (mainHFM.cpp:200)
+==16603== 
+==16603== LEAK SUMMARY:
+==16603==    definitely lost: 786,264 bytes in 112 blocks
+==16603==    indirectly lost: 502,328 bytes in 5,670 blocks
+==16603==      possibly lost: 0 bytes in 0 blocks
+==16603==    still reachable: 72,704 bytes in 1 blocks
+==16603==         suppressed: 0 bytes in 0 blocks
+==16603== Reachable blocks (those to which a pointer was found) are not shown.
+==16603== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==16603== 
+==16603== For counts of detected and suppressed errors, rerun with: -v
+==16603== ERROR SUMMARY: 13 errors from 13 contexts (suppressed: 0 from 0)

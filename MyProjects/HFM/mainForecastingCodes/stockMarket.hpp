@@ -131,9 +131,10 @@ int stockMarketForecasting(int argc, char **argv)
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
 
 	int timeES = 10;
+	int timeGPLS = 30;
 	sol = forecastObject.run(timeES, 0, 0);
+	forecastObject.runMultiObjSearch(timeGPLS,&sol->first);
 
-	forecastObject.runMultiObjSearch(&sol->first);
 
 
 	//Validacao
