@@ -146,7 +146,6 @@ public:
 //		vNSeq.push_back(nsAddMeanBigM);
 //		vNSeq.push_back(nsVAlpha);
 
-
 		//TODO check why ES goes more generations some time when we do not have improvements.
 
 		vector<int> vNSeqMax(vNSeq.size(), 1000);
@@ -237,7 +236,6 @@ public:
 			pf = generalPLS.search(timeGPLS, 0, pf);
 		}
 
-
 //		pf = paretoSearch.search(120, 0);
 		//pf = multiobjectvns.search(20, 0);
 
@@ -255,6 +253,7 @@ public:
 		}
 
 		pf->clear();
+		mev.clear();
 		getchar();
 	}
 
@@ -328,13 +327,13 @@ public:
 	//return blind forecasts for the required steps ahead of problemParam class
 	vector<double> returnBlind(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& vTimeSeries)
 	{
-		return  eval->returnForecasts(sol->first.getR(), vTimeSeries, vTimeSeries[eval->getTargetFile()].size(), problemParam.getStepsAhead());
+		return eval->returnForecasts(sol->first.getR(), vTimeSeries, vTimeSeries[eval->getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
 	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
 		vector<double> foIndicatorNew(NMETRICS, 0);
-		vector<double> estimatedValues = returnForecasts(sol,vForecastingsValidation);
+		vector<double> estimatedValues = returnForecasts(sol, vForecastingsValidation);
 
 		int maxLag = problemParam.getMaxLag();
 		vector<double> targetValues;
@@ -358,7 +357,7 @@ public:
 
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation,problemParam.getStepsAhead());
+		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
 		return targetAndForecasts.second;
 	}
 

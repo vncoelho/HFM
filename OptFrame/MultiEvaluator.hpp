@@ -92,6 +92,13 @@ public:
 		return sngEvaluators.size();
 	}
 
+	unsigned clear()
+	{
+		for(int e=0;e<int(sngEvaluators.size());e++)
+		{
+			delete sngEvaluators[e];
+		}
+	}
 
 
 //	bool getAllowCosts()

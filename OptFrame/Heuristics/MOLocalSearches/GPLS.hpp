@@ -65,17 +65,17 @@ public:
 	}
 
 	//Special addSolution used in the GPLS speedUp
-	bool addSolution(Pareto<R, ADS>& p, Solution<R, ADS>* candidate, MultiEvaluation* candidateMev)
+	bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
 		bool added = true;
 		for (int ind = 0; ind < p.size(); ind++)
 		{
 			MultiEvaluation popIndFitness = p.getIndMultiEvaluation(ind);
 
-			if (paretoManager<R, ADS>::domWeak.dominates(popIndFitness, *candidateMev))
+			if (paretoManager<R, ADS>::domWeak.dominates(popIndFitness, candidateMev))
 				return false;
 
-			if (paretoManager<R, ADS>::dom.dominates(*candidateMev, popIndFitness))
+			if (paretoManager<R, ADS>::dom.dominates(candidateMev, popIndFitness))
 			{
 				p.erase(ind);
 				gplsData.nsParetoOptimum.erase(gplsData.nsParetoOptimum.begin() + ind);
@@ -87,7 +87,7 @@ public:
 
 		if (added)
 		{
-			p.push_back(*candidate, *candidateMev);
+			p.push_back(candidate, candidateMev);
 			vector<bool> neigh;
 			for (int n = 0; n < r; n++)
 				neigh.push_back(false);

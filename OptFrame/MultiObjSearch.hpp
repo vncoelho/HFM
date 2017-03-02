@@ -544,26 +544,26 @@ public:
 ////		return false;
 //	}
 
-	bool addSolution(Pareto<R, ADS>& p, Solution<R, ADS>* candidate)
+	bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate)
 	{
-		MultiEvaluation& mev = multiEval.evaluate(*candidate);
-		bool added = addSolution(p, candidate, &mev);
-//		mev.clear();
+		MultiEvaluation& mev = multiEval.evaluate(candidate);
+		bool added = addSolution(p, candidate, mev);
+
 		delete &mev;
 		return added;
 	}
 
-	virtual bool addSolution(Pareto<R, ADS>& p, Solution<R, ADS>* candidate, MultiEvaluation* candidateMev)
+	virtual bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
 		bool added = true;
 		for (int ind = 0; ind < p.size(); ind++)
 		{
 			MultiEvaluation popIndFitness = p.getIndMultiEvaluation(ind);
 
-			if (domWeak.dominates(popIndFitness, *candidateMev))
+			if (domWeak.dominates(popIndFitness, candidateMev))
 				return false;
 
-			if (dom.dominates(*candidateMev, popIndFitness))
+			if (dom.dominates(candidateMev, popIndFitness))
 			{
 				p.erase(ind);
 				ind--;
@@ -571,7 +571,7 @@ public:
 
 		}
 		if (added == true)
-			p.push_back(*candidate, *candidateMev);
+			p.push_back(candidate, candidateMev);
 
 		return added;
 	}
