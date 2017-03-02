@@ -192,10 +192,11 @@ public:
 		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
+//		MultiEvaluator<RepEFP> mev(v_e);
 
-//		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
 
-		MultiEvaluator<RepEFP> mev(v_e);
+		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+
 
 		if (s != NULL)
 		{
@@ -236,9 +237,6 @@ public:
 			pf = generalPLS.search(timeGPLS, 0, pf);
 		}
 
-//		pf = paretoSearch.search(120, 0);
-		//pf = multiobjectvns.search(20, 0);
-
 		vector<MultiEvaluation*> vEval = pf->getParetoFront();
 		vector<Solution<RepEFP>*> vSolPf = pf->getParetoSet();
 
@@ -254,7 +252,6 @@ public:
 
 		pf->clear();
 		mev.clear();
-		getchar();
 	}
 
 	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
@@ -284,8 +281,10 @@ public:
 
 		pair<Solution<RepEFP>&, Evaluation&>* finalSol;
 
+		int targetValue = 4.963133247;
+		targetValue = 0;
 		//finalSol = EsCOpt->search(timeES);
-		finalSol = es->search(timeES);
+		finalSol = es->search(timeES,targetValue);
 
 //		vnd->setMessageLevel(3);
 //		if (timeVND > 0)

@@ -140,14 +140,14 @@ public:
 		return *sngEvaluators[index];
 	}
 
-	void addEvaluator(const Evaluator<R, ADS>& ev)
-	{
-		sngEvaluators.push_back(&ev.clone());
-	}
+//	void addEvaluator(const Evaluator<R, ADS>& ev)
+//	{
+//		sngEvaluators.push_back(&ev.clone());
+//	}
 
-	void addEvaluator(Evaluator<R, ADS>* ev)
+	void addEvaluator(Evaluator<R, ADS>& ev)
 	{
-		sngEvaluators.push_back(ev);
+		sngEvaluators.push_back(&ev);
 	}
 
 	unsigned size() const
@@ -160,6 +160,10 @@ public:
 		return sngEvaluators[index]->betterThan(ev1, ev2);
 	}
 
+	virtual bool equals(const Evaluation& ev1, const Evaluation& ev2, int index)
+	{
+		return sngEvaluators[index]->equals(ev1, ev2);
+	}
 
 	MultiEvaluation& evaluate(const Solution<R, ADS>& s)
 	{

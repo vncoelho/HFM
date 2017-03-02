@@ -133,8 +133,12 @@ public:
 			if (mev.betterThan(mev1[e], mev2[e], e))
 				better++;
 
-			if (abs(mev1[e].evaluation() - mev2[e].evaluation()) < 0.0001)
+			if (mev.equals(mev1[e], mev2[e], e))
 				equals++;
+
+//			if (abs(mev1[e].evaluation() - mev2[e].evaluation()) < 0.0001)
+//
+
 		}
 
 		return make_pair(better, equals);

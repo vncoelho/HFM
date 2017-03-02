@@ -44,7 +44,7 @@ int stockMarketForecasting(int argc, char **argv)
 	cout << "nomeOutput=" << nomeOutput << endl;
 
 	//Numero de passos a frente - Horizonte de previsao
-	int fh = 15;
+	int fh = 30;
 	//O valor mais antigo que pode ser utilizado como entrada do modelo de previsao [100]
 	int argvMaxLagRate = 10;
 
@@ -131,7 +131,7 @@ int stockMarketForecasting(int argc, char **argv)
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
 
 	int timeES = 10;
-	int timeGPLS = 30;
+	int timeGPLS = 60;
 	sol = forecastObject.run(timeES, 0, 0);
 	forecastObject.runMultiObjSearch(timeGPLS,&sol->first);
 

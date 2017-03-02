@@ -136,10 +136,10 @@ public:
 		return paretoSet[ind]->clone();
 	}
 
-	MultiEvaluation& getIndMultiEvaluation(int ind)
-	{
-		return *paretoFront[ind];
-	}
+//	MultiEvaluation& getIndMultiEvaluation(int ind)
+//	{
+//		return *paretoFront[ind];
+//	}
 
 	MultiEvaluation& getIndMultiEvaluation(int ind) const
 	{
@@ -558,7 +558,7 @@ public:
 		bool added = true;
 		for (int ind = 0; ind < p.size(); ind++)
 		{
-			MultiEvaluation popIndFitness = p.getIndMultiEvaluation(ind);
+			const MultiEvaluation& popIndFitness = p.getIndMultiEvaluation(ind);
 
 			if (domWeak.dominates(popIndFitness, candidateMev))
 				return false;

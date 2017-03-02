@@ -65,9 +65,19 @@ public:
 		return evaluate(r);
 	}
 
+	unsigned size() const
+	{
+		return 5;
+	}
+
 	bool betterThan(const Evaluation& ev1, const Evaluation& ev2, int index)
 	{
-		return sngEvaluators[0]->betterThan(ev1, ev2);
+		return evalEFP.betterThan(ev1, ev2);
+	}
+
+	bool equals(const Evaluation& ev1, const Evaluation& ev2, int index)
+	{
+		return evalEFP.equals(ev1, ev2);
 	}
 
 

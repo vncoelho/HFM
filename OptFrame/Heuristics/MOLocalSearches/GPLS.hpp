@@ -70,7 +70,7 @@ public:
 		bool added = true;
 		for (int ind = 0; ind < p.size(); ind++)
 		{
-			MultiEvaluation popIndFitness = p.getIndMultiEvaluation(ind);
+			const MultiEvaluation& popIndFitness = p.getIndMultiEvaluation(ind);
 
 			if (paretoManager<R, ADS>::domWeak.dominates(popIndFitness, candidateMev))
 				return false;
@@ -203,9 +203,17 @@ public:
 				pMan2PPLS.gplsData.newSol[ind] = false;
 			}
 
+
 			//Run local search for each individual of the population - Pareto Manager, pMan2PPLS, updates population
 			for (int ind = 0; ind < p.size(); ind++)
 				vLS[k]->exec(x_e, &p.getNonDominatedSol(ind), &p.getIndMultiEvaluation(ind), &pMan2PPLS, timelimit - tnow.now(), target_f);
+
+//			for(int e=0;e<x_e.size();e++)
+//			{
+//				x_e.getIndMultiEvaluation(e).print();
+//			}
+//			getchar();
+
 
 			p.clear();
 
