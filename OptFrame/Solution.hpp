@@ -65,7 +65,6 @@ public:
 	Solution(R&& _r) noexcept :
 			r(std::move(_r)), ads(nullptr)
 	{
-		cout<<"oi move semantics"<<endl;
 	}
 
 
@@ -82,7 +81,6 @@ public:
 	Solution(const Solution<R, ADS>& s) :
 			r(s.r)
 	{
-		cout<<"oi"<<endl;
 		//cout << __PRETTY_FUNCTION__ << endl;
 		if (s.ads)
 			ads = new ADS(*s.ads);
@@ -98,15 +96,12 @@ public:
 	Solution(Solution<R, ADS> && s) noexcept :
 			r(std::move(s.r)), ads(s.ads)
 	{
-		cout<<"chamo na xinxa copia"<<endl;
 		s.ads = nullptr;
 	}
 
 	// leave option to rewrite with clone()
 	virtual Solution<R, ADS>& operator=(const Solution<R, ADS>& s)
 	{
-		cout<<"chamo na xinxa da copia const"<<endl;
-				getchar();
 		if (&s == this) // auto ref check
 			return *this;
 
@@ -126,8 +121,6 @@ public:
 	 */
 	virtual Solution<R, ADS>& operator=(Solution<R, ADS> && s) noexcept
 	{
-		cout<<"chamo na xinxa no const"<<endl;
-		getchar();
 		// transform s in a rhs
 		r = std::move(s.r);
 		// steal pointer from s
