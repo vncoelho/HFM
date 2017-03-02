@@ -203,11 +203,11 @@ public:
 			if (pf == NULL)
 			{
 				pf = new Pareto<RepEFP>();
-				pf->push_back(s, mev);
+				pf->push_back(*s, mev);
 			}
 			else
 			{
-				pf->push_back(s, mev);
+				pf->push_back(*s, mev);
 			}
 		}
 
@@ -253,6 +253,8 @@ public:
 			cout << endl;
 
 		}
+
+		pf->clear();
 		getchar();
 	}
 

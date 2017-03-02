@@ -55,17 +55,17 @@ public:
 	{
 	}
 
-	virtual void exec(Pareto<R, ADS>& p, Solution<R, ADS>& s, paretoManager<R, ADS>& pManager, double timelimit, double target_f)
+	virtual void exec(Pareto<R, ADS>& p, Solution<R, ADS>* s, paretoManager<R, ADS>* pManager, double timelimit, double target_f)
 	{
-		MultiEvaluation& sMev = mev.evaluate(s);
+		MultiEvaluation* sMev = &mev.evaluate(*s);
 
 		exec(p, s, sMev, pManager, timelimit, target_f);
 
-		sMev.clear();
-		delete &sMev;
+//		sMev.clear();
+		delete sMev;
 	}
 
-	virtual void exec(Pareto<R, ADS>& p, Solution<R, ADS>& s, MultiEvaluation& sMev, paretoManager<R, ADS>& pManager, double timelimit, double target_f)
+	virtual void exec(Pareto<R, ADS>& p, Solution<R, ADS>* s, MultiEvaluation* sMev, paretoManager<R, ADS>* pManager, double timelimit, double target_f)
 	{
 		num_calls++;
 		Timer t;
@@ -73,15 +73,16 @@ public:
 		int iter = 0;
 		while ((iter < iterMax) && ((t.now() - timelimit) < 0))
 		{
-			Move<R, ADS>& move = ns.move(s);
-			if (move.canBeApplied(s))
+			Move<R, ADS>& move = ns.move(*s);
+			if (move.canBeApplied(*s))
 			{
 
-				Move<R, ADS>* mov_rev = move.apply(sMev, s);
-				bool added = pManager.addSolution(p, &s);
-				delete mov_rev->apply(s);
+				Move<R, ADS>* mov_rev = move.apply(*sMev, *s);
+				bool added = pManager->addSolution(p, s);
+				delete mov_rev->apply(*s);
 				delete mov_rev;
-//			vector<MoveCost*> vMoveCost;
+
+				//			vector<MoveCost*> vMoveCost;
 //			for (int ev = 0; ev < v_e.size(); ev++)
 //			{
 //				vMoveCost.push_back(&v_e[ev].moveCost(sMev[ev], move, s));

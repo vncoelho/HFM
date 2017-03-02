@@ -87,7 +87,7 @@ public:
 
 		if (added)
 		{
-			p.push_back(candidate, candidateMev);
+			p.push_back(*candidate, *candidateMev);
 			vector<bool> neigh;
 			for (int n = 0; n < r; n++)
 				neigh.push_back(false);
@@ -106,7 +106,7 @@ public:
 // "Generalization in the multiobjective case of the most simple metaheuristic: the hill-climbing method. "
 //  Speed-up techniques for solving large-scale biobjective TSP, by Lust (2010)
 template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
-class GeneralParetoLocalSearch: public MultiObjSearch<R, ADS>
+class GeneralParetoLocalSearch: public MOLocalSearch<R, ADS>
 {
 	typedef vector<Evaluation*> FitnessValues;
 
@@ -127,6 +127,16 @@ public:
 
 	virtual ~GeneralParetoLocalSearch()
 	{
+	}
+
+	virtual void exec(Pareto<R, ADS>& p, Solution<R, ADS>* s, paretoManager<R, ADS>* pManager, double timelimit, double target_f)
+	{
+
+	}
+
+	virtual void exec(Pareto<R, ADS>& p, Solution<R, ADS>* s, MultiEvaluation* sMev, paretoManager<R, ADS>* pManager, double timelimit, double target_f)
+	{
+
 	}
 
 	//virtual void exec(Population<R, ADS>& p_0, FitnessValues& e_pop, double timelimit, double target_f)
@@ -195,14 +205,14 @@ public:
 
 			//Run local search for each individual of the population - Pareto Manager, pMan2PPLS, updates population
 			for (int ind = 0; ind < p.size(); ind++)
-				vLS[k]->exec(x_e, p.getNonDominatedSol(ind), p.getIndMultiEvaluation(ind), pMan2PPLS, timelimit - tnow.now(), target_f);
+				vLS[k]->exec(x_e, &p.getNonDominatedSol(ind), &p.getIndMultiEvaluation(ind), &pMan2PPLS, timelimit - tnow.now(), target_f);
 
 			p.clear();
 
 			//Updated current Pareto p with the individuals added in this current iteration
 			for (int ind = 0; ind < x_e.size(); ind++)
 				if (pMan2PPLS.gplsData.newSol[ind])
-					p.push_back(&x_e.getNonDominatedSol(ind), &x_e.getIndMultiEvaluation(ind));
+					p.push_back(x_e.getNonDominatedSol(ind), x_e.getIndMultiEvaluation(ind));
 
 			if (p.size() != 0)
 			{

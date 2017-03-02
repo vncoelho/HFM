@@ -61,9 +61,8 @@ public:
 	{
 		unsigned sizeNewPop = _pf.paretoSet.size();
 		for (unsigned i = 0; i < sizeNewPop; i++)
-		{
-			this->push_back(&_pf.getNonDominatedSol(i), &_pf.getIndMultiEvaluation(i));
-		}
+			this->push_back(_pf.getNonDominatedSol(i), _pf.getIndMultiEvaluation(i));
+
 	}
 
 	virtual ~Pareto()
@@ -79,19 +78,17 @@ public:
 //		paretoFront.push_back(new MultiEvaluation(v_e));
 //	}
 
-	void push_back(Solution<R, ADS>* s, MultiEvaluator<R, ADS>& mEval)
+	void push_back(const Solution<R, ADS>& s, MultiEvaluator<R, ADS>& mEval)
 	{
-		MultiEvaluation& mev = mEval.evaluate(*s);
-
-		push_back(s, &mev);
-
+		MultiEvaluation& mev = mEval.evaluate(s);
+		push_back(s, mev);
 		delete &mev;
 	}
 
-	void push_back(const Solution<R, ADS>* s, const MultiEvaluation* mev)
+	void push_back(const Solution<R, ADS>& s, const MultiEvaluation& mev)
 	{
-		paretoSet.push_back(&s->clone());
-		paretoFront.push_back(&mev->clone());
+		paretoSet.push_back(&s.clone());
+		paretoFront.push_back(&mev.clone());
 	}
 
 	unsigned size()
@@ -182,7 +179,7 @@ public:
 		unsigned sizeNewPop = pCopy.paretoSet.size();
 
 		for (unsigned i = 0; i < sizeNewPop; i++)
-			this->push_back(&pCopy.getNonDominatedSol(i), &pCopy.getIndMultiEvaluation(i));
+			this->push_back(pCopy.getNonDominatedSol(i), pCopy.getIndMultiEvaluation(i));
 
 		return (*this);
 	}
@@ -574,7 +571,7 @@ public:
 
 		}
 		if (added == true)
-			p.push_back(candidate, candidateMev);
+			p.push_back(*candidate, *candidateMev);
 
 		return added;
 	}
