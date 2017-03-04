@@ -187,7 +187,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 		if (optMethod == 0)
 			sol = forecastObject.run(timeES, timeVND, timeILS);
 		else
-			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
+			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 
 		vector<double> validationNotUsed;
 		validationNotUsed = rF.getLastForecasts(0, maxLag);

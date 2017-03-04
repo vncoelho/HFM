@@ -220,7 +220,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 		if (optMethod == 0)
 			sol = forecastObject.run(timeES, timeVND, timeILS);
 		if (optMethod == 1)
-			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
+			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 		if (optMethod == 2)
 			sol = forecastObject.runGRASP(timeGRASP, nIterGRASP); // GRASP
 

@@ -16,7 +16,6 @@ using namespace optframe;
 using namespace EFP;
 extern int nThreads;
 
-
 int stockMarketForecasting(int argc, char **argv)
 {
 	nThreads = 7;
@@ -24,7 +23,7 @@ int stockMarketForecasting(int argc, char **argv)
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	seed = 9;
+	seed = 0;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
@@ -130,42 +129,50 @@ int stockMarketForecasting(int argc, char **argv)
 //		getchar();
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
 
-	int timeES = 10;
+	int timeES = 30;
 	int timeGPLS = 60;
 	sol = forecastObject.run(timeES, 0, 0);
-	forecastObject.runMultiObjSearch(timeGPLS,&sol->first);
+	Pareto<RepEFP>* pf = forecastObject.runMultiObjSearch(timeGPLS, &sol->first);
 
-
+	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
+	vector<Solution<RepEFP>*> vSolPF = pf->getParetoSet();
+	int nObtainedParetoSol = vEvalPF.size();
+	for (int i = 0; i < nObtainedParetoSol; i++)
+	{
+		//vector<double> solEvaluations;
+		for (int e = 0; e < vEvalPF[i]->size(); e++)
+			cout << vEvalPF[i]->at(e).getObjFunction() << "\t";
+		cout << endl;
+	}
+	pf->exportParetoFront("paretoFrontGPLS.txt");
 
 	//Validacao
-	vector<vector<double> > validationSet;
-	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag + fh));
-	vector<double> errors = forecastObject.returnErrors(sol, trainningSet);
-	vector<double> previsao = forecastObject.returnForecasts(sol, validationSet);
+//	vector<vector<double> > validationSet;
+//	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag + fh));
+//	vector<double> errors = forecastObject.returnErrors(sol, trainningSet);
+//	vector<double> previsao = forecastObject.returnForecasts(sol, validationSet);
+//
+//	foIndicators.push_back(errors[MAPE_INDEX]);
+//	foIndicators.push_back(sol->second.evaluation());
+//	foIndicators.push_back(argvMaxLagRate);
+//	foIndicators.push_back(maxLag);
+//	foIndicators.push_back(NTRaprox);
+//	foIndicators.push_back(timeES);
+//	foIndicators.push_back(seed);
+//
+//	cout << setprecision(3);
+//	cout << foIndicators << endl;
+//	cout << errors << endl;
+//	cout << previsao << endl;
+//
+//	cout << "printing real values!" << endl;
+//	for (int b = 93; b < validationSet[0].size(); b++)
+//		cout << validationSet[0][b] << "\t";
+//	cout << endl;
+//
+//	cout << sol->first.getR() << endl;
 
-	foIndicators.push_back(errors[MAPE_INDEX]);
-	foIndicators.push_back(sol->second.evaluation());
-	foIndicators.push_back(argvMaxLagRate);
-	foIndicators.push_back(maxLag);
-	foIndicators.push_back(NTRaprox);
-	foIndicators.push_back(timeES);
-	foIndicators.push_back(seed);
-
-
-	cout << setprecision(3);
-	cout<<foIndicators<<endl;
-	cout<<errors<<endl;
-	cout<<previsao<<endl;
-
-	cout<<"printing real values!"<<endl;
-	for(int b=93;b<validationSet[0].size();b++)
-		cout<<validationSet[0][b]<<"\t";
-	cout<<endl;
-
-	cout<<sol->first.getR()<<endl;
-
-
-	cout<<"Stock market forecasting finished!"<<endl;
+	cout << "MO Stock Market forecasting finished!" << endl;
 	return 0;
 }
 

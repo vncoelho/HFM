@@ -161,7 +161,7 @@ int priceCompetitionBlind(int argc, char **argv)
 		if (optMethod == 0)
 			sol = forecastObject.run(timeES, timeVND, timeILS);
 		else
-			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
+			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 
 		vector<vector<double> > validationBlindForecastings; //Validation Blind for the Competition
 		int maxLag = problemParam.getMaxLag();

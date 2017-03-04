@@ -33,7 +33,8 @@ const int PINBALL_ERROR_INDEX = 4;
 const int SMAPE_INDEX = 5;
 const int WMAPE_INDEX = 6;
 const int MMAPE_INDEX = 7;
-const int NMETRICS = 8;
+const int MAPE_INV_INDEX = 8;
+const int NMETRICS = 9;
 
 float sigmoid(float x)
 {
@@ -562,10 +563,21 @@ public:
 			if (forecastingTargetNotNull == 0)
 				forecastingTargetNotNull = 0.0001;
 
+
+
 			double absDiff = abs(estimation - forecastingTarget);
 
 			if (accIndicator == MAPE_INDEX || accIndicator == -1)
 				foIndicator[MAPE_INDEX] += (absDiff / abs(forecastingTargetNotNull));
+
+			if (accIndicator == MAPE_INV_INDEX || accIndicator == -1)
+			{
+				double forecastingTargetNotMax = forecastingTarget;
+				double tsMaxValues = pEFP.getMax(targetFile);
+				if (forecastingTargetNotMax == tsMaxValues)
+					forecastingTargetNotMax = tsMaxValues - 0.0001;
+				foIndicator[MAPE_INV_INDEX] += (absDiff / abs(tsMaxValues - forecastingTargetNotMax));
+			}
 
 			if (accIndicator == SMAPE_INDEX || accIndicator == -1)
 				foIndicator[SMAPE_INDEX] += (absDiff / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
@@ -607,6 +619,12 @@ public:
 		{
 			foIndicator[MAPE_INDEX] *= 100;
 			foIndicator[MAPE_INDEX] /= nSamples;
+		}
+
+		if (accIndicator == MAPE_INV_INDEX || accIndicator == -1)
+		{
+			foIndicator[MAPE_INV_INDEX] *= 100;
+			foIndicator[MAPE_INV_INDEX] /= nSamples;
 		}
 
 		if (accIndicator == SMAPE_INDEX || accIndicator == -1)

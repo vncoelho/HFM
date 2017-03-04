@@ -181,7 +181,7 @@ int smartStorage(int argc, char **argv)
 		if (optMethod == 0)
 			sol = forecastObject.run(timeES, timeVND, timeILS);
 		else
-			sol = forecastObject.runEFP(timeGRASP, timeILS); // GRASP + ILS
+			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 
 		//int needInputs = sol->first.getR().earliestInput + stepsAhead;
 		int needInputs = problemParam.getMaxLag();

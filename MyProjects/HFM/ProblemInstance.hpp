@@ -16,6 +16,7 @@ class ProblemInstance
 private:
 	// Your private vars
 	vector<double> means;
+	vector<double> vMax;
 	vector<double> stdDesvs;
 	//int precision;
 	//int options;
@@ -39,49 +40,38 @@ public:
 		//number of different explanatory variables
 		int nExVar = forecastings.size();
 
-		vector<int> nForecastings;
-
-		nForecastings.resize(nExVar);
-		means.resize(nExVar);
-		stdDesvs.resize(nExVar);
-
+		vector<int> tsNumberOfSamples(nExVar);
+		means.resize(nExVar,0);
+		stdDesvs.resize(nExVar,0);
+		vMax.resize(nExVar,0);
 		//vector with the number of forecasting in each file
 
 		for (int exVar = 0; exVar < nExVar; exVar++)
-		{
-			//Scanner scanner = *scannerFiles[exVar];
-			nForecastings[exVar] = forecastings[exVar].size();
-			//cout << "nForecastings[" << exVar << "]: " << nForecastings[exVar] << endl;
+			tsNumberOfSamples[exVar] = forecastings[exVar].size();
 
-			/*for (int i = 0; i < nForecastings[exVar]; i++)
-			{
-				cout<< forecastings[exVar][i]<<endl;
-			}*/
-
-			means[exVar] = 0;
-			stdDesvs[exVar] = 0;
-		}
 
 		//getchar();
 		//Average Calc
 		for (int exVar = 0; exVar < nExVar; exVar++)
 		{
-			for (int i = 0; i < nForecastings[exVar]; i++)
+			for (int i = 0; i < tsNumberOfSamples[exVar]; i++)
 			{
 				means[exVar] += getForecastings(exVar, i);
+				if(getForecastings(exVar, i)>vMax[exVar])
+					vMax[exVar] = getForecastings(exVar, i);
 			}
 
-			means[exVar] = means[exVar] / nForecastings[exVar];
+			means[exVar] = means[exVar] / tsNumberOfSamples[exVar];
 
 			//cout << "Media = " << mean << endl;
 
-			for (int i = 0; i < nForecastings[exVar]; i++)
+			for (int i = 0; i < tsNumberOfSamples[exVar]; i++)
 			{
 				double desv = getForecastings(exVar, i) - means[exVar];
 				stdDesvs[exVar] += desv * desv;
 			}
 
-			stdDesvs[exVar] = stdDesvs[exVar] / nForecastings[exVar];
+			stdDesvs[exVar] = stdDesvs[exVar] / tsNumberOfSamples[exVar];
 			stdDesvs[exVar] = sqrt(stdDesvs[exVar]);
 		}
 
@@ -116,6 +106,11 @@ public:
 	double getMean(int file)
 	{
 		return means[file];
+	}
+
+	double getMax(int file)
+	{
+		return vMax[file];
 	}
 
 	vector<double> getMeans()

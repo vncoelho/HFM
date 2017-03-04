@@ -161,7 +161,6 @@ public:
 
 	virtual ~ForecastClass()
 	{
-
 		tForecastings.clear();
 
 		delete p;
@@ -176,27 +175,28 @@ public:
 			delete vizPert[i];
 		vizPert.clear();
 
+		for (int i = 0; i < vNSeq.size(); i++)
+			delete vNSeq[i];
+
 		delete ilsPert; //todo verify
 		delete ils; //todo verify
 		delete vnd;
 		delete EsCOpt;
-
 	}
 
-	void runMultiObjSearch(int timeGPLS, Solution<RepEFP>* s = NULL, Pareto<RepEFP>* pf = NULL)
+	Pareto<RepEFP>* runMultiObjSearch(int timeGPLS, Solution<RepEFP>* s = NULL, Pareto<RepEFP>* pf = NULL)
 	{
 
 		vector<Evaluator<RepEFP>*> v_e;
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INV_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
-//		MultiEvaluator<RepEFP> mev(v_e);
+		MultiEvaluator<RepEFP> mev(v_e);
 
-
-		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
-
+//		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
 
 		if (s != NULL)
 		{
@@ -237,21 +237,21 @@ public:
 			pf = generalPLS.search(timeGPLS, 0, pf);
 		}
 
-		vector<MultiEvaluation*> vEval = pf->getParetoFront();
-		vector<Solution<RepEFP>*> vSolPf = pf->getParetoSet();
+//		vector<MultiEvaluation*> vEval = pf->getParetoFront();
+//		vector<Solution<RepEFP>*> vSolPf = pf->getParetoSet();
+//
+//		int nObtainedParetoSol = vEval.size();
+//		for (int i = 0; i < nObtainedParetoSol; i++)
+//		{
+//			//vector<double> solEvaluations;
+//			for (int e = 0; e < vEval[i]->size(); e++)
+//				cout << vEval[i]->at(e).getObjFunction() << "\t";
+//			cout << endl;
+//
+//		}
 
-		int nObtainedParetoSol = vEval.size();
-		for (int i = 0; i < nObtainedParetoSol; i++)
-		{
-			//vector<double> solEvaluations;
-			for (int e = 0; e < vEval[i]->size(); e++)
-				cout << vEval[i]->at(e).getObjFunction() << "\t";
-			cout << endl;
-
-		}
-
-		pf->clear();
 		mev.clear();
+		return pf;
 	}
 
 	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
@@ -264,6 +264,7 @@ public:
 
 		return finalSol;
 	}
+
 	pair<Solution<RepEFP>&, Evaluation&>* runGRASP(int timeGRASP, int nSol)
 	{
 		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, nSol);
@@ -281,10 +282,10 @@ public:
 
 		pair<Solution<RepEFP>&, Evaluation&>* finalSol;
 
-		int targetValue = 4.963133247;
+		double targetValue = 4.963133247;
 		targetValue = 0;
 		//finalSol = EsCOpt->search(timeES);
-		finalSol = es->search(timeES,targetValue);
+		finalSol = es->search(timeES, targetValue);
 
 //		vnd->setMessageLevel(3);
 //		if (timeVND > 0)
@@ -299,15 +300,8 @@ public:
 		return finalSol;
 	}
 
-	pair<Solution<RepEFP>&, Evaluation&>* runDiscreteES(int timeES)
+	pair<Solution<RepEFP>&, Evaluation&>* runGILS(int timeGRASP, int timeILS)
 	{
-		pair<Solution<RepEFP>&, Evaluation&>* finalSol;
-		return finalSol;
-	}
-
-	pair<Solution<RepEFP>&, Evaluation&>* runEFP(int timeGRASP, int timeILS)
-	{
-
 		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, 100000);
 		g.setMessageLevel(3);
 		pair<Solution<RepEFP>&, Evaluation&>* finalSol;
