@@ -509,24 +509,48 @@ public:
 
 		int beginParallel;
 
-		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
+		bool parallelEval = false;
+		if (parallelEval)
 		{
-			vector<double> forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
+			//===================================================================
+			//		PARALELL CODE FOR MULTI CPU
+			vector<vector<double> > allForecastsVectors(ceil(double(nSamples) / stepSize));
+			vector<vector<double> > allForecastsTarget(ceil(double(nSamples) / stepSize));
 
-			int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
+#pragma omp parallel for num_threads(nThreads)
+			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
+			{
+				vector<double> forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
 
-			allForecasts.insert(allForecasts.end(), forecasts.begin(), forecasts.begin() + fhSize);
-			allTargets.insert(allTargets.end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
+				int index = (beginParallel - maxLag) / stepSize;
+
+				allForecastsVectors[index].insert(allForecastsVectors[index].end(), forecasts.begin(), forecasts.begin() + fhSize);
+				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+			}
+
+
+			for (int aV = 0; aV < allForecastsVectors.size(); aV++)
+				for (int k = 0; k < allForecastsVectors[aV].size(); k++)
+				{
+					allForecasts.push_back(allForecastsVectors[aV][k]);
+					allTargets.push_back(allForecastsTarget[aV][k]);
+				}
+			//		PARALELL CODE FOR MULTI CPU
+			//===================================================================
 		}
+		else
+		{
 
-		//#pragma omp parallel for num_threads(nThreads)
-		//			int np = omp_get_num_threads();
-		//					cout << "number of threads: " << np << endl;
-		//							getchar();
-//		double effectNumberSamples = (nForTargetFile - maxLag);
-//				vector<vector<double> > allForecastsVectors(ceil(effectNumberSamples / stepsAhead));
-//		allForecastsVectors[index] = std::move(returnForecasts(rep, vForecastings, beginParallel));			//predicteds;
+			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
+			{
+				vector<double> forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
+				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
 
+				allForecasts.insert(allForecasts.end(), forecasts.begin(), forecasts.begin() + fhSize);
+				allTargets.insert(allTargets.end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+			}
+		}
 		return make_pair(allTargets, allForecasts);
 	}
 
@@ -562,8 +586,6 @@ public:
 			double forecastingTargetNotNull = forecastingTarget;
 			if (forecastingTargetNotNull == 0)
 				forecastingTargetNotNull = 0.0001;
-
-
 
 			double absDiff = abs(estimation - forecastingTarget);
 
@@ -692,7 +714,6 @@ public:
 		//cout << foIndicatorStepsAhead << endl;
 		return foIndicator;
 	}
-
 
 	virtual bool isMinimization() const
 	{
