@@ -18,15 +18,15 @@ class MoveNEIGHRemoveSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 private:
 	int rule;
 	bool reverse;
-	vector<pair<int, int> > singleIndexOld;
-	vector<vector<double> > singleFuzzyRSOld;
+	pair<int, int> singleIndexOld;
+	vector<double> singleFuzzyRSOld;
 
 public:
 
 	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::apply; // prevents name hiding
 	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::canBeApplied; // prevents name hiding
 
-	MoveNEIGHRemoveSingleInput(int _rule, bool _reverse, vector<pair<int, int> > _singleIndexOld, vector<vector<double> > _singleFuzzyRSOld) :
+	MoveNEIGHRemoveSingleInput(int _rule, bool _reverse, pair<int, int> _singleIndexOld, vector<double> _singleFuzzyRSOld) :
 			rule(_rule), reverse(_reverse), singleIndexOld(_singleIndexOld), singleFuzzyRSOld(_singleFuzzyRSOld)
 	{
 
@@ -43,25 +43,30 @@ public:
 
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
 	{
-		vector<pair<int, int> > tempSingleIndexOld = rep.singleIndex;
-		vector<vector<double> > tempSingleFuzzyRSOld = rep.singleFuzzyRS;
+		pair<int, int> tempSingleIndexOld;
+		vector<double> tempSingleFuzzyRSOld;
 
 		if (reverse == false)
 		{
 			if (rep.singleIndex.size() >= 0)
 			{
+				tempSingleIndexOld = rep.singleIndex[rule];
+				tempSingleFuzzyRSOld = rep.singleFuzzyRS[rule];
+
 				rep.singleIndex.erase(rep.singleIndex.begin() + rule);
 				rep.singleFuzzyRS.erase(rep.singleFuzzyRS.begin() + rule);
+				return new MoveNEIGHRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
 			}
+
 		}
+		else
 		{
-			rep.singleIndex.clear();
-			rep.singleFuzzyRS.clear();
-			rep.singleIndex = singleIndexOld;
-			rep.singleFuzzyRS = singleFuzzyRSOld;
+			rep.singleIndex.insert(rep.singleIndex.begin() + rule - 1, singleIndexOld);
+			rep.singleFuzzyRS.insert(rep.singleFuzzyRS.begin() + rule - 1, singleFuzzyRSOld);
 		}
 
 		return new MoveNEIGHRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
+
 	}
 
 	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
@@ -103,8 +108,8 @@ public:
 	virtual void first()
 	{
 
-		vector<pair<int, int> > tempSingleIndexOld;
-		vector<vector<double> > tempSingleFuzzyRSOld;
+		pair<int, int> tempSingleIndexOld;
+		vector<double> tempSingleFuzzyRSOld;
 
 		for (int rule = 0; rule < rep.singleIndex.size(); rule++)
 		{
@@ -174,8 +179,8 @@ public:
 		if (rep.singleIndex.size() > 0)
 			rule = rg.rand(rep.singleIndex.size());
 
-		vector<pair<int, int> > tempSingleIndexOld;
-		vector<vector<double> > tempSingleFuzzyRSOld;
+		pair<int, int> tempSingleIndexOld;
+		vector<double> tempSingleFuzzyRSOld;
 
 		return *new MoveNEIGHRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld); // return a random move
 	}

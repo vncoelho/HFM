@@ -509,8 +509,7 @@ public:
 
 		int beginParallel;
 
-		bool parallelEval = false;
-		if (parallelEval)
+		if (nThreads>1)
 		{
 			//===================================================================
 			//		PARALELL CODE FOR MULTI CPU

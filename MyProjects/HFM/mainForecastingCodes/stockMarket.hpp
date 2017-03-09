@@ -18,7 +18,7 @@ extern int nThreads;
 
 int stockMarketForecasting(int argc, char **argv)
 {
-	nThreads = 3;
+	nThreads = 4;
 	cout << "Welcome to stock market forecasting!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737

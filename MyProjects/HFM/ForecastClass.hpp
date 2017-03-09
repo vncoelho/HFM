@@ -224,7 +224,7 @@ public:
 		vector<MOLocalSearch<RepEFP>*> vMOLS;
 		vMOLS.push_back(&moriCSI);
 		vMOLS.push_back(&moriRSI);
-//		vMOLS.push_back(&moriASI); //Todo -- CHECK THIS NS -- IT IS PRODUCING ERRORS INSIDE G2PPLS
+		vMOLS.push_back(&moriASI); //Todo -- CHECK THIS NS -- IT IS PRODUCING ERRORS INSIDE G2PPLS
 		vMOLS.push_back(&moriMFR);
 
 		GeneralParetoLocalSearch<RepEFP> generalPLS(mev, grIP, initial_population_size, vMOLS);
@@ -282,7 +282,7 @@ public:
 
 		pair<Solution<RepEFP>&, Evaluation&>* finalSol;
 
-		double targetValue = 4.963133247;
+		double targetValue = 3.879748973;
 		targetValue = 0;
 		//finalSol = EsCOpt->search(timeES);
 		finalSol = es->search(timeES, targetValue);
