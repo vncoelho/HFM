@@ -98,5 +98,6 @@ void autocorr::ACF(const double *v, const size_t N, acorrInfo &info)
 	// calculate the log/log slope of the autocorrelation
 	acorrSlope(info);
 
+	delete devMean;
 	//delete [] m;
 } // ACF

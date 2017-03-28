@@ -6,9 +6,19 @@ CONCERTDIR    = /opt/ibm/ILOG/CPLEX_Studio1251/concert
 CCLNFLAGS = -L$(CPLEXDIR)/lib/x86-64_sles10_4.1/static_pic -DIL_STD -lilocplex -lcplex -L$(CONCERTDIR)/lib/x86-64_sles10_4.1/static_pic -lconcert -m64 -lm -pthread
 CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include 
 
+
+#OpenMP Multi-Core Multi-Thread flags
+OPENMP_FLAGS = -fopenmp -lpthread
+
+#Raspberry WiringPi Flags (Package GPIO, Copyright (c) 2012-2017 Gordon Henderson, is required)
+LDFLAGS	= -L/usr/local/lib
+LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
+
+GCC_FLAGS = -Ofast -g --std=c++11
+
 #-Wall 
 gfp:
-	g++ ./MyProjects/mainHFM.cpp ./OptFrame/Scanner++/Scanner.cpp --std=c++11 -fopenmp -lpthread -Ofast -o ./MyProjects/app_HFM
+	g++ $(GCC_FLAGS) $(OPENMP_FLAGS) ./MyProjects/mainHFM.cpp ./OptFrame/Scanner++/Scanner.cpp   -o ./MyProjects/app_HFM
 #	g++ ./MyProjects/mainHFM.cpp ./OptFrame/Scanner++/Scanner.cpp --std=c++11 -fopenmp -lpthread -g -o ./MyProjects/app_HFM
 
 	

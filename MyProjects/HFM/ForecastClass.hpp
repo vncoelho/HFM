@@ -202,9 +202,9 @@ public:
 		pf.push_back(s, *mev);
 	}
 
-	Pareto<RepEFP>* runMultiObjSearch(int timeGPLS, Pareto<RepEFP>* pf = NULL)
+	Pareto<RepEFP>* runMultiObjSearch(int timeGPLS, Pareto<RepEFP>* _pf = NULL)
 	{
-
+		Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 //		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
 
 //		if (vS != NULL)
@@ -238,13 +238,13 @@ public:
 		vMOLS.push_back(&moriMFR);
 
 		GeneralParetoLocalSearch<RepEFP> generalPLS(*mev, grIP, initial_population_size, vMOLS);
-		if (pf == NULL)
+		if (_pf == NULL)
 		{
 			pf = generalPLS.search(timeGPLS, 0);
 		}
 		else
 		{
-			pf = generalPLS.search(timeGPLS, 0, pf);
+			pf = generalPLS.search(timeGPLS, 0, _pf);
 		}
 
 //		vector<MultiEvaluation*> vEval = pf->getParetoFront();

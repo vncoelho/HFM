@@ -140,7 +140,9 @@ int stockMarketForecasting(int argc, char **argv)
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 		sol = forecastObject->run(timeES, 0, 0);
 		forecastObject->addSolToParetoWithFCMEV(sol->first, *pf);
-		pf = forecastObject->runMultiObjSearch(timeGPLS, pf);
+		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
+		delete pf;
+		pf = pfNew;
 	}
 
 	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
@@ -157,7 +159,7 @@ int stockMarketForecasting(int argc, char **argv)
 			cout << blindForecasts[f] << "/" << testingSet[0][f] << "\t";
 
 		cout << endl;
-getchar();
+//getchar();
 	}
 
 	for (int i = 0; i < nObtainedParetoSol; i++)
@@ -168,7 +170,7 @@ getchar();
 		cout << endl;
 	}
 
-	pf->exportParetoFront("paretoFrontGPLS.txt");
+	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt");
 
 	//Validacao
 //	vector<vector<double> > validationSet;
@@ -195,6 +197,9 @@ getchar();
 //	cout << endl;
 //
 //	cout << sol->first.getR() << endl;
+
+	delete pf;
+	delete forecastObject;
 
 	cout << "MO Stock Market forecasting finished!" << endl;
 	return 0;
