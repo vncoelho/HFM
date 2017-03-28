@@ -60,29 +60,23 @@ public:
 	{
 		long tini = time(NULL);
 
-		Solution<R, ADS>* s0 = &s.clone();
 		Evaluation* e0 = &e.clone();
 
 		ls.exec(s, e, timelimit, target_f);
 
 		long tnow = time(NULL);
 
-		while ((evaluator.betterThan(s, *s0)) && ((tnow - tini) < timelimit))
+		while ((evaluator.betterThan(e, *e0)) && ((tnow - tini) < timelimit))
 		{
-			delete s0;
-			s0 = &s.clone();
-			delete e0;
-			e0 = &e.clone();
+			//delete e0;
+			//e0 = &e.clone();
+            (*e0) = e;
 
 			ls.exec(s, e, timelimit, target_f);
 
 			tnow = time(NULL);
-		}
+		}	
 
-		s = *s0;
-		e = *e0;
-
-		delete s0;
 		delete e0;
 	}
 

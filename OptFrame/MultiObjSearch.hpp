@@ -209,7 +209,7 @@ public:
 
 	void exportParetoFront(string output)
 	{
-				FILE* fPF = fopen(output.c_str(), "a");
+		FILE* fPF = fopen(output.c_str(), "a");
 		for (int i = 0; i < paretoFront.size(); i++)
 		{
 			for (int e = 0; e < paretoFront[i]->size(); e++)

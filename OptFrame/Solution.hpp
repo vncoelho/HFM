@@ -59,7 +59,6 @@ public:
 	Solution(const R& _r) :
 			r(_r), ads(nullptr)
 	{
-
 	}
 
 	Solution(R&& _r) noexcept :

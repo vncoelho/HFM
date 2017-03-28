@@ -158,14 +158,14 @@ public:
 			if (tnow.now() < timelimit)
 				p_0 = init_pareto.generatePareto(init_pop_size, timelimit - tnow.now());
 
-			cout << "Generated Pareto contains" << p_0.size() << " individuals!" << endl;
+			cout << "Population generated with " << p_0.size() << " individuals!" << endl;
 		}
 		else
 		{
 			cout << "Extracting Pareto Front given as parameters..." << endl;
 			p_0 = *_pf;
 
-			cout << "Extracted initial contains " << p_0.size() << " individuals!" << endl;
+			cout << "Extracted initial constains " << p_0.size() << " individuals!" << endl;
 		}
 
 //		TODO REmove this printing

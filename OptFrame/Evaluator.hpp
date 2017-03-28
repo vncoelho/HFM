@@ -60,11 +60,12 @@ class Evaluator: public Direction
 {
 protected:
 	bool allowCosts; // move.cost() is enabled or disabled for this Evaluator
+	evtype weight;   // defaults to 1
 
 public:
 
-	Evaluator(bool _allowCosts = true) :
-			allowCosts(_allowCosts)
+	Evaluator(bool _allowCosts = true, evtype w = 1) :
+			allowCosts(_allowCosts), weight(w)
 	{
 	}
 
@@ -75,6 +76,16 @@ public:
 	bool getAllowCosts()
 	{
 		return allowCosts;
+	}
+	
+	evtype getWeight() const
+	{
+		return weight;
+	}
+	
+	void setWeight(const evtype& w)
+	{
+		weight = w;
 	}
 
 	Evaluation& evaluate(const Solution<R, ADS>& s)
@@ -190,7 +201,7 @@ public:
 			// destroy initial move
 			delete &ini;
 			// create a MoveCost object...
-			p = new MoveCost(e_end.first - e_ini.first, e_end.second - e_end.second);
+			p = new MoveCost(e_end.first - e_ini.first, e_end.second - e_ini.second, e.weight);
 			// ... and set the lexicographic costs
 			p->setAlternativeCosts(alternatives);
 			// return a MoveCost object pointer
@@ -296,7 +307,7 @@ public:
 			// apply move to both Evaluation and Solution
 			Move<R, ADS>* rev = applyMove(e, m, s);
 			// TODO: check outdated and estimated!
-			MoveCost mcost(e.getObjFunction() - e_begin.first, e.getInfMeasure() - e_begin.second, false, false);
+			MoveCost mcost(e.getObjFunction() - e_begin.first, e.getInfMeasure() - e_begin.second, 1, false, false);
 			// guarantee that alternative costs have same size
 			assert(alt_begin.size() == e.getAlternativeCosts().size());
 			// compute alternative costs
