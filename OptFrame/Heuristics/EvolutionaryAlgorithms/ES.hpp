@@ -639,7 +639,11 @@ public:
 		}
 		pop.clear();
 
-		return new pair<Solution<R, ADS>&, Evaluation&>(*sStar, *eStar);
+		pair<Solution<R, ADS>&, Evaluation&>* pairToReturn = new pair<Solution<R, ADS>&, Evaluation&>(*sStar, *eStar);
+		delete sStar;
+		delete eStar;
+		return pairToReturn;
+//		return new pair<Solution<R, ADS>&, Evaluation&>(*sStar, *eStar);
 	}
 
 	static string idComponent()

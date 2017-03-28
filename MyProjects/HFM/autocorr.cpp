@@ -55,7 +55,7 @@ void autocorr::ACF(const double *v, const size_t N, acorrInfo &info)
 
 	// The devMean array will contain the deviation from the mean.
 	// That is, v[i] - mean(v).
-	double *devMean = new double[N];
+	vector<double> devMean(N); // = new double[N];
 
 	double sum;
 	size_t i;
@@ -98,6 +98,6 @@ void autocorr::ACF(const double *v, const size_t N, acorrInfo &info)
 	// calculate the log/log slope of the autocorrelation
 	acorrSlope(info);
 
-	delete devMean;
+
 	//delete [] m;
 } // ACF

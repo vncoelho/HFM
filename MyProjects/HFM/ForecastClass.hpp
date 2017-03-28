@@ -47,7 +47,7 @@ private:
 	EmptyLocalSearch<RepEFP> emptyLS;
 	vector<NSSeq<RepEFP>*> vNSeq;
 
-	EFPESContinous* EsCOpt;
+//	EFPESContinous* EsCOpt;
 	ES<RepEFP>* es;
 
 	vector<vector<double> >& tForecastings;
@@ -60,7 +60,6 @@ private:
 	vector<pair<Solution<RepEFP>&, Evaluation&>*> vFinalSol;
 
 	ILSLPerturbationLPlus2<RepEFP>* ilsPert;
-	vector<NS<RepEFP>*> vizPert;
 
 	ProblemParameters& problemParam;
 	methodParameters& methodParam;
@@ -80,10 +79,11 @@ public:
 		int nIntervals = 5;
 
 		NSSeqNEIGHModifyRules* nsModifyFuzzyRules = new NSSeqNEIGHModifyRules(*p, rg);
-		NSSeqNEIGHVAlpha* nsVAlpha = new NSSeqNEIGHVAlpha(*p, rg, nIntervals);
 		NSSeqNEIGHChangeSingleInput* nsChangeSingleInput = new NSSeqNEIGHChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
 		NSSeqNEIGHRemoveSingleInput* nsRemoveSingleInput = new NSSeqNEIGHRemoveSingleInput(rg);
 		NSSeqNEIGHAddSingleInput* nsAddSingleInput = new NSSeqNEIGHAddSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
+//		NSSeqNEIGHVAlpha* nsVAlpha = new NSSeqNEIGHVAlpha(*p, rg, nIntervals);
+
 //		NSSeqNEIGHAddX* nsAddMean01 = new NSSeqNEIGHAddX(*p, rg, 0.1);
 //		NSSeqNEIGHAddX* nsAddMean1 = new NSSeqNEIGHAddX(*p, rg, 1);
 //		NSSeqNEIGHAddX* nsAddMeanD15 = new NSSeqNEIGHAddX(*p, rg, p->getMean(0) / 15);
@@ -104,21 +104,18 @@ public:
 
 		FirstImprovement<RepEFP>* fiModifyFuzzyRules = new FirstImprovement<RepEFP>(*eval, *nsModifyFuzzyRules);
 		FirstImprovement<RepEFP>* fiChangeSingleInput = new FirstImprovement<RepEFP>(*eval, *nsChangeSingleInput);
-		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+//		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
 //		int maxRDM = 100;
 //		RandomDescentMethod<RepEFP>* rdm = new RandomDescentMethod<RepEFP>(*eval, *ns, maxRDM);
 //		//rdm->setMessageLevel(3);
-		vLS.push_back(fiVAlpha);
+//		vLS.push_back(fiVAlpha);
 		vLS.push_back(fiModifyFuzzyRules);
 		vLS.push_back(fiChangeSingleInput);
 		vnd = new VariableNeighborhoodDescent<RepEFP>(*eval, vLS);
 
-		vizPert.push_back(nsModifyFuzzyRules);
-		vizPert.push_back(nsVAlpha);
-		vizPert.push_back(nsChangeSingleInput);
-		ilsPert = new ILSLPerturbationLPlus2<RepEFP>(*eval, 50, *vizPert[0], rg);
-		ilsPert->add_ns(*vizPert[1]);
-		ilsPert->add_ns(*vizPert[2]);
+		ilsPert = new ILSLPerturbationLPlus2<RepEFP>(*eval, 50, *nsModifyFuzzyRules, rg);
+		ilsPert->add_ns(*nsChangeSingleInput);
+//		nsVAlpha
 		ils = new IteratedLocalSearchLevels<RepEFP>(*eval, *c, *vnd, *ilsPert, 100, 10);
 
 		int mu = methodParam.getESMU();
@@ -128,7 +125,9 @@ public:
 		int mutationDesv = methodParam.getESMutationDesv();
 		//cout<<mu<<"\t"<<lambda<<"\t"<<esMaxG<<"\t"<<initialDesv<<"\t"<<mutationDesv<<endl;
 		//getchar();
-		EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, esMaxG, rg, initialDesv, mutationDesv);
+
+		//Old continous Evolution Strategy - Deprecated
+//		EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, esMaxG, rg, initialDesv, mutationDesv);
 
 		//olr = new OptimalLinearRegression(*eval, *p);
 
@@ -183,18 +182,15 @@ public:
 			delete vNSeq[i];
 		vNSeq.clear();
 
-		//Do not delete because vNSeq may contain the same NS
-//		for (int i = 0; i < vizPert.size(); i++)
-//			delete vizPert[i];
-//		vizPert.clear();
-
 		delete ilsPert; //todo verify
 		delete ils; //todo verify
 		delete vnd;
-		delete EsCOpt;
+//		delete EsCOpt;
 
+		mev->clear();
+		delete mev;
+		delete es;
 	}
-
 
 	//add solution to pareto front evaluating with forecasting class evaluators
 	void addSolToParetoWithFCMEV(Solution<RepEFP>& s, Pareto<RepEFP>& pf)
@@ -240,10 +236,12 @@ public:
 		GeneralParetoLocalSearch<RepEFP> generalPLS(*mev, grIP, initial_population_size, vMOLS);
 		if (_pf == NULL)
 		{
+			delete pf;
 			pf = generalPLS.search(timeGPLS, 0);
 		}
 		else
 		{
+			delete pf;
 			pf = generalPLS.search(timeGPLS, 0, _pf);
 		}
 
@@ -264,16 +262,14 @@ public:
 		return pf;
 	}
 
-	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
-	{
-
-		pair<Solution<RepEFP>&, Evaluation&>* finalSol = NULL;
-		finalSol = EsCOpt->search(1);
-
-		//olr->exec(finalSol->first, 100, 100);
-
-		return finalSol;
-	}
+	//Mathematical model for finding optimal weights between models, ensemble forecasting TODO
+//	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
+//	{
+//
+//		pair<Solution<RepEFP>&, Evaluation&>* finalSol = NULL;
+//		//olr->exec(finalSol->first, 100, 100);
+//		return finalSol;
+//	}
 
 	pair<Solution<RepEFP>&, Evaluation&>* runGRASP(int timeGRASP, int nSol)
 	{
@@ -294,8 +290,8 @@ public:
 
 		double targetValue = 3.879748973;
 		targetValue = 0;
-		//finalSol = EsCOpt->search(timeES);
 		finalSol = es->search(timeES, targetValue);
+		//finalSol = EsCOpt->search(timeES); //Continous ES -- Deprecated
 
 //		vnd->setMessageLevel(3);
 //		if (timeVND > 0)

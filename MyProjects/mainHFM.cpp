@@ -37,6 +37,8 @@ using namespace EFP;
 
 int main(int argc, char **argv)
 {
+
+
 //	variate_generator<mt19937, uniform_real<> > rngU(mt19937(123), uniform_real<>());
 //	variate_generator<mt19937, normal_distribution<> > rngN(mt19937(123), normal_distribution<>(2, .5));
 //	variate_generator<mt19937, binomial_distribution<> > rngB(mt19937(123), binomial_distribution<>(3, .7));

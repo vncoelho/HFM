@@ -127,23 +127,26 @@ int stockMarketForecasting(int argc, char **argv)
 
 //		forecastObject.runMultiObjSearch();
 //		getchar();
-	pair<Solution<RepEFP>&, Evaluation&>* sol;
+
 	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 10;
-	int timeGPLS = 30;
+	int timeES = 20;
+	int timeGPLS = 60;
 	for (int b = 0; b < 2; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		sol = forecastObject->run(timeES, 0, 0);
+		pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
 		forecastObject->addSolToParetoWithFCMEV(sol->first, *pf);
 		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
+		delete sol;
+		delete forecastObject;
 	}
+	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 
 	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
 	vector<Solution<RepEFP>*> vSolPF = pf->getParetoSet();
@@ -200,6 +203,7 @@ int stockMarketForecasting(int argc, char **argv)
 
 	delete pf;
 	delete forecastObject;
+
 
 	cout << "MO Stock Market forecasting finished!" << endl;
 	return 0;
