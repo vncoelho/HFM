@@ -18,7 +18,7 @@ extern int nThreads;
 
 int stockMarketForecasting(int argc, char **argv)
 {
-	nThreads = 4;
+	nThreads = 1;
 	cout << "Welcome to stock market forecasting!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
@@ -28,16 +28,18 @@ int stockMarketForecasting(int argc, char **argv)
 	srand(seed);
 	rg.setSeed(seed);
 
-	if (argc != 2)
-	{
-		cout << "Parametros incorretos!" << endl;
-		cout << "Os parametros esperados sao: nomeOutput targetTS construtiveNRulesACF timeES" << endl;
-		exit(1);
-	}
+//	if (argc != 2)
+//	{
+//		cout << "Parametros incorretos!" << endl;
+//		cout << "Os parametros esperados sao: stockMarketTimeSeries" << endl;
+//		exit(1);
+//	}
 
 	const char* caminhoOutput = argv[1];
 
 	string nomeOutput = caminhoOutput;
+	nomeOutput = "MyProjects/HFM/Instance/dadosBovespa/bovespa";
+
 	//===================================
 	cout << "Parametros:" << endl;
 	cout << "nomeOutput=" << nomeOutput << endl;
@@ -123,20 +125,41 @@ int stockMarketForecasting(int argc, char **argv)
 	vector<vector<double> > trainningSet; // trainningSetVector
 	trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, fh, nTotalForecastingsTrainningSet));
 
-	ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
-
 //		forecastObject.runMultiObjSearch();
 //		getchar();
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
+	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
-	int timeES = 30;
-	int timeGPLS = 60;
-	sol = forecastObject.run(timeES, 0, 0);
-	Pareto<RepEFP>* pf = forecastObject.runMultiObjSearch(timeGPLS, &sol->first);
+	ForecastClass* forecastObject;
+	int timeES = 10;
+	int timeGPLS = 30;
+	for (int b = 0; b < 2; b++)
+	{
+		if (b == 1)
+			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
+		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
+		sol = forecastObject->run(timeES, 0, 0);
+		forecastObject->addSolToParetoWithFCMEV(sol->first, *pf);
+		pf = forecastObject->runMultiObjSearch(timeGPLS, pf);
+	}
 
 	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
 	vector<Solution<RepEFP>*> vSolPF = pf->getParetoSet();
 	int nObtainedParetoSol = vEvalPF.size();
+
+	vector<vector<double> > testingSet;
+	testingSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
+
+	for (int i = 0; i < nObtainedParetoSol; i++)
+	{
+		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), testingSet);
+		for (int f = 0; f < blindForecasts.size(); f++)
+			cout << blindForecasts[f] << "/" << testingSet[0][f] << "\t";
+
+		cout << endl;
+getchar();
+	}
+
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		//vector<double> solEvaluations;
@@ -144,6 +167,7 @@ int stockMarketForecasting(int argc, char **argv)
 			cout << vEvalPF[i]->at(e).getObjFunction() << "\t";
 		cout << endl;
 	}
+
 	pf->exportParetoFront("paretoFrontGPLS.txt");
 
 	//Validacao

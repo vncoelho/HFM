@@ -79,8 +79,8 @@ int main(int argc, char **argv)
 	type = 99992;
 	type = 1111111;
 //	type = 69;
-	type = 33333;
-	type = 999999;
+//	type = 33333;
+	type = 999999; //Stock Market
 	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1

@@ -362,11 +362,12 @@ public:
 		return *new EvaluationEFP(fo);
 	}
 
-	vector<double> evaluateAll(const RepEFP& rep, int accIndicator)
+	vector<double> evaluateAll(const RepEFP& rep, int accIndicator, vector<vector<double> >* vForecastings = NULL)
 	{
-		const vector<vector<double> >& vForecastings = pEFP.getForecastingsVector();
+		if (vForecastings == NULL)
+			vForecastings = &pEFP.getForecastingsVector();
 
-		pair<vector<double>, vector<double> > targetAndForecasts = generateSWMultiRoundForecasts(rep, vForecastings, problemParam.getStepsAhead());
+		pair<vector<double>, vector<double> > targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
 		vector<double> foIndicator = getAccuracy(targetAndForecasts.first, targetAndForecasts.second, accIndicator);
 
 		return foIndicator;
@@ -509,7 +510,7 @@ public:
 
 		int beginParallel;
 
-		if (nThreads>1)
+		if (nThreads > 1)
 		{
 			//===================================================================
 			//		PARALELL CODE FOR MULTI CPU
@@ -527,7 +528,6 @@ public:
 				allForecastsVectors[index].insert(allForecastsVectors[index].end(), forecasts.begin(), forecasts.begin() + fhSize);
 				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
 			}
-
 
 			for (int aV = 0; aV < allForecastsVectors.size(); aV++)
 				for (int k = 0; k < allForecastsVectors[aV].size(); k++)

@@ -66,6 +66,7 @@ private:
 	methodParameters& methodParam;
 
 	//OptimalLinearRegression* olr;
+	MultiEvaluator<RepEFP>* mev;
 
 public:
 
@@ -156,12 +157,19 @@ public:
 		es->setMessageLevel(3);
 
 		//MO
-
+		vector<Evaluator<RepEFP>*> v_e;
+		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INV_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
+		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
+		mev = new MultiEvaluator<RepEFP>(v_e);
 	}
 
 	virtual ~ForecastClass()
 	{
-		tForecastings.clear();
+//		tForecastings.clear();
 
 		delete p;
 		delete eval;
@@ -171,63 +179,65 @@ public:
 			delete vLS[i];
 		vLS.clear();
 
-		for (int i = 0; i < vizPert.size(); i++)
-			delete vizPert[i];
-		vizPert.clear();
-
 		for (int i = 0; i < vNSeq.size(); i++)
 			delete vNSeq[i];
+		vNSeq.clear();
+
+		//Do not delete because vNSeq may contain the same NS
+//		for (int i = 0; i < vizPert.size(); i++)
+//			delete vizPert[i];
+//		vizPert.clear();
 
 		delete ilsPert; //todo verify
 		delete ils; //todo verify
 		delete vnd;
 		delete EsCOpt;
+
 	}
 
-	Pareto<RepEFP>* runMultiObjSearch(int timeGPLS, Solution<RepEFP>* s = NULL, Pareto<RepEFP>* pf = NULL)
-	{
 
-		vector<Evaluator<RepEFP>*> v_e;
-		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INV_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
-		MultiEvaluator<RepEFP> mev(v_e);
+	//add solution to pareto front evaluating with forecasting class evaluators
+	void addSolToParetoWithFCMEV(Solution<RepEFP>& s, Pareto<RepEFP>& pf)
+	{
+		pf.push_back(s, *mev);
+	}
+
+	Pareto<RepEFP>* runMultiObjSearch(int timeGPLS, Pareto<RepEFP>* pf = NULL)
+	{
 
 //		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
 
-		if (s != NULL)
-		{
-			if (pf == NULL)
-			{
-				pf = new Pareto<RepEFP>();
-				pf->push_back(*s, mev);
-			}
-			else
-			{
-				pf->push_back(*s, mev);
-			}
-		}
+//		if (vS != NULL)
+//		{
+//			if (pf == NULL)
+//			{
+//				pf = new Pareto<RepEFP>();
+//
+//				for (int ns = 0; ns < vS.size(); ns++)
+//					pf->push_back(*vS[ns], mev);
+//			}
+//			else
+//			{
+//				for (int ns = 0; ns < vS.size(); ns++)
+//					pf->push_back(*vS[ns], mev);
+//			}
+//		}
 
 		int initial_population_size = 10;
 		GRInitialPopulation<RepEFP> bip(*c, rg, 1);
 //		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
-//		TwoPhaseParetoLocalSearch<RepEFP> paretoSearch(mev, bip, initial_population_size, vNSeq);
-
-		GRInitialPareto<RepEFP> grIP(*c, rg, 1, mev);
-		MORandomImprovement<RepEFP> moriCSI(mev, *vNSeq[0], 1000);
-		MORandomImprovement<RepEFP> moriRSI(mev, *vNSeq[1], 1000);
-		MORandomImprovement<RepEFP> moriASI(mev, *vNSeq[2], 1000);
-		MORandomImprovement<RepEFP> moriMFR(mev, *vNSeq[3], 1000);
+		GRInitialPareto<RepEFP> grIP(*c, rg, 1, *mev);
+		MORandomImprovement<RepEFP> moriCSI(*mev, *vNSeq[0], 1000);
+		MORandomImprovement<RepEFP> moriRSI(*mev, *vNSeq[1], 1000);
+		MORandomImprovement<RepEFP> moriASI(*mev, *vNSeq[2], 1000);
+		MORandomImprovement<RepEFP> moriMFR(*mev, *vNSeq[3], 1000);
 		vector<MOLocalSearch<RepEFP>*> vMOLS;
 		vMOLS.push_back(&moriCSI);
 		vMOLS.push_back(&moriRSI);
 		vMOLS.push_back(&moriASI); //Todo -- CHECK THIS NS -- IT IS PRODUCING ERRORS INSIDE G2PPLS
 		vMOLS.push_back(&moriMFR);
 
-		GeneralParetoLocalSearch<RepEFP> generalPLS(mev, grIP, initial_population_size, vMOLS);
+		GeneralParetoLocalSearch<RepEFP> generalPLS(*mev, grIP, initial_population_size, vMOLS);
 		if (pf == NULL)
 		{
 			pf = generalPLS.search(timeGPLS, 0);
@@ -250,7 +260,7 @@ public:
 //
 //		}
 
-		mev.clear();
+//		mev->clear();
 		return pf;
 	}
 
@@ -318,36 +328,39 @@ public:
 	}
 
 	//return blind forecasts for the required steps ahead of problemParam class
-	vector<double> returnBlind(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& vTimeSeries)
+	vector<double> returnBlind(RepEFP& trainedModel, vector<vector<double> >& vTimeSeries)
 	{
-		return eval->returnForecasts(sol->first.getR(), vTimeSeries, vTimeSeries[eval->getTargetFile()].size(), problemParam.getStepsAhead());
+		return eval->returnForecasts(trainedModel, vTimeSeries, vTimeSeries[eval->getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
-	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
+	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& vForecastingsValidation)
 	{
-		vector<double> foIndicatorNew(NMETRICS, 0);
-		vector<double> estimatedValues = returnForecasts(sol, vForecastingsValidation);
+		return eval->evaluateAll(sol->first.getR(), -1, &vForecastingsValidation);
 
-		int maxLag = problemParam.getMaxLag();
-		vector<double> targetValues;
+//		(NMETRICS, 0);
+//		vector<double> estimatedValues = returnForecasts(sol, vForecastingsValidation);
+//
+//		int maxLag = problemParam.getMaxLag();
+//		vector<double> targetValues;
+//
+//		for (int i = maxLag; i < vForecastingsValidation[0].size(); i++)
+//			targetValues.push_back(vForecastingsValidation[0][i]);
+//
+////		cout << validationSetValues << endl;
+////		getchar();
+//		foIndicatorNew = returnErrorsCallGetAccuracy(targetValues, estimatedValues);
+////		cout << "insideForecastClassNew" << endl;
+////		cout << foIndicatorNew << endl;
 
-		for (int i = maxLag; i < vForecastingsValidation[0].size(); i++)
-			targetValues.push_back(vForecastingsValidation[0][i]);
-
-//		cout << validationSetValues << endl;
-//		getchar();
-		foIndicatorNew = returnErrorsCallGetAccuracy(targetValues, estimatedValues);
-//		cout << "insideForecastClassNew" << endl;
-//		cout << foIndicatorNew << endl;
-
-		return foIndicatorNew;
+//		return foIndicatorNew;
 	}
 
-	vector<double> returnErrorsCallGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
+	//return all possible forecasting measures
+	vector<double> callEvalGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
 	{
 		return eval->getAccuracy(targetValues, estimatedValues, -1);
 	}
-
+//
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
 		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());

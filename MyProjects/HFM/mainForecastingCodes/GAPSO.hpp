@@ -211,7 +211,7 @@ int GAPSO_SKU(int argc, char **argv)
 		cout << "Vector of forecasts: \n " << vForecasts << endl;
 		vector<vector<double> > blind = validationSet;
 		blind[0].erase(blind[0].end() - stepsAhead, blind[0].end());
-		cout << "Blind forecasts: \n " << forecastObject.returnBlind(sol, blind) << endl;
+		cout << "Blind forecasts: \n " << forecastObject.returnBlind(sol->first.getR(), blind) << endl;
 
 		foIndicators.push_back(errors[WMAPE_INDEX]);
 		foIndicators.push_back(sol->second.evaluation());

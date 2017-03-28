@@ -437,7 +437,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 		vector<double> foIndicatorCalibration;
 		vector<vector<double> > dataForBlindForecasts;
 		dataForBlindForecasts.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag));
-		vector<double> blindForecasts = forecastObject.returnBlind(sol, dataForBlindForecasts);
+		vector<double> blindForecasts = forecastObject.returnBlind(sol->first.getR(), dataForBlindForecasts);
 
 
 		cout<<blindForecasts<<endl;

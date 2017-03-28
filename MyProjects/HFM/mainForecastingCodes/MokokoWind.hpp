@@ -232,7 +232,7 @@ int mokokoWindSotavento(int argc, char **argv)
 //
 
 		vector<double> targetValues = rFComplete.getPartsForecastsEndToBegin(0, 0, nValidationRounds * nSA);
-		vector<double> errors = forecastingClassOBJ.returnErrorsCallGetAccuracy(targetValues, predictedValues);
+		vector<double> errors = forecastingClassOBJ.callEvalGetAccuracy(targetValues, predictedValues);
 		cout << "HFM errors MMAPE and RMSE:" << endl;
 		cout << errors[MMAPE_INDEX] << "\t" << errors[RMSE_INDEX] << endl;
 

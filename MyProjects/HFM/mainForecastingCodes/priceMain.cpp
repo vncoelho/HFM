@@ -173,7 +173,7 @@ int priceCompetitionBlind(int argc, char **argv)
 
 
 		vector<double> blindResults;
-		blindResults = forecastObject.returnBlind(sol, validationBlindForecastings);
+		blindResults = forecastObject.returnBlind(sol->first.getR(), validationBlindForecastings);
 		batchOfBlindResults.push_back(blindResults);
 		//cout << blindResults << endl;
 

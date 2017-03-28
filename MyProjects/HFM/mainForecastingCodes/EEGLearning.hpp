@@ -290,11 +290,10 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 	return bestPairs;
 }
 
-pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int _sa)
+pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int fh)
 {
 
 	int evalFOMinimizer = evalFO;
-	int nSA = _sa;
 	int mu = 100;
 	int lambda = mu * 6;
 	int contructiveNumberOfRules = 100;
@@ -331,8 +330,7 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 	ProblemParameters problemParam;
 	//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
 
-	problemParam.setStepsAhead(nSA);
-	int stepsAhead = problemParam.getStepsAhead();
+	problemParam.setStepsAhead(fh);
 
 	int nTotalForecastingsTrainningSet = tFTraining.getForecastsSize(0);
 
@@ -340,9 +338,9 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 	//========SET PROBLEM MAXIMUM LAG ===============
 	cout << "argvMaxLagRate: " << argvMaxLagRate << endl;
 
-	int iterationMaxLag = ((nTotalForecastingsTrainningSet - stepsAhead) * argvMaxLagRate) / 100.0;
+	int iterationMaxLag = ((nTotalForecastingsTrainningSet - fh) * argvMaxLagRate) / 100.0;
 	iterationMaxLag = ceil(iterationMaxLag);
-	if (iterationMaxLag > (nTotalForecastingsTrainningSet - stepsAhead))
+	if (iterationMaxLag > (nTotalForecastingsTrainningSet - fh))
 		iterationMaxLag--;
 	if (iterationMaxLag <= 0)
 		iterationMaxLag = 1;
@@ -366,13 +364,13 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 
 	cout << std::setprecision(3);
 	cout << std::fixed;
-	double NTRaprox = (nTotalForecastingsTrainningSet - maxLag) / double(stepsAhead);
+	double NTRaprox = (nTotalForecastingsTrainningSet - maxLag) / double(fh);
 	cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
 	cout << "#nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
 	cout << "#~NTR: " << NTRaprox << endl;
 	cout << "#sizeTrainingSet: " << tFTraining.getForecastsSize(0) << endl;
 	cout << "#maxNotUsed: " << maxLag << endl;
-	cout << "#StepsAhead: " << stepsAhead << endl << endl;
+	cout << "#StepsAhead: " << fh << endl << endl;
 
 	vector<vector<double> > trainningSet = tFTraining.getTS();
 	; // trainningSetVector
@@ -386,27 +384,10 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 	//		getchar();
 	pair<Solution<RepEFP>&, Evaluation&>* sol;
 	sol = forecastObject.run(timeES, 0, 0);
-//	sol = forecastObject.runEFP(5,timeES);
-
-//	vector<double> foIndicatorCalibration;
-//	vector<vector<double> > validationSet;
-//	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag + stepsAhead));
-//	vector<double> errors = forecastObject.returnErrors(sol, validationSet);
-//
-//	foIndicators.push_back(errors[SMAPE_INDEX]);
-//	foIndicators.push_back(sol->second.evaluation());
-//	foIndicators.push_back(argvMaxLagRate);
-//	foIndicators.push_back(maxLag);
-//	foIndicators.push_back(NTRaprox);
-//	foIndicators.push_back(timeES);
-//	foIndicators.push_back(seed);
-//	vfoIndicatorCalibration.push_back(foIndicators);
-
 	return sol;
-
 }
 
-vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<RepEFP>&, Evaluation&>* sol, RandGen& rg, int _sa)
+vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<RepEFP>&, Evaluation&>* sol, RandGen& rg, int fh)
 {
 
 	int mu = 100;
@@ -416,7 +397,6 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
-	int nSA = _sa;
 	// ============ END FORCES ======================
 
 	// ============= METHOD PARAMETERS=================
@@ -446,8 +426,7 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 	ProblemParameters problemParam;
 	//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
 
-	problemParam.setStepsAhead(nSA);
-	int stepsAhead = problemParam.getStepsAhead();
+	problemParam.setStepsAhead(fh);
 
 	int nTotalForecastingsTrainningSet = tFValidation.getForecastsSize(0);
 
@@ -455,10 +434,10 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 	problemParam.setMaxLag(sol->first.getR().earliestInput);
 	int maxLag = problemParam.getMaxLag();
 
-	if (nTotalForecastingsTrainningSet < (maxLag + stepsAhead))
+	if (nTotalForecastingsTrainningSet < (maxLag + fh))
 	{
 		cout << "ERROR on learnModel -- small TS size " << endl;
-		cout << "nTotalForecastingsTrainningSet:" << nTotalForecastingsTrainningSet << "\tmaxLag + stepsAhead:" << maxLag + stepsAhead << endl;
+		cout << "nTotalForecastingsTrainningSet:" << nTotalForecastingsTrainningSet << "\tmaxLag + stepsAhead:" << maxLag + fh << endl;
 	}
 
 	//If maxUpperLag is greater than 0 model uses predicted data
@@ -485,10 +464,12 @@ int EEGBiometricSystem(int argc, char **argv)
 	srand(seed);
 	rg.setSeed(seed);
 
+	//0 50 5 10 10
+
 	if (argc != 6)
 	{
 		cout << "Parametros incorretos!" << endl;
-		cout << "Os parametros esperados sao: exp fh nTests timeES" << endl;
+		cout << "Os parametros esperados sao: exp fh nModels nTests timeES" << endl;
 		exit(1);
 	}
 
@@ -496,19 +477,18 @@ int EEGBiometricSystem(int argc, char **argv)
 	int argvFH = atoi(argv[2]);
 	int maxNM = atoi(argv[3]);
 	int argvTimeES = atoi(argv[4]);
-	int argvNumberV = atoi(argv[5]);
-	int nVolunters = argvNumberV;
+	int nVolunters = atoi(argv[5]);
 
 	//Forcing some values TODO
-	argEXP = 1;
-	argvFH = 80;
+	argEXP = 2;
+	argvFH = 80; //Max value for fh (if not random , this is the value)
 	maxNM = 10;
 	argvTimeES = 10;
 	nVolunters = 4;
 	int argvMaxLagRate = 3; // percentage of ts to be used
 	bool randomFH = true;
 	bool randomChannel = true;
-	bool randomQI = false; //random indicator of quality (MAPE,SMAPE
+	bool randomQI = true; //random indicator of quality (MAPE,SMAPE
 	//=============================================
 	//Learning instance and validation
 
@@ -528,6 +508,7 @@ int EEGBiometricSystem(int argc, char **argv)
 //	int fixedChannelV = 30;
 
 	//cout << "expT: " << expT << " -- channel: " << fixedChannelT << " with " << trainingSetPercentage * 100 << "%" << endl;
+	cout << "EEG-BASED BIOMETRIC SYSTEM GOING TO RUN" << endl;
 	cout << maxNM << " models from " << nVolunters << " volunteers" << " expT " << expT << " with " << trainingSetPercentage * 100 << "%" << endl;
 	cout << "expV: " << expV << " with " << validationSetPercentage * 100 << "%" << endl;
 
@@ -596,6 +577,7 @@ int EEGBiometricSystem(int argc, char **argv)
 				cout << "forcing FH in the learning phase!" << endl;
 				fH = argvFH;
 			}
+
 			if (!randomChannel)
 			{
 				cout << "forcing random channel in the learning phase!" << endl;
@@ -640,13 +622,14 @@ int EEGBiometricSystem(int argc, char **argv)
 //			getchar();
 
 			vector<double> allErrors = checkLearningAbility(tFTraining, HFMmodel, rg, fH);
-			vector<double> currentErrors;
+			vector<double> biometricSystemMeasures;
 			for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
-				currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
-			//			cout << allErrors << endl;
-			//			getchar();
+				biometricSystemMeasures.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
+//			cout << allErrors << endl;
+//			cout << biometricSystemMeasures << endl;
+//			getchar();
 
-			HFMModelAndParam* HFMCurrentModelAndParams = new HFMModelAndParam(HFMmodel, currentErrors, fH, v, variableChannelT);
+			HFMModelAndParam* HFMCurrentModelAndParams = new HFMModelAndParam(HFMmodel, biometricSystemMeasures, fH, v, variableChannelT);
 			setOfHFMLearningModels.push_back(HFMCurrentModelAndParams);
 		}
 	}

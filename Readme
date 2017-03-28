@@ -1,10 +1,5 @@
-OptFrame - Optimization Framework
+Hybrid Forecasting Model - A forecasting framework built upon metaheuristics
+2012-2017
+Vitor Nazário Coelho
 
-To get started (MCT for Windows/Linux):
-- compile and run MCT.java application;
-- this can be done like this: javac MCT.java && java MCT
-
-To get started (MCT stable version for Linux only):
-- run MCT.sh script
-
-Good luck!
+This framework is constructed inside the scope of the OptFrame - Optimization Framework
