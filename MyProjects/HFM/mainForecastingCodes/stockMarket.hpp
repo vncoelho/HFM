@@ -23,7 +23,7 @@ int stockMarketForecasting(int argc, char **argv)
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
-	seed = 0;
+	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);
@@ -131,8 +131,8 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 5;
-	int timeGPLS = 10;
+	int timeES = 30;
+	int timeGPLS = 60;
 	for (int b = 0; b < 2; b++)
 	{
 		if (b == 1)

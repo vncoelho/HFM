@@ -38,7 +38,7 @@ public:
 
 	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
 	{
-		return (rule >= 0);
+		return ((rule >= 0) && (rule < rep.singleIndex.size()) && (rep.singleIndex.size() > 1));
 	}
 
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
@@ -48,7 +48,7 @@ public:
 
 		if (reverse == false)
 		{
-			if (rep.singleIndex.size() >= 0)
+			if (rep.singleIndex.size() > 0)
 			{
 				tempSingleIndexOld = rep.singleIndex[rule];
 				tempSingleFuzzyRSOld = rep.singleFuzzyRS[rule];
@@ -61,8 +61,8 @@ public:
 		}
 		else
 		{
-			rep.singleIndex.insert(rep.singleIndex.begin() + rule - 1, singleIndexOld);
-			rep.singleFuzzyRS.insert(rep.singleFuzzyRS.begin() + rule - 1, singleFuzzyRSOld);
+			rep.singleIndex.insert(rep.singleIndex.begin() + rule, singleIndexOld);
+			rep.singleFuzzyRS.insert(rep.singleFuzzyRS.begin() + rule, singleFuzzyRSOld);
 		}
 
 		return new MoveNEIGHRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
@@ -107,7 +107,6 @@ public:
 
 	virtual void first()
 	{
-
 		pair<int, int> tempSingleIndexOld;
 		vector<double> tempSingleFuzzyRSOld;
 

@@ -72,9 +72,10 @@ public:
 
 			rep.singleFuzzyRS.push_back(fuzzyRules);
 		}
+		else
 		{
-			rep.singleIndex.erase(rep.singleIndex.begin() + K);
-			rep.singleFuzzyRS.erase(rep.singleFuzzyRS.begin() + K);
+			rep.singleIndex.erase(rep.singleIndex.begin() + rep.singleIndex.size());
+			rep.singleFuzzyRS.erase(rep.singleFuzzyRS.begin() + rep.singleFuzzyRS.size());
 		}
 		return new MoveNEIGHAddSingleInput(file, K, !reverse, pEFP, rg);
 	}
@@ -121,7 +122,7 @@ public:
 	virtual void first()
 	{
 
-		for (int lag = 1; lag < maxLag; lag++)
+		for (int lag = 1; lag <= maxLag; lag++)
 		{
 			moves.push_back(new MoveNEIGHAddSingleInput(0, lag, false, pEFP, rg));
 		}
@@ -186,7 +187,7 @@ public:
 
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
 	{
-
+		//TODO - Check the possibility of add negative K values
 		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
 		int file = rg.rand(pEFP.getNumberExplanatoryVariables());
 

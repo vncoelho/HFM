@@ -111,7 +111,7 @@ public:
 		{
 			cout << "BUG Evaluator K (function getKValue): K = " << K << endl;
 			cout << "BUG Evaluator K (function getKValue): (i + pa - K) = " << i + pa - K << endl;
-			cout << "BUG Evaluator K (function getKValue): vForecastings[file].size() = " << vForecastings[file].size() << endl;
+			cout << "BUG Evaluator K (function getKValue): vForecastings["<<file<<"].size() = " << vForecastings[file].size() << endl;
 			getchar();
 		}
 
@@ -396,6 +396,7 @@ public:
 			{
 				int file = rep.singleIndex[nSP].first;
 				int K = rep.singleIndex[nSP].second;
+//				cout<<file<<"\t"<<K<<endl;
 
 				double singleValue = getKValue(K, file, begin, pa, vForecastings, predicteds);
 

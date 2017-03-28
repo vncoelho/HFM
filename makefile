@@ -14,7 +14,8 @@ OPENMP_FLAGS = -fopenmp -lpthread
 LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
-GCC_FLAGS = -Ofast -g --std=c++11
+GCC_FLAGS = -Ofast --std=c++11
+#GCC_FLAGS = -Ofast -g --std=c++11
 
 #-Wall 
 gfp:

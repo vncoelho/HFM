@@ -76,7 +76,6 @@ public:
 			Move<R, ADS>& move = ns.move(*s);
 			if (move.canBeApplied(*s))
 			{
-
 				Move<R, ADS>* mov_rev = move.apply(*sMev, *s);
 				bool added = pManager->addSolution(p, *sMev,*s);
 				delete mov_rev->apply(*s);

@@ -42,7 +42,7 @@ public:
 		bool maxLagCheck = false;
 		bool notNull1 = false;
 		bool notNull2 = false;
-		if (rule >= 0)
+		if ((rule >= 0) && (rule < rep.singleIndex.size()))
 		{
 			maxLagCheck = ((rep.singleIndex[rule].second + X) <= maxLag);
 			minimumLag = ((rep.singleIndex[rule].second - X) > maxUpperLag);
@@ -61,8 +61,8 @@ public:
 		else
 			rep.singleIndex[rule].second -= X;
 
-		if (rep.singleIndex[rule].second > rep.earliestInput)
-			rep.earliestInput = rep.singleIndex[rule].second;
+//		if (rep.singleIndex[rule].second > rep.earliestInput)
+//			rep.earliestInput = rep.singleIndex[rule].second;
 
 		return new MoveNEIGHChangeSingleInput(rule, !sign, maxLag, maxUpperLag, X);
 	}
@@ -173,8 +173,8 @@ public:
 
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
 	{
-		int maxChange = 5;;
-		int X = rg.rand(maxChange) + 1;
+		int MAXCHANGE = 5;
+		int X = rg.rand(MAXCHANGE) + 1;
 		int rule = -1;
 		if (rep.singleIndex.size() > 0)
 			rule = rg.rand(rep.singleIndex.size());

@@ -135,6 +135,7 @@ public:
 		vNSeq.push_back(nsChangeSingleInput);
 		vNSeq.push_back(nsRemoveSingleInput);
 		vNSeq.push_back(nsAddSingleInput);
+//		vNSeq.push_back(nsVAlpha);
 //		vNSeq.push_back(nsAddMean01);
 //		vNSeq.push_back(nsAddMean1);
 //		vNSeq.push_back(nsAddMeanD15);
@@ -144,7 +145,7 @@ public:
 //		vNSeq.push_back(nsAddMeanM2);
 //		vNSeq.push_back(nsAddMeanM5);
 //		vNSeq.push_back(nsAddMeanBigM);
-//		vNSeq.push_back(nsVAlpha);
+
 
 		//TODO check why ES goes more generations some time when we do not have improvements.
 
@@ -238,15 +239,18 @@ public:
 		GRInitialPopulation<RepEFP> bip(*c, rg, 1);
 //		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 		GRInitialPareto<RepEFP> grIP(*c, rg, 1, *mev);
-		MORandomImprovement<RepEFP> moriCSI(*mev, *vNSeq[0], 1000);
-		MORandomImprovement<RepEFP> moriRSI(*mev, *vNSeq[1], 1000);
-		MORandomImprovement<RepEFP> moriASI(*mev, *vNSeq[2], 1000);
-		MORandomImprovement<RepEFP> moriMFR(*mev, *vNSeq[3], 1000);
+		int maxTriesRI = 100;
+		MORandomImprovement<RepEFP> moriMFR(*mev, *vNSeq[0], maxTriesRI);
+		MORandomImprovement<RepEFP> moriCSI(*mev, *vNSeq[1], maxTriesRI);
+		MORandomImprovement<RepEFP> moriRSI(*mev, *vNSeq[2], maxTriesRI);
+		MORandomImprovement<RepEFP> moriASI(*mev, *vNSeq[3], maxTriesRI);
+
 		vector<MOLocalSearch<RepEFP>*> vMOLS;
-		vMOLS.push_back(&moriCSI);
+		vMOLS.push_back(&moriASI);
 		vMOLS.push_back(&moriRSI);
-		vMOLS.push_back(&moriASI); //Todo -- CHECK THIS NS -- IT IS PRODUCING ERRORS INSIDE G2PPLS
 		vMOLS.push_back(&moriMFR);
+		vMOLS.push_back(&moriCSI);
+
 
 		GeneralParetoLocalSearch<RepEFP> generalPLS(*mev, grIP, initial_population_size, vMOLS);
 		if (_pf == NULL)
