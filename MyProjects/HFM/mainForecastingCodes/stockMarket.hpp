@@ -131,15 +131,15 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 30;
-	int timeGPLS = 60;
+	int timeES = 10;
+	int timeGPLS = 20;
 	for (int b = 0; b < 2; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 		pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
-		forecastObject->addSolToParetoWithParetoManager(*pf,sol->first);
+		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
 		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
@@ -159,25 +159,25 @@ int stockMarketForecasting(int argc, char **argv)
 
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
-		cout<<setprecision(2);
+		cout << setprecision(2);
 		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), testingSet);
 		for (int f = 0; f < blindForecasts.size(); f++)
-			cout << blindForecasts[f] << "/" << testingSet[0][f] << "/" << (testingSet[0][f]-blindForecasts[f]) << "\t";
+			cout << blindForecasts[f] << "/" << testingSet[0][f] << "/" << (testingSet[0][f] - blindForecasts[f]) << "\t";
 
 		cout << endl;
 //getchar();
 	}
 
-	cout <<"\nPrinting pareto front forecast accuracy measures..." << endl;
+	cout << "\nPrinting pareto front forecast accuracy measures..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
-		//vector<double> solEvaluations;
+		cout << setprecision(5);
 		for (int e = 0; e < vEvalPF[i]->size(); e++)
 			cout << vEvalPF[i]->at(e).getObjFunction() << "\t\t";
 		cout << endl;
 	}
 
-	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt");
+	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt","w");
 
 	//Validacao
 //	vector<vector<double> > validationSet;
@@ -207,7 +207,6 @@ int stockMarketForecasting(int argc, char **argv)
 
 	delete pf;
 	delete forecastObject;
-
 
 	cout << "MO Stock Market forecasting finished!" << endl;
 	return 0;
