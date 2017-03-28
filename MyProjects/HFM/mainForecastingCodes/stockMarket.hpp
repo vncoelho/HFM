@@ -115,10 +115,10 @@ int stockMarketForecasting(int argc, char **argv)
 	cout << std::setprecision(9);
 	cout << std::fixed;
 	double NTRaprox = (nTotalForecastingsTrainningSet - maxLag) / double(fh);
-	cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
-	cout << "#nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
-	cout << "#~NTR: " << NTRaprox << endl;
 	cout << "#timeSeriesSize: " << rF.getForecastsSize(0) << endl;
+	cout << "#nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
+	cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
+	cout << "#~NTR: " << NTRaprox << endl;
 	cout << "#maxNotUsed: " << maxLag << endl;
 	cout << "#StepsAhead: " << fh << endl << endl;
 
@@ -131,18 +131,20 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 20;
-	int timeGPLS = 60;
+	int timeES = 5;
+	int timeGPLS = 10;
 	for (int b = 0; b < 2; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 		pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
-		forecastObject->addSolToParetoWithFCMEV(sol->first, *pf);
+		forecastObject->addSolToParetoWithParetoManager(*pf,sol->first);
 		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
+		delete &sol->first;
+		delete &sol->second;
 		delete sol;
 		delete forecastObject;
 	}
@@ -157,19 +159,21 @@ int stockMarketForecasting(int argc, char **argv)
 
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
+		cout<<setprecision(2);
 		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), testingSet);
 		for (int f = 0; f < blindForecasts.size(); f++)
-			cout << blindForecasts[f] << "/" << testingSet[0][f] << "\t";
+			cout << blindForecasts[f] << "/" << testingSet[0][f] << "/" << (testingSet[0][f]-blindForecasts[f]) << "\t";
 
 		cout << endl;
 //getchar();
 	}
 
+	cout <<"\nPrinting pareto front forecast accuracy measures..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		//vector<double> solEvaluations;
 		for (int e = 0; e < vEvalPF[i]->size(); e++)
-			cout << vEvalPF[i]->at(e).getObjFunction() << "\t";
+			cout << vEvalPF[i]->at(e).getObjFunction() << "\t\t";
 		cout << endl;
 	}
 

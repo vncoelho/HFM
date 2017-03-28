@@ -192,10 +192,25 @@ public:
 		delete es;
 	}
 
+//	//add solution to pareto front evaluating with forecasting class evaluators
+//	void addSolToParetoWithFCMEV(Solution<RepEFP>& s, Pareto<RepEFP>& pf)
+//	{
+//		pf.push_back(s, *mev);
+//	}
+
+
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolToParetoWithFCMEV(Solution<RepEFP>& s, Pareto<RepEFP>& pf)
+	void addSolToParetoWithParetoManager(Pareto<RepEFP>& pf, const Solution<RepEFP>& candidateS)
 	{
-		pf.push_back(s, *mev);
+		paretoManager<RepEFP> paretoMan(*mev);
+		paretoMan.addSolution(pf, candidateS);
+	}
+
+	//add solution to pareto front evaluating with forecasting class evaluators
+	void addSolToParetoWithParetoManager(Pareto<RepEFP>& pf, const Solution<RepEFP>& candidateS, const MultiEvaluation& candidateMev)
+	{
+		paretoManager<RepEFP> paretoMan(*mev);
+		paretoMan.addSolution(pf, candidateS, candidateMev);
 	}
 
 	Pareto<RepEFP>* runMultiObjSearch(int timeGPLS, Pareto<RepEFP>* _pf = NULL)

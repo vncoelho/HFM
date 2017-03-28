@@ -380,13 +380,19 @@ public:
 		newRep.derivativeFuzzyRS = derivativeFuzzyRS;
 		newRep.earliestInput = earliestInput;
 
+
+		//=================================================================
+		//When evalAprox,approximationsEnayatifar, are !=0
+		newRep.alpha = rg.rand(100) / 10000.0; //aprox == 1
+
+		//aprox == ( 2 | 4 | 5 )
 		vector<double> vAlpha(NAJUSTS, rg.randG(0, 0.1));
-		newRep.alpha = rg.rand(100) / 10000.0;
 		newRep.vAlpha = vAlpha;
 
 		vector<int> vIndex;
 		vector<double> vIndexAlphas;
 
+		//aprox == 3
 		int nAdjust = rg.rand(1) + 1;
 		for (int nA = 0; nA <= nAdjust; nA++)
 		{
@@ -402,6 +408,7 @@ public:
 
 		newRep.vIndex = vIndex;
 		newRep.vIndexAlphas = vIndexAlphas;
+		//=================================================================
 
 		/*
 		 cout << newRep.earliestInput << endl;
