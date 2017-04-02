@@ -32,17 +32,19 @@ private:
 public:
 	ProblemParameters(string parametersFile)
 	{
-		// Put here your code
-		// You can read the input data from the 'scanner' object
-
 		readFile(parametersFile);
-		//cout << vNotUsedForTests << endl;
-		//getchar();
+
 	}
 
 	ProblemParameters()
 	{
 
+	}
+
+	//the target file is always the first time series
+	int getTargetFile()
+	{
+		return 0;
 	}
 
 	void readFile(string parametersFile)

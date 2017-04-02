@@ -63,7 +63,6 @@ private:
 
 	//int optionsP;
 	int nForecastings;
-	int targetFile;
 
 	//desired optmization metric
 	int optMetric;
@@ -76,15 +75,16 @@ private:
 
 	double timeTest, timeTest2;
 	int counter;
+	int targetFile;
 public:
 
 	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _evalFO, int _aprox) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), optMetric(_evalFO), aprox(_aprox)
 	{
 		roundToZero = false; // If true, forecasts are all rounded to 0! TODO
-		targetFile = 0; //this is the file to be learned
 
 		nForecastings = pEFP.getForecatingsSizeFile(0); //all files have the same size
+		targetFile = problemParam.getTargetFile();
 
 		nEvalForSpeedUp = 0;
 		timeInMS = 0;
@@ -98,10 +98,6 @@ public:
 
 	}
 
-	int getTargetFile()
-	{
-		return targetFile;
-	}
 
 	int getKValue(const int K, const int file, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
 	{

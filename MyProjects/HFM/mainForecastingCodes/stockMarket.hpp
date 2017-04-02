@@ -45,9 +45,9 @@ int stockMarketForecasting(int argc, char **argv)
 	cout << "nomeOutput=" << nomeOutput << endl;
 
 	//Numero de passos a frente - Horizonte de previsao
-	int fh = 30;
+	int fh = 10;
 	//O valor mais antigo que pode ser utilizado como entrada do modelo de previsao [100]
-	int argvMaxLagRate = 10;
+	int argvMaxLagRate =25;
 
 	vector<string> explanatoryVariables;
 
@@ -154,17 +154,30 @@ int stockMarketForecasting(int argc, char **argv)
 	vector<Solution<RepEFP>*> vSolPF = pf->getParetoSet();
 	int nObtainedParetoSol = vEvalPF.size();
 
-	vector<vector<double> > testingSet;
-	testingSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
+	int targetFile = problemParam.getTargetFile();
+	vector<vector<double> > dataForFeedingValidationTest;
+	dataForFeedingValidationTest.push_back(rF.getPartsForecastsEndToBegin(0, fh, maxLag));
+	vector<vector<double> > targetValidationSet;
+	targetValidationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh));
+	//Using Multi Round forescasting for obtaining validation and tests
+//	vector<vector<double> > validationSet;
+//	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
 
+
+	vector<vector<double> > ensembleBlindForecasts;
+	cout << "\nPrinting obtained sets of predicted values..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		cout << setprecision(2);
-		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), testingSet);
+		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
 		for (int f = 0; f < blindForecasts.size(); f++)
-			cout << blindForecasts[f] << "/" << testingSet[0][f] << "/" << (testingSet[0][f] - blindForecasts[f]) << "\t";
+			cout << blindForecasts[f] << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts[f]) << "\t";
 
 		cout << endl;
+
+//		cout << forecastObject->returnForecastsAndTargets(vSolPF[i]->getR(), validationSet) << endl;
+//		getchar();
+		ensembleBlindForecasts.push_back(blindForecasts);
 //getchar();
 	}
 
@@ -177,7 +190,7 @@ int stockMarketForecasting(int argc, char **argv)
 		cout << endl;
 	}
 
-	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt","w");
+	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt", "w");
 
 	//Validacao
 //	vector<vector<double> > validationSet;

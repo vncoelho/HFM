@@ -146,7 +146,6 @@ public:
 //		vNSeq.push_back(nsAddMeanM5);
 //		vNSeq.push_back(nsAddMeanBigM);
 
-
 		//TODO check why ES goes more generations some time when we do not have improvements.
 
 		vector<int> vNSeqMax(vNSeq.size(), 1000);
@@ -199,7 +198,6 @@ public:
 //		pf.push_back(s, *mev);
 //	}
 
-
 	//add solution to pareto front evaluating with forecasting class evaluators
 	void addSolToParetoWithParetoManager(Pareto<RepEFP>& pf, const Solution<RepEFP>& candidateS)
 	{
@@ -250,7 +248,6 @@ public:
 		vMOLS.push_back(&moriRSI);
 		vMOLS.push_back(&moriMFR);
 		vMOLS.push_back(&moriCSI);
-
 
 		GeneralParetoLocalSearch<RepEFP> generalPLS(*mev, grIP, initial_population_size, vMOLS);
 		if (_pf == NULL)
@@ -343,9 +340,10 @@ public:
 	}
 
 	//return blind forecasts for the required steps ahead of problemParam class
-	vector<double> returnBlind(RepEFP& trainedModel, vector<vector<double> >& vTimeSeries)
+	//this function feed a trainedModel with the last samples from the vector of TimeSeries
+	vector<double> returnBlind(const RepEFP& trainedModel, vector<vector<double> >& vTimeSeries)
 	{
-		return eval->returnForecasts(trainedModel, vTimeSeries, vTimeSeries[eval->getTargetFile()].size(), problemParam.getStepsAhead());
+		return eval->returnForecasts(trainedModel, vTimeSeries, vTimeSeries[problemParam.getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
 	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& vForecastingsValidation)
@@ -380,6 +378,11 @@ public:
 	{
 		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
 		return targetAndForecasts.second;
+	}
+
+	pair<vector<double>, vector<double> > returnForecastsAndTargets(const RepEFP& rep, vector<vector<double> > vForecastingsValidation)
+	{
+		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());
 	}
 
 	vector<double> returnErrorsPersistance(vector<double> targetValues, int fH)

@@ -25,6 +25,7 @@ private:
 	ProblemParameters problemParam;
 	vector<vector<double> > forecastings;
 
+
 public:
 	ProblemInstance(vector<vector<double> > _forecastings, ProblemParameters& _problemParam) :
 		forecastings(_forecastings),problemParam(_problemParam)
@@ -102,6 +103,7 @@ public:
 
 		//================================================
 	}
+
 
 	double getMean(int file)
 	{
