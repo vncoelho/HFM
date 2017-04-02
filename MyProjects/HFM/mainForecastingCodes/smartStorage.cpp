@@ -219,5 +219,6 @@ int smartStorage(int argc, char **argv)
 	fprintf(fResults, "\n\nPinball error:%f\n", pinball);
 	fclose(fResults);
 
+
 	return 0;
 }

@@ -10,6 +10,7 @@
 #include <numeric>
 #include "../../../OptFrame/RandGen.hpp"
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
+#include "../../BBV/BBVTolls.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -47,7 +48,7 @@ int stockMarketForecasting(int argc, char **argv)
 	//Numero de passos a frente - Horizonte de previsao
 	int fh = 10;
 	//O valor mais antigo que pode ser utilizado como entrada do modelo de previsao [100]
-	int argvMaxLagRate =25;
+	int argvMaxLagRate = 25;
 
 	vector<string> explanatoryVariables;
 
@@ -163,7 +164,6 @@ int stockMarketForecasting(int argc, char **argv)
 //	vector<vector<double> > validationSet;
 //	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
 
-
 	vector<vector<double> > ensembleBlindForecasts;
 	cout << "\nPrinting obtained sets of predicted values..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
@@ -192,36 +192,15 @@ int stockMarketForecasting(int argc, char **argv)
 
 	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt", "w");
 
-	//Validacao
-//	vector<vector<double> > validationSet;
-//	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag + fh));
-//	vector<double> errors = forecastObject.returnErrors(sol, trainningSet);
-//	vector<double> previsao = forecastObject.returnForecasts(sol, validationSet);
-//
-//	foIndicators.push_back(errors[MAPE_INDEX]);
-//	foIndicators.push_back(sol->second.evaluation());
-//	foIndicators.push_back(argvMaxLagRate);
-//	foIndicators.push_back(maxLag);
-//	foIndicators.push_back(NTRaprox);
-//	foIndicators.push_back(timeES);
-//	foIndicators.push_back(seed);
-//
-//	cout << setprecision(3);
-//	cout << foIndicators << endl;
-//	cout << errors << endl;
-//	cout << previsao << endl;
-//
-//	cout << "printing real values!" << endl;
-//	for (int b = 93; b < validationSet[0].size(); b++)
-//		cout << validationSet[0][b] << "\t";
-//	cout << endl;
-//
-//	cout << sol->first.getR() << endl;
-
 	delete pf;
 	delete forecastObject;
 
 	cout << "MO Stock Market forecasting finished!" << endl;
+
+	//	===========================================
+	//	TIME FOR BRINCANDO COM A BOLSA DE VALORES (BBV)
+	BBVTools bbvTools;
+
 	return 0;
 }
 
