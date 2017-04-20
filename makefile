@@ -14,14 +14,14 @@ OPENMP_FLAGS = -fopenmp -lpthread
 LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
-GCC_FLAGS = -Ofast --std=c++11
+GCC_FLAGS = -Ofast --std=c++11  -lsndfile
 
 SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 #GCC_FLAGS = -Ofast -g --std=c++11
 
 #-Wall 
 gfp:
-	g++ $(GCC_FLAGS) $(OPENMP_FLAGS) $(SCANNERFLAGS)  ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
+	g++ $(GCC_FLAGS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
 	
 clean:
 	#make clean -C ./MyProjects/

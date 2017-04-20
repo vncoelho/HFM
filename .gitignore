@@ -19,3 +19,6 @@ Outputs
 Examples
 mct
 mct.sh
+*.wav
+output*
+Output*

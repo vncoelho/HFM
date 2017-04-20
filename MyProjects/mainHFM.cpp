@@ -27,6 +27,8 @@
 #include "./HFM/mainForecastingCodes/MokokoWind.hpp"
 #include "./HFM/mainForecastingCodes/REW2016_REED.hpp"
 #include "HFM/mainForecastingCodes/stockMarket.hpp"
+#include "HFM/mainForecastingCodes/readMP3.hpp"
+#include "HFM/mainForecastingCodes/usingNonDominatedModels.hpp"
 
 using namespace std;
 using namespace optframe;
@@ -35,9 +37,31 @@ using namespace EFP;
 //#include <tr1/random>
 //using namespace std::tr1;
 
+enum SwitchOptions {
+	Option_Invalid,
+    APEN_SPEEDUP,
+    STOCKMARKET,
+	GENERATE_NONDOMINATED_HFM_MODELS,
+	APEN_MICROGRID,
+	APEN_MICROGRID_ONLINE,
+	APEN_TWO_VARIABLES_MULTIVARIATE_FORECASTS,
+	LOAD_COMP,
+	PRICE_COMP,
+	WCCI_CFI_COMP,
+	JAMES_TAYLOR_EUROPEAN_DATASET,
+	RAIN_FORECAST,
+	MUSIC_GENERATION_WITH_FORECASTS,
+	MOKOKO_WIND_FORECASTS,
+	MOKOKO_WIND_POWER_PROBABILISTIC_FORECASTS,
+	EEG_BIOMETRIC_SYSTEM,
+	GAPSO_SKU_TESTS_FOR_BENCHMARK,
+	WCCI_CFI_COMP_CALIBRATION,
+	HOSSEIN_BLIND_FORECASTS_LOAD_FORECASTS
+
+};
+
 int main(int argc, char **argv)
 {
-
 
 //	variate_generator<mt19937, uniform_real<> > rngU(mt19937(123), uniform_real<>());
 //	variate_generator<mt19937, normal_distribution<> > rngN(mt19937(123), normal_distribution<>(2, .5));
@@ -68,29 +92,15 @@ int main(int argc, char **argv)
 // ==============================================
 //Running know forecasting problems
 
-	int type = 0; // price
-	//type = 1; // load
-	type = 2; // MG
-	type = 3; // JAMES TAYLOR 2007 European Dataset
-	type = 4; // rain forecast
-	type = 69; // mokoko forecast
-
-	type = 9999; // WCCI Forecasting comp calibration
-	type = 2016; //GAPSO
-
-	type = 99992;
-	type = 1111111;
-//	type = 69;
-//	type = 33333;
-	type = 999999; //Stock Market
-	int r;
 
 	int trainningMode = 0; //calibration mode active if value is 1
+	bool r;
+	SwitchOptions optionSwitch = GENERATE_NONDOMINATED_HFM_MODELS;
 
-	switch (type)
+	switch (optionSwitch)
 	{
 
-	case 1000:
+	case APEN_SPEEDUP:
 
 //		r = APEN_SI_DemandForecasting(argc, argv);
 		r = APEN_SI_SpeedUp_DemandForecasting(argc, argv);
@@ -99,7 +109,7 @@ int main(int argc, char **argv)
 		return r;
 		break;
 
-	case 0: //Eletricity Price Competition Mode
+	case PRICE_COMP: //Eletricity Price Competition Mode
 		if (trainningMode == 0)
 			r = priceCompetitionBlind(argc, argv);
 		else
@@ -109,7 +119,7 @@ int main(int argc, char **argv)
 		return r;
 		break;
 
-	case 1: //Load Competition Mode
+	case LOAD_COMP: //Load Competition Mode
 		if (trainningMode == 0)
 			r = loadCompetitionBlind(argc, argv);
 		else
@@ -119,91 +129,103 @@ int main(int argc, char **argv)
 		return r;
 		break;
 
-	case 2: //Liu Mode Applied Energy, 2014
+	case APEN_MICROGRID: //Liu Mode Applied Energy, 2014
 		r = microGridLiuAppliedEnergy(argc, argv);
 		cout << "Program ended successfully in MG Mode" << endl;
 		return r;
 		break;
 
-	case 21: //Liu Mode Applied Energy, 2014
+	case APEN_MICROGRID_ONLINE: //Liu Mode Applied Energy, 2014
 		r = microGridLiuAppliedEnergyOnline(argc, argv);
 		cout << "Program ended successfully in ONLINE MG Mode" << endl;
 		return r;
 		break;
 
-	case 3: //James Taylor 2007
+	case JAMES_TAYLOR_EUROPEAN_DATASET: //James Taylor 2007
 		r = jamesTaylorEuropeanDataset(argc, argv);
 		cout << "Program ended successfully in James Taylor Eurpean Dataset Mode" << endl;
 		return r;
 		break;
 
-	case 4: //James Taylor 2007
+	case RAIN_FORECAST: //James Taylor 2007
 		r = rainMain(argc, argv);
-		cout << "Program ended successfully in James Taylor Eurpean Dataset Mode" << endl;
+		cout << "Program ended successfully in rainMode" << endl;
 		return r;
 		break;
 
-	case 69: //James Taylor 2007
-		r = mokokoProbabilisticForecastWindPower(argc, argv);
-		cout << "Program ended successfully in Mokoko's place configuration! \n Ziiz Gud ! \n A naice to meet you ! \n Godbye" << endl;
-		return r;
-		break;
 
-	case 100: //James Taylor 2007
+
+	case APEN_TWO_VARIABLES_MULTIVARIATE_FORECASTS: //James Taylor 2007
 		r = AETwoVariables(argc, argv);
 		cout << "Program ended successfully in AE many variables final batch!" << endl;
 		return r;
 		break;
 
-	case 1112: //James Taylor 2007
+	case 1112:
 		r = smartStorage(argc, argv);
 		cout << "Program ended successfully in Smart Storage" << endl;
 		return r;
 		break;
 
-	case 9999: //James Taylor 2007
+	case WCCI_CFI_COMP_CALIBRATION:
 		r = CIFWCCICalibration(argc, argv);
 		cout << "Program ended successfully in CIF calibration WCCI Conference!" << endl;
 		return r;
 		break;
 
-	case 99992: //CIFWCCIGeneratingForecasts
+	case WCCI_CFI_COMP: //CIFWCCIGeneratingForecasts
 		r = CIFWCCIGeneratingForecasts(argc, argv);
 		cout << "Program ended successfully in CIF calibration WCCI Conference!" << endl;
 		return r;
 		break;
 
-	case 2016: //James Taylor 2007
+	case GAPSO_SKU_TESTS_FOR_BENCHMARK:
 		r = GAPSO_SKU(argc, argv);
 		cout << "Program ended successfully in GAPSO-SKU forecasting!" << endl;
 		return r;
 		break;
 
-	case 1111111: //James Taylor 2007
+	case EEG_BIOMETRIC_SYSTEM:
 		r = EEGBiometricSystem(argc, argv);
 		cout << "Program ended successfully in EEG learning!" << endl;
 		return r;
 		break;
 
-
-	case 33333: //James Taylor 2007
+	case HOSSEIN_BLIND_FORECASTS_LOAD_FORECASTS:
 		r = hosseinBlindForecasts(argc, argv);
 		cout << "Program ended successfully in Hossein Model Blind !" << endl;
 		return r;
 		break;
 
-	case 692: //James Taylor 2007
+	case MOKOKO_WIND_FORECASTS: //James Taylor 2007
 		r = mokokoWindSotavento(argc, argv);
 		cout << "Program ended successfully in Mokoko 2 !" << endl;
 		return r;
 		break;
 
-	case 999999: //James Taylor 2007
+	case MOKOKO_WIND_POWER_PROBABILISTIC_FORECASTS:
+		r = mokokoProbabilisticForecastWindPower(argc, argv);
+		cout << "Program ended successfully in Mokoko's place configuration! \n Ziiz Gud ! \n A naice to meet you ! \n Godbye" << endl;
+		return r;
+		break;
+
+	case STOCKMARKET: //James Taylor 2007
 		r = stockMarketForecasting(argc, argv);
 		cout << "Parabens! Previsao da bolsa terminada" << endl;
 		return r;
 		break;
 
+	case MUSIC_GENERATION_WITH_FORECASTS: //James Taylor 2007
+		r = readWAV(argc, argv);
+		cout << "Parabens! WAV lido com sucessos" << endl;
+		return r;
+		break;
+
+	case GENERATE_NONDOMINATED_HFM_MODELS: //James Taylor 2007
+		r = usingNonDominatedHFMModels(argc, argv);
+		cout << "Parabens! Non-dominated solutions successfully have been generated." << endl;
+		return r;
+		break;
 
 	default:
 		int r = HFModel(argc, argv);
@@ -212,5 +234,4 @@ int main(int argc, char **argv)
 	}
 
 }
-
 
