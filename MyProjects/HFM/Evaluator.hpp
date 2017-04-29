@@ -98,16 +98,20 @@ public:
 
 	}
 
-
-	int getKValue(const int K, const int file, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
+	double getKValue(const int K, const int file, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
 	{
 		double value = 0;
 
-		if ((K == 0) || ((i + pa - K) < 0))
+		if ((K == 0))
 		{
 			cout << "BUG Evaluator K (function getKValue): K = " << K << endl;
+			getchar();
+		}
+
+		if (((i + pa - K) < 0))
+		{
 			cout << "BUG Evaluator K (function getKValue): (i + pa - K) = " << i + pa - K << endl;
-			cout << "BUG Evaluator K (function getKValue): vForecastings["<<file<<"].size() = " << vForecastings[file].size() << endl;
+			cout << "BUG Evaluator K (function getKValue): vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
 			getchar();
 		}
 
@@ -127,7 +131,7 @@ public:
 	}
 
 	//defuzzification process -- Converter a node input into useful estimation values
-	void defuzzification(double ruleGreater, double greaterWeight, double ruleLower, double lowerWeight, double ruleEpsilon, FuzzyFunction fuzzyFunc, double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
+	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const FuzzyFunction fuzzyFunc, const double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
 	{
 
 		if (fuzzyFunc == Heavisde)
@@ -194,7 +198,7 @@ public:
 	}
 
 	//Different approximations that can be used to approximate a forecasts with pre-defined rules (some can be consider optimized weights)
-	void approximationsEnayatifar(const int& aprox, const double& alpha, const vector<double>& vAlpha, const vector<double>& vIndexAlphas, vector<int>& vIndex, double& estimation, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds, const int& maxLag)
+	void approximationsEnayatifar(const int& aprox, const double& alpha, const vector<double>& vAlpha, const vector<double>& vIndexAlphas, const vector<int>& vIndex, double& estimation, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds, const int& maxLag)
 	{
 		if (aprox == 1)
 		{
@@ -358,7 +362,7 @@ public:
 		return *new EvaluationEFP(fo);
 	}
 
-	vector<double> evaluateAll(const RepEFP& rep, int accIndicator, vector<vector<double> >* vForecastings = NULL)
+	vector<double> evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
 	{
 		if (vForecastings == NULL)
 			vForecastings = &pEFP.getForecastingsVector();
@@ -369,7 +373,7 @@ public:
 		return foIndicator;
 	}
 
-	vector<double> returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, int begin, int fh)
+	vector<double> returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
 	{
 		int sizeSP = rep.singleIndex.size();
 		int sizeAP = rep.averageIndex.size();
@@ -496,7 +500,7 @@ public:
 	}
 
 	//return a pair -- first vector contain the real values while the second has the forecasted ones
-	pair<vector<double>, vector<double> > generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, int stepSize)
+	pair<vector<double>, vector<double> > generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
 	{
 		vector<double> allForecasts;
 		vector<double> allTargets;
@@ -526,6 +530,7 @@ public:
 				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
 			}
 
+
 			for (int aV = 0; aV < allForecastsVectors.size(); aV++)
 				for (int k = 0; k < allForecastsVectors[aV].size(); k++)
 				{
@@ -552,7 +557,7 @@ public:
 
 	//return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
 	//if equals to -1 it calls all indicators calculus
-	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, int accIndicator)
+	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, const int accIndicator)
 	{
 
 		int nSamples = targetValues.size();
@@ -597,17 +602,23 @@ public:
 				foIndicator[MAPE_INV_INDEX] += (absDiff / abs(tsMaxValues - forecastingTargetNotMax));
 			}
 
+			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == -1)
+				foIndicator[MSE_INDEX] += pow(absDiff, 2);
+
 			if (accIndicator == SMAPE_INDEX || accIndicator == -1)
-				foIndicator[SMAPE_INDEX] += (absDiff / (abs(forecastingTargetNotNull) + abs(estimation)) / 2);
+			{
+				double forecastingTargetNotNullSMAPE = abs(forecastingTarget + estimation);
+				if (forecastingTargetNotNullSMAPE == 0)
+					forecastingTargetNotNullSMAPE = 0.0001;
+
+				foIndicator[SMAPE_INDEX] += (absDiff / forecastingTargetNotNullSMAPE / 2);
+			}
 
 			if (accIndicator == WMAPE_INDEX || accIndicator == -1)
 				foIndicator[WMAPE_INDEX] += (absDiff / sumTarget);
 
 			if (accIndicator == MMAPE_INDEX || accIndicator == -1)
 				foIndicator[MMAPE_INDEX] += (absDiff / avgTarget);
-
-			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == -1)
-				foIndicator[MSE_INDEX] += pow(absDiff, 2);
 
 			//PinballFunction
 			if (accIndicator == PINBALL_INDEX || accIndicator == -1)

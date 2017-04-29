@@ -29,6 +29,9 @@
 #include "HFM/mainForecastingCodes/stockMarket.hpp"
 #include "HFM/mainForecastingCodes/readMP3.hpp"
 #include "HFM/mainForecastingCodes/usingNonDominatedModels.hpp"
+#include "HFM/mainForecastingCodes/musicGen.hpp"
+
+
 
 using namespace std;
 using namespace optframe;
@@ -41,6 +44,7 @@ enum SwitchOptions {
 	Option_Invalid,
     APEN_SPEEDUP,
     STOCKMARKET,
+	MUSIC_GEN,
 	GENERATE_NONDOMINATED_HFM_MODELS,
 	APEN_MICROGRID,
 	APEN_MICROGRID_ONLINE,
@@ -96,6 +100,8 @@ int main(int argc, char **argv)
 	int trainningMode = 0; //calibration mode active if value is 1
 	bool r;
 	SwitchOptions optionSwitch = GENERATE_NONDOMINATED_HFM_MODELS;
+
+	optionSwitch=MUSIC_GEN;
 
 	switch (optionSwitch)
 	{
@@ -226,6 +232,14 @@ int main(int argc, char **argv)
 		cout << "Parabens! Non-dominated solutions successfully have been generated." << endl;
 		return r;
 		break;
+
+	case MUSIC_GEN:
+		r = musicGen(argc, argv);
+		cout << "Parabens! Music has been created." << endl;
+		return r;
+		break;
+
+
 
 	default:
 		int r = HFModel(argc, argv);

@@ -160,9 +160,9 @@ public:
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INV_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
 		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
+//		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
+//		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
 		mev = new MultiEvaluator<RepEFP>(v_e);
 	}
 
@@ -380,7 +380,8 @@ public:
 		return targetAndForecasts.second;
 	}
 
-	pair<vector<double>, vector<double> > returnForecastsAndTargets(const RepEFP& rep, vector<vector<double> > vForecastingsValidation)
+	//Target and forecasts
+	pair<vector<double>, vector<double> > returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
 	{
 		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());
 	}
@@ -404,6 +405,18 @@ public:
 //		getchar();
 
 		return eval->getAccuracy(targetValues, estimatedValues, -1);
+	}
+
+	void exportForecasts(const vector<double> forecasts, string output)
+	{
+		FILE* fResults = fopen(output.c_str(), "w");
+		for (int n = 0; n < forecasts.size(); n++)
+		{
+//			cout<< forecasts[n]<<endl;
+//			getchar();
+					fprintf(fResults, "%.10f\n", forecasts[n]);
+		}
+		fclose(fResults);
 	}
 
 };

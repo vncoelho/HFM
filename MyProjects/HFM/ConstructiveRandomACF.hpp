@@ -41,7 +41,6 @@ private:
 	int precision;
 	// Your private vars
 
-	int lags;
 	vector<double> alphaACF;
 
 public:
@@ -56,14 +55,12 @@ public:
 			getchar();
 		}
 
-		lags = problemParam.getMaxLag();
-		lags += 1; //the ACF generator counts lag 0
 		precisionSP = precision;
 		precisionMP = precision;
 		precisionDP = precision;
 		cout << "Inside constructive ACF -- Forcing average and derivative values" << endl;
-		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
-		precisionDP = 1;
+//		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
+//		precisionDP = 1;
 	}
 
 	virtual ~ConstructiveACF()
@@ -184,7 +181,7 @@ public:
 				acfData[i] = data[nEXV].at(i);
 
 			acorrInfo info;
-			autocorr acf(-1, lags);
+			autocorr acf(-1, problemParam.getMaxLag() + 1); //the ACF generator counts lag 0);
 			acf.ACF(acfData, nTotalPoints, info);
 			acfPoints.push_back(info.points());
 		}
@@ -242,8 +239,8 @@ public:
 		for (int nEXV = 0; nEXV < numberExplanatoryVariables; nEXV++)
 		{
 			int nACFUsefullPoints = lagsRLC[nEXV].size();
-			int mean = pEFP.getMean(nEXV);
-			int stdDesv = pEFP.getStdDesv(nEXV);
+			double mean = pEFP.getMean(nEXV);
+			double stdDesv = pEFP.getStdDesv(nEXV);
 
 			double meanWeight = pEFP.getMean(0); //File 0 is the target file
 			double stdDesvWeight = pEFP.getStdDesv(0);
@@ -379,7 +376,6 @@ public:
 		newRep.derivativeIndex = derivativeIndex;
 		newRep.derivativeFuzzyRS = derivativeFuzzyRS;
 		newRep.earliestInput = earliestInput;
-
 
 		//=================================================================
 		//When evalAprox,approximationsEnayatifar, are !=0

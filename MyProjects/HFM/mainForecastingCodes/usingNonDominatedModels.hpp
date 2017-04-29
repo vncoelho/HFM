@@ -38,7 +38,8 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 	const char* caminhoOutput = argv[1];
 
 	string nomeOutput = caminhoOutput;
-	nomeOutput = "MyProjects/HFM/Instance/dadosBovespa/bovespa";
+//	nomeOutput = "MyProjects/HFM/Instance/dadosBovespa/bovespa";
+	nomeOutput = "MyProjects/HFM/Instance/Physionet/S001R01/Channel-30";
 
 	//===================================
 	cout << "Parametros:" << endl;
@@ -189,16 +190,16 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 		cout << endl;
 	}
 
-	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt", "w");
+	pf->exportParetoFront("../Outputs/paretoFrontGPLS.txt", "w");
 
 	delete pf;
 	delete forecastObject;
 
 	cout << "MO Stock Market forecasting finished!" << endl;
 
-	//	===========================================
-	//	TIME FOR BRINCANDO COM A BOLSA DE VALORES (BBV)
-	BBVTools bbvTools;
+//	//	===========================================
+//	//	TIME FOR BRINCANDO COM A BOLSA DE VALORES (BBV)
+//	BBVTools bbvTools;
 
 	return 0;
 }
