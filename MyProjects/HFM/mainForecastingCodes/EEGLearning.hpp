@@ -448,7 +448,7 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 	vector<vector<double> > validationSet = tFValidation.getTS();
 
 	ForecastClass forecastObject(validationSet, problemParam, rg, methodParam);
-	vector<double> errors = forecastObject.returnErrors(sol, validationSet);
+	vector<double> errors = forecastObject.returnErrors(sol->first.getR(), validationSet);
 
 	return errors;
 }

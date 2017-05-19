@@ -25,6 +25,7 @@ using namespace std;
 namespace EFP
 {
 
+//TODO -- Change to ENUM
 const int MAPE_INDEX = 0;
 const int PINBALL_INDEX = 1;
 const int MSE_INDEX = 2;
@@ -35,6 +36,7 @@ const int WMAPE_INDEX = 6;
 const int MMAPE_INDEX = 7;
 const int MAPE_INV_INDEX = 8;
 const int NMETRICS = 9;
+const int ALL_EVALUATIONS = -1;
 
 float sigmoid(float x)
 {
@@ -66,8 +68,6 @@ private:
 
 	//desired optmization metric
 	int optMetric;
-	bool roundToZero;
-
 	int aprox;
 	int nEvalForSpeedUp;
 
@@ -78,11 +78,9 @@ private:
 	int targetFile;
 public:
 
-	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _evalFO, int _aprox) : // If necessary, add more parameters
-			pEFP(_pEFP), problemParam(_problemParam), optMetric(_evalFO), aprox(_aprox)
+	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _optMetric, int _aprox) : // If necessary, add more parameters
+			pEFP(_pEFP), problemParam(_problemParam), optMetric(_optMetric), aprox(_aprox)
 	{
-		roundToZero = false; // If true, forecasts are all rounded to 0! TODO
-
 		nForecastings = pEFP.getForecatingsSizeFile(0); //all files have the same size
 		targetFile = problemParam.getTargetFile();
 
@@ -98,21 +96,37 @@ public:
 
 	}
 
-	double getKValue(const int K, const int file, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
+	double getKValue(const int K, const int file, const int begin, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
 	{
 		double value = 0;
 
-		if ((K == 0))
+		if (((begin + pa - K) < 0))
 		{
-			cout << "BUG Evaluator K (function getKValue): K = " << K << endl;
+			cout << "BUG Evaluator (function getKValue): (i + pa - K) = " << begin + pa - K << endl;
+			cout << "vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
 			getchar();
 		}
 
-		if (((i + pa - K) < 0))
+		if ((K == 0))
 		{
-			cout << "BUG Evaluator K (function getKValue): (i + pa - K) = " << i + pa - K << endl;
-			cout << "BUG Evaluator K (function getKValue): vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
-			getchar();
+
+			if (!problemParam.getForceSampleLearningWithEndogenous())
+			{
+				cout << "BUG Evaluator (function getKValue): K = " << K << endl;
+				getchar();
+			}
+			else
+			{
+				cout << "Go Ahead! Sample learning mode on! " << endl;
+				getchar();//TODO
+				if (file == targetFile)
+					value = 0;
+				else
+					value = vForecastings[file][begin];
+
+				return value;
+			}
+
 		}
 
 		if ((pa >= K) && (file == targetFile) && (K > 0))
@@ -121,8 +135,8 @@ public:
 		}
 		else
 		{
-			if ((i + pa - K) < int(vForecastings[file].size()))
-				value = vForecastings[file][i + pa - K];
+			if ((begin + pa - K) < int(vForecastings[file].size()))
+				value = vForecastings[file][begin + pa - K];
 			else
 				value = 0;
 		}
@@ -130,7 +144,7 @@ public:
 		return value;
 	}
 
-	//defuzzification process -- Converter a node input into useful estimation values
+//defuzzification process -- Converter a node input into useful estimation values
 	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const FuzzyFunction fuzzyFunc, const double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
 	{
 
@@ -154,7 +168,6 @@ public:
 		//Trapezoid Function
 		if (fuzzyFunc == Trapezoid)
 		{
-			double est = 0;
 			double a = ruleGreater;
 			double mu = 0;
 			if (value <= (a - epsilon))
@@ -168,16 +181,13 @@ public:
 				mu = value * K1 + K2;
 			}
 
-			est = greaterWeight * mu;
-			estimation += est;
-
+			estimation += greaterWeight * mu;
 			greaterAccepeted += mu;
 		}
 
 		if (fuzzyFunc == Trapezoid)
 		{
 			double b = ruleLower;
-			double est = 0;
 			double mu = 0;
 			if (value >= (b + epsilon))
 				mu = 0;
@@ -189,15 +199,14 @@ public:
 				double K2 = 1 - b * K1;
 				mu = value * K1 + K2;
 			}
-			est = lowerWeight * mu;
-			estimation += est;
 
+			estimation += lowerWeight * mu;
 			lowerAccepted += mu;
 		}
 
 	}
 
-	//Different approximations that can be used to approximate a forecasts with pre-defined rules (some can be consider optimized weights)
+//Different approximations that can be used to approximate a forecasts with pre-defined rules (some can be consider optimized weights)
 	void approximationsEnayatifar(const int& aprox, const double& alpha, const vector<double>& vAlpha, const vector<double>& vIndexAlphas, const vector<int>& vIndex, double& estimation, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds, const int& maxLag)
 	{
 		if (aprox == 1)
@@ -352,6 +361,33 @@ public:
 		}
 	}
 
+	void modifyEstimation(double& estimation)
+	{
+		//Block all negative predicted values
+		if (problemParam.getRoundingNegative() == true)
+		{
+			if (estimation < 0)
+				estimation = 0;
+		}
+
+		//Do not allow real values, round all values to integer
+		if (problemParam.getRoundingToInteger() == true)
+		{
+			estimation = round(estimation);
+		}
+
+		//Rounding target to binary output
+		if (problemParam.getBinary() == true)
+		{
+			estimation = round(estimation);
+			if (estimation < 0)
+				estimation = 0;
+
+			if (estimation > 1)
+				estimation = 1;
+		}
+	}
+
 	EvaluationEFP& evaluate(const RepEFP& rep)
 	{
 		//Fo vector with different metrics calculations
@@ -396,7 +432,6 @@ public:
 			{
 				int file = rep.singleIndex[nSP].first;
 				int K = rep.singleIndex[nSP].second;
-//				cout<<file<<"\t"<<K<<endl;
 
 				double singleValue = getKValue(K, file, begin, pa, vForecastings, predicteds);
 
@@ -408,8 +443,6 @@ public:
 				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
 
 				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, greaterAccepeted, lowerAccepted);
-
-				//fuzzyWeights.push_back(value);
 			}
 
 			for (int nMP = 0; nMP < sizeAP; nMP++)
@@ -425,7 +458,6 @@ public:
 
 					mean += getKValue(K, file, begin, pa, vForecastings, predicteds);
 				}
-
 				mean = mean / nAveragePoints;
 
 				double ruleGreater = rep.averageFuzzyRS[nMP][GREATER];
@@ -436,8 +468,6 @@ public:
 				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
 
 				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, greaterAccepeted, lowerAccepted);
-
-				//fuzzyWeights.push_back(mean);
 			}
 
 			for (int nDP = 0; nDP < sizeDP; nDP++)
@@ -458,8 +488,6 @@ public:
 						d -= value;
 				}
 
-				//fuzzyWeights.push_back(d);
-
 				double ruleGreater = rep.derivativeFuzzyRS[nDP][GREATER];
 				double greaterWeight = rep.derivativeFuzzyRS[nDP][GREATER_WEIGHT];
 				double ruleLower = rep.derivativeFuzzyRS[nDP][LOWER];
@@ -470,36 +498,28 @@ public:
 				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, greaterAccepeted, lowerAccepted);
 			}
 
-			//cout << "EstimationAntes:" << estimation << endl;
+			//Applying rules weights
 			double accepted = greaterAccepeted + lowerAccepted;
 			if (accepted > 0)
 				estimation /= accepted;
 
+			//Approximations using time series backshift operators
 			if (aprox != 0)
-			{
-				double alpha = rep.alpha;
-				vector<double> vAlpha = rep.vAlpha;
-				vector<double> vIndexAlphas = rep.vIndexAlphas;
-				vector<int> vIndex = rep.vIndex;
+				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, predicteds, maxLag);
 
-				approximationsEnayatifar(aprox, alpha, vAlpha, vIndexAlphas, vIndex, estimation, begin, pa, vForecastings, predicteds, maxLag);
-			}
-
-			//				Remove this for other forecast problem -- rain forecast
-			if (roundToZero == true)
-			{
-				if (estimation < 0)
-					estimation = 0;
-			}
+			//================================================
+			//Apply special operators, rounding, binary, on estimated value
+			modifyEstimation(estimation);
+			//================================================
 
 			predicteds.push_back(estimation);
 
-		} //End of current iteration ... steps head
+		} //Forecasting horizon loop -- Steps Ahead
 
 		return predicteds;
 	}
 
-	//return a pair -- first vector contain the real values while the second has the forecasted ones
+//return a pair -- first vector contain the real values while the second has the forecasted ones - StepsSize=slidingWindowStepSize
 	pair<vector<double>, vector<double> > generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
 	{
 		vector<double> allForecasts;
@@ -530,7 +550,6 @@ public:
 				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
 			}
 
-
 			for (int aV = 0; aV < allForecastsVectors.size(); aV++)
 				for (int k = 0; k < allForecastsVectors[aV].size(); k++)
 				{
@@ -555,8 +574,8 @@ public:
 		return make_pair(allTargets, allForecasts);
 	}
 
-	//return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
-	//if equals to -1 it calls all indicators calculus
+//return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
+//if equals to -1 it calls all indicators calculus
 	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, const int accIndicator)
 	{
 
@@ -568,11 +587,10 @@ public:
 			cout << "estimatedValues.size() = " << estimatedValues.size() << endl;
 		}
 		vector<double> foIndicator(NMETRICS, 0);
-		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
 
 		double sumTarget = 0;
 		double avgTarget = 0;
-		if (accIndicator == WMAPE_INDEX || accIndicator == MMAPE_INDEX || accIndicator == -1)
+		if (accIndicator == WMAPE_INDEX || accIndicator == MMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			for (int i = 0; i < nSamples; i++)
 				sumTarget += targetValues[i];
@@ -590,10 +608,10 @@ public:
 
 			double absDiff = abs(estimation - forecastingTarget);
 
-			if (accIndicator == MAPE_INDEX || accIndicator == -1)
+			if (accIndicator == MAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 				foIndicator[MAPE_INDEX] += (absDiff / abs(forecastingTargetNotNull));
 
-			if (accIndicator == MAPE_INV_INDEX || accIndicator == -1)
+			if (accIndicator == MAPE_INV_INDEX || accIndicator == ALL_EVALUATIONS)
 			{
 				double forecastingTargetNotMax = forecastingTarget;
 				double tsMaxValues = pEFP.getMax(targetFile);
@@ -602,10 +620,10 @@ public:
 				foIndicator[MAPE_INV_INDEX] += (absDiff / abs(tsMaxValues - forecastingTargetNotMax));
 			}
 
-			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == -1)
+			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 				foIndicator[MSE_INDEX] += pow(absDiff, 2);
 
-			if (accIndicator == SMAPE_INDEX || accIndicator == -1)
+			if (accIndicator == SMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 			{
 				double forecastingTargetNotNullSMAPE = abs(forecastingTarget + estimation);
 				if (forecastingTargetNotNullSMAPE == 0)
@@ -614,14 +632,14 @@ public:
 				foIndicator[SMAPE_INDEX] += (absDiff / forecastingTargetNotNullSMAPE / 2);
 			}
 
-			if (accIndicator == WMAPE_INDEX || accIndicator == -1)
+			if (accIndicator == WMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 				foIndicator[WMAPE_INDEX] += (absDiff / sumTarget);
 
-			if (accIndicator == MMAPE_INDEX || accIndicator == -1)
+			if (accIndicator == MMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 				foIndicator[MMAPE_INDEX] += (absDiff / avgTarget);
 
 			//PinballFunction
-			if (accIndicator == PINBALL_INDEX || accIndicator == -1)
+			if (accIndicator == PINBALL_INDEX || accIndicator == ALL_EVALUATIONS)
 			{
 				double quantilError = 0.5;
 				double pinballFunctionQuantils = 0;
@@ -644,42 +662,42 @@ public:
 		}
 
 		//MAPE FINAL CALC
-		if (accIndicator == MAPE_INDEX || accIndicator == -1)
+		if (accIndicator == MAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[MAPE_INDEX] *= 100;
 			foIndicator[MAPE_INDEX] /= nSamples;
 		}
 
-		if (accIndicator == MAPE_INV_INDEX || accIndicator == -1)
+		if (accIndicator == MAPE_INV_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[MAPE_INV_INDEX] *= 100;
 			foIndicator[MAPE_INV_INDEX] /= nSamples;
 		}
 
-		if (accIndicator == SMAPE_INDEX || accIndicator == -1)
+		if (accIndicator == SMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[SMAPE_INDEX] *= 100;
 			foIndicator[SMAPE_INDEX] /= nSamples;
 		}
 
-		if (accIndicator == WMAPE_INDEX || accIndicator == -1)
+		if (accIndicator == WMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[WMAPE_INDEX] *= 100;
 			foIndicator[WMAPE_INDEX] /= nSamples;
 		}
 
-		if (accIndicator == MMAPE_INDEX || accIndicator == -1)
+		if (accIndicator == MMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[MMAPE_INDEX] *= 100;
 			foIndicator[MMAPE_INDEX] /= nSamples;
 		}
 
-		if (accIndicator == PINBALL_INDEX || accIndicator == -1)
+		if (accIndicator == PINBALL_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[PINBALL_INDEX] /= nSamples;
 		}
 
-		if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == -1)
+		if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator[MSE_INDEX] /= nSamples;
 
@@ -699,6 +717,7 @@ public:
 		//cout << foIndicator[MAPE_INDEX] << endl;
 		//MSE AND RSME FINAL CALC
 		//PINBALL FINAL CALC
+//		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
 		/*
 		 double minPinball = 1000000;
 		 double pinbalError;
@@ -727,155 +746,155 @@ public:
 		return true;
 	}
 
-	static string idComponent()
-	{
-		return "OptFrame:Evaluator:EFPEvaluator";
-	}
-
 	virtual string id() const
 	{
 		return idComponent();
 	}
 
-	//	virtual bool betterThan(double a, double b)
-	//	{
-	//		// MINIMIZATION
-	//		return (a < (b - EPSILON_EFP));
-	//	}
+	static string idComponent()
+	{
+		return "OptFrame:Evaluator:HFMEvaluator";
+	}
 
-	//
-	//	vector<double> evaluateAll(const RepEFP& rep, int accIndicator)
-	//	{
-	//		Timer tnow;
-	//		//Fo vector with different metrics calculations
-	//		vector<double> foIndicator(NMETRICS + 1, 0); //nMetrics + ErrorPinball
-	//
-	//		/*
-	//		 vector<vector<double> > foIndicatorStepsAhead(NMETRICS + 1);
-	//		 for (int i = 0; i < foIndicatorStepsAhead.size(); i++)
-	//		 foIndicatorStepsAhead[i].resize(stepsAhead);*/
-	//
-	//		vector<vector<double> >& vForecastings = pEFP.getForecastingsVector();
-	//
-	//		//validation mode = false | returnforecasts = false
-	//		vector<double> predictedValues = generateSWMultiRoundForecasts(rep, vForecastings);
-	//
-	//		int maxLag = problemParam.getMaxLag();
-	//		vector<double> targetValues;
-	//		for (int i = maxLag; i < vForecastings[targetFile].size(); i++)
-	//			targetValues.push_back(vForecastings[targetFile][i]);
-	//
-	//		foIndicator = getAccuracy(targetValues, predictedValues, accIndicator);
-	//
-	//		timeTest+=tnow.now();
-	//		Timer tNow2;
-	//		vector<double> foIndicator2 = evaluateAll2(rep, accIndicator);
-	//		timeTest2+=tNow2.now();
-	//		counter++;
-	//		if(counter%10000==0)
-	//		{
-	//			cout<<"("<<timeTest/counter<<","<<timeTest2/counter<<")\n";
-	//			counter=0;
-	//			timeTest=0;
-	//			timeTest2=0;
-	//		}
-	//		if (foIndicator2 != foIndicator)
-	//		{
-	//			cout << foIndicator2 << endl;
-	//			cout << foIndicator << endl;
-	//			getchar();
-	//		}
-	//
-	//		return foIndicator;
-	//	}
+//	virtual bool betterThan(double a, double b)
+//	{
+//		// MINIMIZATION
+//		return (a < (b - EPSILON_EFP));
+//	}
 
-	//	//generate sliding window, with FH steps, multi round forecasts
-	//	vector<double> generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings)
-	//	{
-	//		int nForTargetFile = vForecastings[targetFile].size();
-	//		int maxLag = problemParam.getMaxLag();
-	//		int nSamples = nForTargetFile - maxLag;
-	//
-	//		vector<double> allForecasts;
-	//
-	//		double effectNumberSamples = (nForTargetFile - maxLag);
-	//		vector<vector<double> > allForecastsVectors(ceil(effectNumberSamples / stepsAhead));
-	//
-	//		//Timer t;
-	//
-	//		//for (int begin = maxLag; begin < nForTargetFile; begin ++) // main loop that varries all the time series
-	//		int beginParallel, fParallel;
-	////		omp_set_num_threads(4);
-	//		//			int np = omp_get_num_threads();
-	//		//					cout << "number of threads: " << np << endl;
-	//		//							getchar();
-	//
-	//////		#pragma omp parallel for ordered
-	////		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
-	////		{
-	//////			omp_set_dynamic(0);     // Explicitly disable dynamic teams
-	//////			omp_set_num_threads(4); // Use 4 threads for all consecutive parallel regions
-	////
-	////			vector<double> predicteds = returnForecasts(rep, vForecastings, beginParallel);
-	////
-	//////			#pragma omp ordered
-	////			allForecasts.insert(allForecasts.end(), predicteds.begin(), predicteds.end());
-	////
-	////
-	////
-	//////			for (fParallel = 0; fParallel < predicteds.size(); fParallel++)
-	//////			{
-	//////				allForecasts.push_back(predicteds[fParallel]);
-	//////			}
-	////		}
-	//
-	////		cout<<"nThreads:"<<nThreads<<endl;
-	////		getchar();
-	//
-	//		//#pragma omp parallel for num_threads(nThreads)
-	//		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
-	//		{
-	//			int index = (beginParallel - maxLag) / stepsAhead;
-	//
-	//			allForecastsVectors[index] = std::move(returnForecasts(rep, vForecastings, beginParallel));			//predicteds;
-	//		}
-	//
-	//		for (int aV = 0; aV < allForecastsVectors.size(); aV++)
-	//			for (int k = 0; k < stepsAhead; k++)
-	//				allForecasts.push_back(allForecastsVectors[aV][k]);
-	//
-	//		//TODO - Parallel Test and report values
-	//
-	////
-	////		 timeInMS += t.inMilliSecs();
-	////		 nEvalForSpeedUp++;
-	////		 if (nEvalForSpeedUp == 1000)
-	////		 {
-	////		 cout << "Total time: " << timeInMS / 1000 << endl;
-	////
-	////		 string speedUpFile = "./apen_SI_speedUpFile";
-	////		 FILE* fResults = fopen(speedUpFile.c_str(), "a");
-	////		 fprintf(fResults, "%.3f\n", timeInMS / 1000);
-	////		 fclose(fResults);
-	////
-	////		 exit(1);
-	////		 }
-	//
-	//
-	//		//TODO do it in a better style
-	//		if (allForecasts.size() > nSamples)
-	//		{
-	//			int nExtraForecasts = allForecasts.size() - nSamples;
-	//			allForecasts.erase(allForecasts.begin() + allForecasts.size() - nExtraForecasts, allForecasts.end());
-	////			cout<<"number of forecasts is bigger than the number of samples"<<endl;
-	////			cout<<"nExtraForecasts: "<< nExtraForecasts << endl;
-	////			exit(1);
-	//		}
-	//
-	//		return allForecasts;
-	//	}
+//
+//	vector<double> evaluateAll(const RepEFP& rep, int accIndicator)
+//	{
+//		Timer tnow;
+//		//Fo vector with different metrics calculations
+//		vector<double> foIndicator(NMETRICS + 1, 0); //nMetrics + ErrorPinball
+//
+//		/*
+//		 vector<vector<double> > foIndicatorStepsAhead(NMETRICS + 1);
+//		 for (int i = 0; i < foIndicatorStepsAhead.size(); i++)
+//		 foIndicatorStepsAhead[i].resize(stepsAhead);*/
+//
+//		vector<vector<double> >& vForecastings = pEFP.getForecastingsVector();
+//
+//		//validation mode = false | returnforecasts = false
+//		vector<double> predictedValues = generateSWMultiRoundForecasts(rep, vForecastings);
+//
+//		int maxLag = problemParam.getMaxLag();
+//		vector<double> targetValues;
+//		for (int i = maxLag; i < vForecastings[targetFile].size(); i++)
+//			targetValues.push_back(vForecastings[targetFile][i]);
+//
+//		foIndicator = getAccuracy(targetValues, predictedValues, accIndicator);
+//
+//		timeTest+=tnow.now();
+//		Timer tNow2;
+//		vector<double> foIndicator2 = evaluateAll2(rep, accIndicator);
+//		timeTest2+=tNow2.now();
+//		counter++;
+//		if(counter%10000==0)
+//		{
+//			cout<<"("<<timeTest/counter<<","<<timeTest2/counter<<")\n";
+//			counter=0;
+//			timeTest=0;
+//			timeTest2=0;
+//		}
+//		if (foIndicator2 != foIndicator)
+//		{
+//			cout << foIndicator2 << endl;
+//			cout << foIndicator << endl;
+//			getchar();
+//		}
+//
+//		return foIndicator;
+//	}
 
-	//TODO -- Check if the above blindForecasting provides the same results as this one down here
+//	//generate sliding window, with FH steps, multi round forecasts
+//	vector<double> generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings)
+//	{
+//		int nForTargetFile = vForecastings[targetFile].size();
+//		int maxLag = problemParam.getMaxLag();
+//		int nSamples = nForTargetFile - maxLag;
+//
+//		vector<double> allForecasts;
+//
+//		double effectNumberSamples = (nForTargetFile - maxLag);
+//		vector<vector<double> > allForecastsVectors(ceil(effectNumberSamples / stepsAhead));
+//
+//		//Timer t;
+//
+//		//for (int begin = maxLag; begin < nForTargetFile; begin ++) // main loop that varries all the time series
+//		int beginParallel, fParallel;
+////		omp_set_num_threads(4);
+//		//			int np = omp_get_num_threads();
+//		//					cout << "number of threads: " << np << endl;
+//		//							getchar();
+//
+//////		#pragma omp parallel for ordered
+////		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
+////		{
+//////			omp_set_dynamic(0);     // Explicitly disable dynamic teams
+//////			omp_set_num_threads(4); // Use 4 threads for all consecutive parallel regions
+////
+////			vector<double> predicteds = returnForecasts(rep, vForecastings, beginParallel);
+////
+//////			#pragma omp ordered
+////			allForecasts.insert(allForecasts.end(), predicteds.begin(), predicteds.end());
+////
+////
+////
+//////			for (fParallel = 0; fParallel < predicteds.size(); fParallel++)
+//////			{
+//////				allForecasts.push_back(predicteds[fParallel]);
+//////			}
+////		}
+//
+////		cout<<"nThreads:"<<nThreads<<endl;
+////		getchar();
+//
+//		//#pragma omp parallel for num_threads(nThreads)
+//		for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepsAhead) // main loop that varries all the time series
+//		{
+//			int index = (beginParallel - maxLag) / stepsAhead;
+//
+//			allForecastsVectors[index] = std::move(returnForecasts(rep, vForecastings, beginParallel));			//predicteds;
+//		}
+//
+//		for (int aV = 0; aV < allForecastsVectors.size(); aV++)
+//			for (int k = 0; k < stepsAhead; k++)
+//				allForecasts.push_back(allForecastsVectors[aV][k]);
+//
+//		//TODO - Parallel Test and report values
+//
+////
+////		 timeInMS += t.inMilliSecs();
+////		 nEvalForSpeedUp++;
+////		 if (nEvalForSpeedUp == 1000)
+////		 {
+////		 cout << "Total time: " << timeInMS / 1000 << endl;
+////
+////		 string speedUpFile = "./apen_SI_speedUpFile";
+////		 FILE* fResults = fopen(speedUpFile.c_str(), "a");
+////		 fprintf(fResults, "%.3f\n", timeInMS / 1000);
+////		 fclose(fResults);
+////
+////		 exit(1);
+////		 }
+//
+//
+//		//TODO do it in a better style
+//		if (allForecasts.size() > nSamples)
+//		{
+//			int nExtraForecasts = allForecasts.size() - nSamples;
+//			allForecasts.erase(allForecasts.begin() + allForecasts.size() - nExtraForecasts, allForecasts.end());
+////			cout<<"number of forecasts is bigger than the number of samples"<<endl;
+////			cout<<"nExtraForecasts: "<< nExtraForecasts << endl;
+////			exit(1);
+//		}
+//
+//		return allForecasts;
+//	}
+
+//TODO -- Check if the above blindForecasting provides the same results as this one down here
 //	vector<double> blindForecasting(const RepEFP& rep, const vector<vector<double> > vForecastings)
 //	{
 //

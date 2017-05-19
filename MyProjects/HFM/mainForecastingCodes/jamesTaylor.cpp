@@ -207,7 +207,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol, validationSet);
+		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(nTrainningRounds);
 		foIndicatorCalibration.push_back(beginTrainingSet);
 		foIndicatorCalibration.push_back(intervalOfBeginTrainningSet);

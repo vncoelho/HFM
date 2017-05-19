@@ -346,9 +346,9 @@ public:
 		return eval->returnForecasts(trainedModel, vTimeSeries, vTimeSeries[problemParam.getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
-	vector<double> returnErrors(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> >& vForecastingsValidation)
+	vector<double> returnErrors(const RepEFP& rep, vector<vector<double> >& vForecastingsValidation)
 	{
-		return eval->evaluateAll(sol->first.getR(), -1, &vForecastingsValidation);
+		return eval->evaluateAll(rep, ALL_EVALUATIONS, &vForecastingsValidation);
 
 //		(NMETRICS, 0);
 //		vector<double> estimatedValues = returnForecasts(sol, vForecastingsValidation);
@@ -371,16 +371,19 @@ public:
 	//return all possible forecasting measures
 	vector<double> callEvalGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
 	{
-		return eval->getAccuracy(targetValues, estimatedValues, -1);
+		return eval->getAccuracy(targetValues, estimatedValues, ALL_EVALUATIONS);
 	}
 //
+
+	//Return forecasts with pre-defined sliding window strategy with FH
 	vector<double> returnForecasts(pair<SolutionEFP&, Evaluation&>* sol, vector<vector<double> > vForecastingsValidation)
 	{
 		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
 		return targetAndForecasts.second;
 	}
 
-	//Target and forecasts
+	/*Target and forecasts
+	Return forecasts with pre-defined sliding window strategy with FH*/
 	pair<vector<double>, vector<double> > returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
 	{
 		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());

@@ -61,7 +61,6 @@ enum SwitchOptions {
 	GAPSO_SKU_TESTS_FOR_BENCHMARK,
 	WCCI_CFI_COMP_CALIBRATION,
 	HOSSEIN_BLIND_FORECASTS_LOAD_FORECASTS
-
 };
 
 int main(int argc, char **argv)

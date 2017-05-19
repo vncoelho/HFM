@@ -434,7 +434,7 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 		//intervalNumber++;
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol, validationSet);
+		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(randomPrecision);
 		foIndicatorCalibration.push_back(randomParametersFiles);
 		foIndicatorCalibration.push_back(nTrainningRounds);

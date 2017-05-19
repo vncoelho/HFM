@@ -241,7 +241,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 			vector<vector<double> > validationSet; //validation set for calibration
 			validationSet.push_back(rF.getPartsForecastsEndToBegin(0, w * 168, nValidationSamples));
 			vector<double> foIndicatorsWeeks;
-			foIndicatorsWeeks = forecastObject.returnErrors(sol, validationSet);
+			foIndicatorsWeeks = forecastObject.returnErrors(sol->first.getR(), validationSet);
 			foIndicatorCalibration.push_back(foIndicatorsWeeks[MAPE_INDEX]);
 			//foIndicatorCalibration.push_back(foIndicatorsWeeks[RMSE_INDEX]);
 		}

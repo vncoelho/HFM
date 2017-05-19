@@ -46,14 +46,22 @@ int musicGen(int argc, char **argv)
 //	cout << "nomeOutput=" << inputTimeSeries << endl;
 
 	vector<string> explanatoryVariables;
-	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/bluesMonoChannel_10_20");
-	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannel_10_20");
+	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/bluesMonoChannelAvgNative");
+	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannelAvgNative");
+	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannelAvgNative");
+	//	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/bluesMonoChannel_10_20");
+	//	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannel_10_20");
+	//	explanatoryVariables.push_back("MyProjects/HFM/Instance/mp3/ExperimentoMonoChannelAvg");
 
 	treatForecasts rF(explanatoryVariables);
 
 	vector<string> timeSeriesToBeForecasted;
-	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/bluesMonoChannel_10_20");
-	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannel_10_20");
+	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/bluesMonoChannelAvgNative");
+	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannelAvgNative");
+	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannelAvgNative");
+	//	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/jazzMonoChannel_10_20");
+	//	timeSeriesToBeForecasted.push_back("MyProjects/HFM/Instance/mp3/ExperimentoMonoChannelAvg");
+
 	treatForecasts tFToBeForecasted(timeSeriesToBeForecasted);
 
 	//Parametros do metodo
@@ -88,20 +96,21 @@ int musicGen(int argc, char **argv)
 	// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
 	ProblemParameters problemParam;
 	//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
-	int timeES = 21 * 60;
+	int timeES = 5 * 60;
 	double fs = 44100;
-	double nSecondsOfTraining = 0.1;
 	double nSecondsForFeeding = 0.2;
 	int maxLag = nSecondsForFeeding * fs;
 	double nSecondsOfForecasts = 0.1;
 	int fh = nSecondsOfForecasts * fs;
-
+	double nSecondsOfTraining = 3;
 	//forcing values
-	fh = 1;
+	fh = 1000;
 	maxLag = 150;
 
 	problemParam.setStepsAhead(fh);
 	problemParam.setMaxLag(maxLag);
+	problemParam.setRounding(true);
+	problemParam.setRoundingNegative(false);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);
@@ -120,9 +129,9 @@ int musicGen(int argc, char **argv)
 	cout << "#trainingTimeWithES: " << timeES << endl << endl;
 
 	vector<vector<double> > trainningSet; // trainningSetVector
-	trainningSet.push_back(rF.getPartsForecastsBeginToEnd(0, beginTrainingSet, nTotalForecastingsTrainningSet));
+	trainningSet.push_back(rF.getPartsForecastsBeginToEnd(2, beginTrainingSet, nTotalForecastingsTrainningSet));
 
-	int multiplier = 10000;
+	int multiplier = 1;
 
 	for (int n = 0; n < trainningSet[0].size(); n++)
 		trainningSet[0][n] *= multiplier;
@@ -132,6 +141,7 @@ int musicGen(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 	pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
 
+	pair<vector<double>, vector<double> > forecastsAndTargets;
 	for (int m = 0; m < timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector
@@ -140,7 +150,7 @@ int musicGen(int argc, char **argv)
 		for (int n = 0; n < validationSet[0].size(); n++)
 			validationSet[0][n] *= multiplier;
 
-		pair<vector<double>, vector<double> > forecastsAndTargets = forecastObject->returnForecastsAndTargets(sol->first.getR(), validationSet);
+		forecastsAndTargets = forecastObject->returnForecastsAndTargets(sol->first.getR(), validationSet);
 
 		for (int n = 0; n < forecastsAndTargets.first.size(); n++)
 		{
@@ -153,7 +163,7 @@ int musicGen(int argc, char **argv)
 		forecastObject->exportForecasts(forecastsAndTargets.second, ss.str());
 	}
 
-//	forecastObject->exportForecasts(forecastsAndTargets.first, "./targetSmall.txt");
+	forecastObject->exportForecasts(forecastsAndTargets.first, "./targetSmall.txt");
 
 	cout << "Music has been created." << endl;
 

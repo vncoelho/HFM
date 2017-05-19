@@ -11,6 +11,33 @@ using namespace scannerpp;
 namespace EFP
 {
 
+struct ForecastingOptions
+{
+	bool roundNegative;
+	bool round;
+	bool binary;
+	bool forceSampleLearningWithEndogenous;
+
+	ForecastingOptions(bool _roundNegative = false, bool _round = false, bool _binary = false, bool _forceSampleLearningWithEndogenous = false) :
+			roundNegative(_roundNegative), round(_round), binary(_binary), forceSampleLearningWithEndogenous(_forceSampleLearningWithEndogenous)
+	{
+
+	}
+
+	friend ostream & operator<<(ostream & os, const ForecastingOptions& fOptions)
+	{
+
+		os << "=======================================" << endl;
+		os << "==========PRINTING PATH ===============" << endl;
+		os << "=======================================" << endl;
+		os << " allowNegative:" << fOptions.roundNegative << " ; round:" << fOptions.round << " ; binary:" << fOptions.binary << " ; forceSampleLearningWithEndogenous:" << fOptions.forceSampleLearningWithEndogenous << endl;
+		os << "=======================================" << endl;
+
+		return os;
+	}
+
+};
+
 class ProblemParameters
 {
 private:
@@ -20,10 +47,11 @@ private:
 	int stepsAhead;
 	int function;
 	vector<int> vNotUsedForTests;
-	int maxLag,maxUpperLag;
+	int maxLag, maxUpperLag;
 	string instancePath;
 	string validationPath;
 	int nFiles;
+	ForecastingOptions fOptions;
 
 	vector<pair<int, int> > oForesSP; //Options to Forecasting with single points
 	vector<pair<int, vector<int> > > oForesMP; //Options to Forecasting with mean points
@@ -249,6 +277,41 @@ public:
 	void setMaxUpperLag(int _maxLag)
 	{
 		maxUpperLag = _maxLag;
+	}
+
+	bool getRoundingToInteger()
+	{
+		return fOptions.round;
+	}
+
+	bool getRoundingNegative()
+	{
+		return fOptions.roundNegative;
+	}
+
+	bool getForceSampleLearningWithEndogenous()
+	{
+		return fOptions.forceSampleLearningWithEndogenous;
+	}
+
+	bool getBinary()
+	{
+		return fOptions.binary;
+	}
+
+	void setRounding(bool desiredRounding)
+	{
+		fOptions.round = desiredRounding;
+	}
+
+	void setRoundingNegative(bool desiredRounding)
+	{
+		fOptions.roundNegative = desiredRounding;
+	}
+
+	void setBinary(bool desiredRounding)
+	{
+		fOptions.binary = desiredRounding;
 	}
 
 	int getMaxUpperLag()

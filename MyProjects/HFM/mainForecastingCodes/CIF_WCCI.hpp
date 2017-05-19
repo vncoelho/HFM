@@ -197,7 +197,7 @@ int CIFWCCICalibration(int argc, char **argv)
 		vector<double> foIndicatorCalibration;
 		vector<vector<double> > validationSet;
 		validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag + stepsAhead));
-		vector<double> errors = forecastObject.returnErrors(sol, validationSet);
+		vector<double> errors = forecastObject.returnErrors(sol->first.getR(), validationSet);
 
 		foIndicators.push_back(errors[SMAPE_INDEX]);
 		foIndicators.push_back(sol->second.evaluation());

@@ -55,12 +55,14 @@ public:
 			getchar();
 		}
 
-		precisionSP = precision;
-		precisionMP = precision;
-		precisionDP = precision;
+		precisionSP = ceil(round(precision/3));
+		precisionMP = ceil(round(precision/3));
+		precisionDP = ceil(round(precision/3));
+
 		cout << "Inside constructive ACF -- Forcing average and derivative values" << endl;
-//		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
-//		precisionDP = 1;
+		precisionSP = precision;
+		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
+		precisionDP = 1;
 	}
 
 	virtual ~ConstructiveACF()
@@ -220,6 +222,21 @@ public:
 		return acfGreedy;
 	}
 
+	vector<vector<pair<double, int> > > returnTrivialRLCForSamplesLearning()
+	{
+		vector<vector<pair<double, int> > > trivialLagsRLC;
+
+		//Jump targetFile
+		for (int nEXV = 1; nEXV < pEFP.getNumberExplanatoryVariables(); nEXV++)
+		{
+			vector<pair<double, int> > vLags;
+			vLags.push_back(make_pair(1, 0));
+			trivialLagsRLC.push_back(vLags);
+
+		}
+		return trivialLagsRLC;
+	}
+
 	Solution<RepEFP>& generateSolution(float notUsed)
 	{
 
@@ -227,6 +244,10 @@ public:
 		int numberExplanatoryVariables = pEFP.getNumberExplanatoryVariables();
 
 		vector<vector<pair<double, int> > > lagsRLC = returnRLCUsingACF();
+
+		//Get trivial inputs when learning samples - Time series does not exist
+		if (problemParam.getForceSampleLearningWithEndogenous())
+			lagsRLC = returnTrivialRLCForSamplesLearning();
 
 		int earliestInput = 0;
 		vector<pair<int, int> > singleIndex;
@@ -378,7 +399,7 @@ public:
 		newRep.earliestInput = earliestInput;
 
 		//=================================================================
-		//When evalAprox,approximationsEnayatifar, are !=0
+		//When evalAprox,approximationsEnayatifar, are different than 0
 		newRep.alpha = rg.rand(100) / 10000.0; //aprox == 1
 
 		//aprox == ( 2 | 4 | 5 )

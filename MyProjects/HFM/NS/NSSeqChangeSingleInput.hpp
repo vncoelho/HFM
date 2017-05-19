@@ -46,7 +46,7 @@ public:
 		{
 			maxLagCheck = ((rep.singleIndex[rule].second + X) <= maxLag);
 			minimumLag = ((rep.singleIndex[rule].second - X) > maxUpperLag);
-			notNull1 = ((rep.singleIndex[rule].second - X) != 0);
+			notNull1 = ((rep.singleIndex[rule].second - X) != 0); //TODO -- strategy to allow moves when samples are being learning
 			notNull2 = ((rep.singleIndex[rule].second + X) != 0);
 		}
 

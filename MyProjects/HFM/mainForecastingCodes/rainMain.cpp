@@ -223,7 +223,7 @@ int rainMain(int argc, char **argv)
 		batchOfResults.push_back(forecastObject.returnForecasts(sol, validationSet));
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol, validationSet);
+		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(randomPrecision);
 		foIndicatorCalibration.push_back(randomParametersFiles);
 		foIndicatorCalibration.push_back(nTrainningRounds);
