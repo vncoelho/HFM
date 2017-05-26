@@ -55,13 +55,19 @@ public:
 			getchar();
 		}
 
-		precisionSP = ceil(round(precision/3));
-		precisionMP = ceil(round(precision/3));
-		precisionDP = ceil(round(precision/3));
+		//TODO
+		//Previously, all of them were receiving precision. Divides equally sounds smarter
+		precisionSP = ceil(round(precision / 3));
+		precisionMP = ceil(round(precision / 3));
+		precisionDP = ceil(round(precision / 3));
+
+//		precisionSP = ceil(round(precision / 2));
+//		precisionMP = ceil(round(precision / 2));
+//		precisionDP = 1;
 
 		cout << "Inside constructive ACF -- Forcing average and derivative values" << endl;
 		precisionSP = precision;
-		precisionMP = 1; // TODO REMOVE THIS AND THE NEXT LAG BEING FORCED
+		precisionMP = 1; // 1 because it feeds a random generator -- rg.rand(precisionMP);
 		precisionDP = 1;
 	}
 

@@ -217,31 +217,31 @@ public:
 		fclose(fPF);
 	}
 
-//	static vector<MultiEvaluation*> filterDominated(vector<Direction*>& vdir, const vector<MultiEvaluation*>& candidates)
-//	{
-//		vector<MultiEvaluation*> nonDom;
-//
-//		ParetoDominance<R, ADS> pDom(vdir);
-//		ParetoDominanceWeak<R, ADS> pDomWeak(vdir);
-//
-//		for (unsigned i = 0; i < candidates.size(); i++)
-//			addSolution(pDom, pDomWeak, nonDom, candidates[i]);
-//
-//		return nonDom;
-//	}
-//
-//	static vector<pair<Solution<R>*, MultiEvaluation*> > filterDominated(vector<Direction*>& vdir, const vector<pair<Solution<R>*, MultiEvaluation*> >& candidates)
-//	{
-//		vector<pair<Solution<R>*, MultiEvaluation*> > nonDom;
-//
-//		ParetoDominance<R, ADS> pDom(vdir);
-//		ParetoDominanceWeak<R, ADS> pDomWeak(vdir);
-//
-//		for (unsigned i = 0; i < candidates.size(); i++)
-//			addSolution(pDom, pDomWeak, nonDom, candidates[i]);
-//
-//		return nonDom;
-//	}
+	static vector<MultiEvaluation*> filterDominated(vector<Direction*>& vdir, const vector<MultiEvaluation*>& candidates)
+	{
+		vector<MultiEvaluation*> nonDom;
+
+		ParetoDominance<R, ADS> pDom(vdir);
+		ParetoDominanceWeak<R, ADS> pDomWeak(vdir);
+
+		for (unsigned i = 0; i < candidates.size(); i++)
+			addSolution(pDom, pDomWeak, nonDom, candidates[i]);
+
+		return nonDom;
+	}
+
+	static vector<pair<Solution<R>*, MultiEvaluation*> > filterDominated(vector<Direction*>& vdir, const vector<pair<Solution<R>*, MultiEvaluation*> >& candidates)
+	{
+		vector<pair<Solution<R>*, MultiEvaluation*> > nonDom;
+
+		ParetoDominance<R, ADS> pDom(vdir);
+		ParetoDominanceWeak<R, ADS> pDomWeak(vdir);
+
+		for (unsigned i = 0; i < candidates.size(); i++)
+			addSolution(pDom, pDomWeak, nonDom, candidates[i]);
+
+		return nonDom;
+	}
 
 	//====================STILL USED BY 2PPLS OR MOVNS ======================
 	// SOON IT SHOULD BE DELETED --- 2PPLS WILL BECOME G2PPLS -- MOVNS UPDATED TO A MORE GENERIC VERSION
@@ -565,11 +565,12 @@ public:
 
 	bool addSolution(Pareto<R, ADS>& p, MultiEvaluation& candidateMev, const Solution<R, ADS>& candidate)
 	{
-		multiEval.evaluate(candidateMev, candidate);
+		multiEval.evaluate(candidateMev,candidate);
 		bool added = addSolution(p, candidate, candidateMev);
 
 		return added;
 	}
+
 
 	virtual bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
@@ -592,22 +593,6 @@ public:
 			p.push_back(candidate, candidateMev);
 
 		return added;
-	}
-
-	bool checkDominance(const Pareto<R, ADS>& p)
-	{
-		Pareto<R, ADS> pFiltered;
-		int nInd = p.size();
-		for (int ind = 0; ind < nInd; ind++)
-		{
-			addSolution(pFiltered, p.getNonDominatedSol(ind), p.getIndMultiEvaluation(ind));
-		}
-
-		if (pFiltered.size() == nInd)
-			return true;
-
-		cout << "CheckDominance, inside MOSearch, found dominated solution inside the Pareto!" << endl;
-		return false;
 	}
 
 //	virtual bool checkDominance(Pareto<R, ADS>& p, MultiEvaluation* candidateMev, vector<MoveCost*>& candidateMovCost)

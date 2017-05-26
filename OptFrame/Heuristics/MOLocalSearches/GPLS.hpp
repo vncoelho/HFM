@@ -254,10 +254,7 @@ public:
 		p.clear();
 		x_e.clear();
 
-		//checking possible dominance problems -- TODO - Remove for a faster code
-		pMan2PPLS.checkDominance(*pReturn);
-
-		cout << "General Two-Phase Pareto Local Search finished with " << x_e.size() << " non-dominated solutions.\n" << endl;
+		cout << "General Two-Phase Pareto Local Search finished with" << x_e.size() << " non-dominated solutions.\n" << endl;
 
 		return pReturn;
 	}
