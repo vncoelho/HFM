@@ -31,8 +31,6 @@
 #include "HFM/mainForecastingCodes/usingNonDominatedModels.hpp"
 #include "HFM/mainForecastingCodes/musicGen.hpp"
 
-
-
 using namespace std;
 using namespace optframe;
 using namespace EFP;
@@ -40,97 +38,56 @@ using namespace EFP;
 //#include <tr1/random>
 //using namespace std::tr1;
 
-enum SwitchOptions {
-	Option_Invalid,
-    APEN_SPEEDUP,
-    STOCKMARKET,
-	MUSIC_GEN,
-	GENERATE_NONDOMINATED_HFM_MODELS,
-	APEN_MICROGRID,
-	APEN_MICROGRID_ONLINE,
-	APEN_TWO_VARIABLES_MULTIVARIATE_FORECASTS,
-	LOAD_COMP,
-	PRICE_COMP,
-	WCCI_CFI_COMP,
-	JAMES_TAYLOR_EUROPEAN_DATASET,
-	RAIN_FORECAST,
-	MUSIC_GENERATION_WITH_FORECASTS,
-	MOKOKO_WIND_FORECASTS,
-	MOKOKO_WIND_POWER_PROBABILISTIC_FORECASTS,
-	EEG_BIOMETRIC_SYSTEM,
-	GAPSO_SKU_TESTS_FOR_BENCHMARK,
-	WCCI_CFI_COMP_CALIBRATION,
-	HOSSEIN_BLIND_FORECASTS_LOAD_FORECASTS
+enum SwitchOptions
+{
+	Option_Invalid, APEN_DEMAND_REW2016_REED, APEN_REED_SPEEDUP, STOCKMARKET, MUSIC_GEN, MUSIC_GEN_MIDI, GENERATE_NONDOMINATED_HFM_MODELS, APEN_MICROGRID, APEN_MICROGRID_ONLINE, APEN_TWO_VARIABLES_MULTIVARIATE_FORECASTS, LOAD_COMP, PRICE_COMP, PRICE_COMP_TM, LOAD_COMP_TM, WCCI_CFI_COMP, JAMES_TAYLOR_EUROPEAN_DATASET, RAIN_FORECAST, MUSIC_GENERATION_WITH_FORECASTS, MOKOKO_WIND_FORECASTS, MOKOKO_WIND_POWER_PROBABILISTIC_FORECASTS, EEG_BIOMETRIC_SYSTEM, GAPSO_SKU_TESTS_FOR_BENCHMARK, WCCI_CFI_COMP_CALIBRATION, HOSSEIN_BLIND_FORECASTS_LOAD_FORECASTS
 };
 
 int main(int argc, char **argv)
 {
-
-//	variate_generator<mt19937, uniform_real<> > rngU(mt19937(123), uniform_real<>());
-//	variate_generator<mt19937, normal_distribution<> > rngN(mt19937(123), normal_distribution<>(2, .5));
-//	variate_generator<mt19937, binomial_distribution<> > rngB(mt19937(123), binomial_distribution<>(3, .7));
-//	variate_generator<mt19937, poisson_distribution<> > rngP(mt19937(123), poisson_distribution<>(20));
-//	variate_generator<mt19937, gamma_distribution<> > rngG(mt19937(123), gamma_distribution<>(3));
-//
-//	for (int i = 0; i < 5; ++i)
-//		std::cout << rngU() << " " << rngN() << " " << rngB() << " " << rngP() << " " << 2 * rngG() << std::endl;
-//	getchar();
-
-//	if (argc != 10)
-//	{
-//		cout << "Wrong parameters!" << endl;
-//		cout << "Expected parameters are: nome nomeValidationSet saida parameters options precision" << endl;
-//		selfUseMode();
-//		exit(1);
-//	}
-//
-//	if (argc != 10)
-//	{
-//		cout << "Wrong parameters!" << endl;
-//		cout << "Expected parameters are: nome nomeValidationSet saida parameters options precision" << endl;
-//		selfUseMode();
-//		exit(1);
-//	}
-
-// ==============================================
-//Running know forecasting problems
-
-
-	int trainningMode = 0; //calibration mode active if value is 1
 	bool r;
-	SwitchOptions optionSwitch = GENERATE_NONDOMINATED_HFM_MODELS;
+	SwitchOptions optionSwitch = GENERATE_NONDOMINATED_HFM_MODELS; //Important paper on the way
 
-	optionSwitch=MUSIC_GEN;
+	optionSwitch = STOCKMARKET;
 
 	switch (optionSwitch)
 	{
 
-	case APEN_SPEEDUP:
-
-//		r = APEN_SI_DemandForecasting(argc, argv);
-		r = APEN_SI_SpeedUp_DemandForecasting(argc, argv);
-
+	case APEN_DEMAND_REW2016_REED:
+		r = APEN_SI_DemandForecasting(argc, argv);
 		cout << "Program ended successfully in MG Mode" << endl;
 		return r;
 		break;
 
-	case PRICE_COMP: //Eletricity Price Competition Mode
-		if (trainningMode == 0)
-			r = priceCompetitionBlind(argc, argv);
-		else
-			r = priceCompetitionCalibrationMode(argc, argv);
+	case APEN_REED_SPEEDUP:
 
+		r = APEN_SI_SpeedUp_DemandForecasting(argc, argv);
+
+		cout << "Program ended successfully in MG Mode for checking SpeedUp_MultiThread" << endl;
+		return r;
+		break;
+
+	case PRICE_COMP: //Eletricity Price Competition Mode
+		r = priceCompetitionBlind(argc, argv);
 		cout << "Program ended successfully in Eletricity Price Mode" << endl;
 		return r;
 		break;
 
-	case LOAD_COMP: //Load Competition Mode
-		if (trainningMode == 0)
-			r = loadCompetitionBlind(argc, argv);
-		else
-			r = loadCompetitionCalibrationMode(argc, argv);
+	case PRICE_COMP_TM: //Eletricity Price Competition Training Mode
+		r = priceCompetitionCalibrationMode(argc, argv);
+		cout << "Program ended successfully in Training Mode Eletricity Price" << endl;
+		return r;
+		break;
 
+	case LOAD_COMP: //Load Competition Mode
+		r = loadCompetitionBlind(argc, argv);
 		cout << "Program ended successfully in Load Competition Mode" << endl;
+		return r;
+		break;
+
+	case LOAD_COMP_TM: //Load Competition Training Mode
+		r = loadCompetitionCalibrationMode(argc, argv);
+		cout << "Program ended successfully in Load Competition Training Mode" << endl;
 		return r;
 		break;
 
@@ -157,8 +114,6 @@ int main(int argc, char **argv)
 		cout << "Program ended successfully in rainMode" << endl;
 		return r;
 		break;
-
-
 
 	case APEN_TWO_VARIABLES_MULTIVARIATE_FORECASTS: //James Taylor 2007
 		r = AETwoVariables(argc, argv);
@@ -238,13 +193,42 @@ int main(int argc, char **argv)
 		return r;
 		break;
 
-
+	case MUSIC_GEN_MIDI:
+		r = musicGenMidiCSV(argc, argv);
+		cout << "Parabens! Music MIDI has been created." << endl;
+		return r;
+		break;
 
 	default:
-		int r = HFModel(argc, argv);
+		int r = HFM_API(argc, argv);
 		cout << "Program ended unsuccessfully in DEFAULT Mode! Something went wrong...." << endl;
 		return r;
 	}
 
+	//	variate_generator<mt19937, uniform_real<> > rngU(mt19937(123), uniform_real<>());
+	//	variate_generator<mt19937, normal_distribution<> > rngN(mt19937(123), normal_distribution<>(2, .5));
+	//	variate_generator<mt19937, binomial_distribution<> > rngB(mt19937(123), binomial_distribution<>(3, .7));
+	//	variate_generator<mt19937, poisson_distribution<> > rngP(mt19937(123), poisson_distribution<>(20));
+	//	variate_generator<mt19937, gamma_distribution<> > rngG(mt19937(123), gamma_distribution<>(3));
+	//
+	//	for (int i = 0; i < 5; ++i)
+	//		std::cout << rngU() << " " << rngN() << " " << rngB() << " " << rngP() << " " << 2 * rngG() << std::endl;
+	//	getchar();
+
+	//	if (argc != 10)
+	//	{
+	//		cout << "Wrong parameters!" << endl;
+	//		cout << "Expected parameters are: nome nomeValidationSet saida parameters options precision" << endl;
+	//		selfUseMode();
+	//		exit(1);
+	//	}
+	//
+	//	if (argc != 10)
+	//	{
+	//		cout << "Wrong parameters!" << endl;
+	//		cout << "Expected parameters are: nome nomeValidationSet saida parameters options precision" << endl;
+	//		selfUseMode();
+	//		exit(1);
+	//	}
 }
 

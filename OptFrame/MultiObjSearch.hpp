@@ -565,12 +565,11 @@ public:
 
 	bool addSolution(Pareto<R, ADS>& p, MultiEvaluation& candidateMev, const Solution<R, ADS>& candidate)
 	{
-		multiEval.evaluate(candidateMev,candidate);
+		multiEval.evaluate(candidateMev, candidate);
 		bool added = addSolution(p, candidate, candidateMev);
 
 		return added;
 	}
-
 
 	virtual bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
@@ -593,6 +592,23 @@ public:
 			p.push_back(candidate, candidateMev);
 
 		return added;
+	}
+
+	bool checkDominance(const Pareto<R, ADS>& p)
+	{
+		Pareto<R, ADS> pFiltered;
+		int nInd = p.size();
+		for (int ind = 0; ind < nInd; ind++)
+		{
+			addSolution(pFiltered, p.getNonDominatedSol(ind), p.getIndMultiEvaluation(ind));
+		}
+
+		if (pFiltered.size() == nInd)
+			return true;
+
+		cout << "CheckDominance, inside MOSearch, found dominated solution inside the Pareto!" << endl;
+		exit(1);
+		return false;
 	}
 
 //	virtual bool checkDominance(Pareto<R, ADS>& p, MultiEvaluation* candidateMev, vector<MoveCost*>& candidateMovCost)

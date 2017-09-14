@@ -69,7 +69,6 @@ public:
 			nForecastings[exVar] = scanner.nextInt();
 //			cout << "nForecastings[" << exVar << "]: " << nForecastings[exVar] << endl;
 
-
 			for (int i = 0; i < nForecastings[exVar]; i++)
 			{
 				double input;
@@ -78,7 +77,6 @@ public:
 
 				forecastings[exVar].push_back(input);
 			}
-
 
 			delete scannerFiles[exVar];
 		}
@@ -145,6 +143,12 @@ public:
 
 	vector<double> getPartsForecastsBeginToEnd(int file, int b, int nPoints)
 	{
+		if (file >= forecastings.size())
+		{
+			cout << "Error on getPartsForecastsBeginToEnd!" << endl;
+			exit(1);
+		}
+
 		vector<double> partsOfForecasts(forecastings[file].begin() + b, forecastings[file].begin() + b + nPoints);
 
 		return partsOfForecasts;
@@ -152,6 +156,7 @@ public:
 
 	vector<double> getPartsForecastsBeginToEnd(vector<double> forecasts, int b, int nPoints)
 	{
+
 		vector<double> partsOfForecasts(forecasts.begin() + b, forecasts.begin() + b + nPoints);
 
 		return partsOfForecasts;
@@ -159,6 +164,12 @@ public:
 
 	vector<double> getPartsForecastsEndToBegin(int file, int e, int nPoints)
 	{
+		if (file >= forecastings.size())
+		{
+			cout << "Error on getPartsForecastsEndToBegin!" << endl;
+			exit(1);
+		}
+
 		int numberSamples = forecastings[file].size();
 		if ((numberSamples - nPoints - e) < 0)
 		{
@@ -176,7 +187,6 @@ public:
 
 	vector<double> getPercentageFromBeginToEnd(int file, int b, double percentage)
 	{
-
 		int nS = getForecastsSize(file) * percentage;
 
 		return getPartsForecastsBeginToEnd(file, b, nS);
@@ -197,6 +207,12 @@ public:
 	}
 	vector<double> getLastForecasts(int file, int nPoints)
 	{
+		if (file >= forecastings.size())
+		{
+			cout << "Error on getLastForecasts!" << endl;
+			exit(1);
+		}
+
 		vector<double> partsOfForecasts = getPartsForecastsEndToBegin(file, 0, nPoints);
 
 		return partsOfForecasts;
@@ -210,7 +226,14 @@ public:
 	}
 	vector<double> getFirstForecasts(int file, int nPoints)
 	{
-		vector<double> partsOfForecasts = getPartsForecastsBeginToEnd(file, 0, nPoints);;
+		if (file >= forecastings.size())
+		{
+			cout << "Error on getFirstForecasts!" << endl;
+			exit(1);
+		}
+
+		vector<double> partsOfForecasts = getPartsForecastsBeginToEnd(file, 0, nPoints);
+		;
 
 		return partsOfForecasts;
 	}

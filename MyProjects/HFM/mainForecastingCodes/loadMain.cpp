@@ -319,7 +319,7 @@ int loadCompetitionCalibrationMode(int argc, char **argv)
 	int mutationDesv = rg.rand(maxMutationDesv) + 1;
 	mu = rg.rand(maxMu) + 1;
 	int lambda = mu * 6;
-	int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
+	int evalFOMinimizer = rg.rand(EVALUTORS_NMETRICS_ENUM_COUNT); //tree is the number of possible objetive function index minimizers
 	int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
 	int construtive = 0;
 	int randomPrecision = rg.rand(maxPrecision) + 10;

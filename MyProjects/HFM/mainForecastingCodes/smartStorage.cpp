@@ -95,7 +95,7 @@ int smartStorage(int argc, char **argv)
 	{
 		int randomPrecision = rg.rand(maxPrecision) + 10;
 		int randomParametersFiles = rg.rand(vParametersFiles.size());
-		int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
+		int evalFOMinimizer = MAE_INDEX;
 		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
 		int construtive = rg.rand(2);
 		initialDesv = rg.rand(maxInitialDesv) + 1;

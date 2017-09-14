@@ -12,15 +12,22 @@
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
 #include "../../BBV/BBVTolls.hpp"
 
+
 using namespace std;
 using namespace optframe;
 using namespace EFP;
 extern int nThreads;
 
+
+
 int stockMarketForecasting(int argc, char **argv)
 {
+
+
+
 	nThreads = 1;
 	cout << "Welcome to stock market forecasting!" << endl;
+	getchar();
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode

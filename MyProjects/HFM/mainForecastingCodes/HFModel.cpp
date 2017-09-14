@@ -15,10 +15,11 @@ using namespace std;
 using namespace optframe;
 using namespace EFP;
 
-int HFModel(int argc, char **argv)
+int HFM_API(int argc, char **argv)
 {
 	cout << "=============================================================" << endl;
-	cout << "Welcome to the Hybrid Metaheuristic Fuzzy Model Interface! :)" << endl;
+	cout << "Welcome to the Hybrid Metaheuristic Fuzzy Model API!" << endl;
+	cout << "Interface is on the way to go... :)" << endl;
 	cout << "=============================================================" << endl;
 	RandGenMersenneTwister rg;
 	long seed = time(NULL); //CalibrationMode

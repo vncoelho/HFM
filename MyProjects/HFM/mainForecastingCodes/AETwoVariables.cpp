@@ -73,7 +73,7 @@ int AETwoVariables(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 		int randomPrecision = rg.rand(maxPrecision) + 10;
-		int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
+		int evalFOMinimizer = rg.rand(EVALUTORS_NMETRICS_ENUM_COUNT); //tree is the number of possible objetive function index minimizers
 		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
 		int construtive = rg.rand(3);
 		double initialDesv = rg.rand(maxInitialDesv) + 1;

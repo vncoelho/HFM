@@ -25,17 +25,26 @@ using namespace std;
 namespace EFP
 {
 
+enum PerformanceIndicator
+{
+	MAPE_INDEX, MAE_INDEX, MSE_INDEX, RMSE_INDEX, MAPE_INV_INDEX, SMAPE_INDEX, MMAPE_INDEX, WMAPE_INDEX, PINBALL_INDEX, PINBALL_ERROR_INDEX, EVALUTORS_NMETRICS_ENUM_COUNT
+};
+
 //TODO -- Change to ENUM
-const int MAPE_INDEX = 0;
-const int PINBALL_INDEX = 1;
-const int MSE_INDEX = 2;
-const int RMSE_INDEX = 3;
-const int PINBALL_ERROR_INDEX = 4;
-const int SMAPE_INDEX = 5;
-const int WMAPE_INDEX = 6;
-const int MMAPE_INDEX = 7;
-const int MAPE_INV_INDEX = 8;
-const int NMETRICS = 9;
+//const int MAPE_INDEX = 0;
+//const int PINBALL_INDEX = 1;
+//const int MSE_INDEX = 2;
+//const int RMSE_INDEX = 3;
+//const int PINBALL_ERROR_INDEX = 4;
+//const int SMAPE_INDEX = 5;
+//const int WMAPE_INDEX = 6;
+//const int MMAPE_INDEX = 7;
+//const int MAPE_INV_INDEX = 8;
+
+//const int MAE_INDEX = 10;
+
+//const int NMETRICS = 10;
+
 const int ALL_EVALUATIONS = -1;
 
 float sigmoid(float x)
@@ -118,7 +127,7 @@ public:
 			else
 			{
 				cout << "Go Ahead! Sample learning mode on! " << endl;
-				getchar();//TODO
+				getchar(); //TODO
 				if (file == targetFile)
 					value = 0;
 				else
@@ -586,7 +595,7 @@ public:
 			cout << "targetValues.size() = " << targetValues.size() << "\t";
 			cout << "estimatedValues.size() = " << estimatedValues.size() << endl;
 		}
-		vector<double> foIndicator(NMETRICS, 0);
+		vector<double> foIndicator(EVALUTORS_NMETRICS_ENUM_COUNT, 0);
 
 		double sumTarget = 0;
 		double avgTarget = 0;
@@ -619,6 +628,9 @@ public:
 					forecastingTargetNotMax = tsMaxValues - 0.0001;
 				foIndicator[MAPE_INV_INDEX] += (absDiff / abs(tsMaxValues - forecastingTargetNotMax));
 			}
+
+			if (accIndicator == MAE_INDEX || accIndicator == ALL_EVALUATIONS)
+				foIndicator[MAE_INDEX] += absDiff;
 
 			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 				foIndicator[MSE_INDEX] += pow(absDiff, 2);
@@ -693,9 +705,10 @@ public:
 		}
 
 		if (accIndicator == PINBALL_INDEX || accIndicator == ALL_EVALUATIONS)
-		{
 			foIndicator[PINBALL_INDEX] /= nSamples;
-		}
+
+		if (accIndicator == MAE_INDEX || accIndicator == ALL_EVALUATIONS)
+			foIndicator[MAE_INDEX] /= nSamples;
 
 		if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{

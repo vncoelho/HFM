@@ -115,7 +115,7 @@ int rainMain(int argc, char **argv)
 	{
 		int randomPrecision = rg.rand(maxPrecision) + 20;
 		int randomParametersFiles = rg.rand(vParametersFiles.size());
-		int evalFOMinimizer = rg.rand(NMETRICS); //tree is the number of possible objetive function index minimizers
+		int evalFOMinimizer = rg.rand(EVALUTORS_NMETRICS_ENUM_COUNT); //tree is the number of possible objetive function index minimizers
 		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
 		int construtive = rg.rand(2);
 		initialDesv = rg.rand(maxInitialDesv) + 1;

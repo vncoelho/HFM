@@ -10,6 +10,8 @@ CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include
 #OpenMP Multi-Core Multi-Thread flags
 OPENMP_FLAGS = -fopenmp -lpthread
 
+RESTSDK_FGLAS = -lboost_system -lcrypto -lssl -lcpprest
+
 #Raspberry WiringPi Flags (Package GPIO, Copyright (c) 2012-2017 Gordon Henderson, is required)
 LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
@@ -21,7 +23,7 @@ SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 
 #-Wall 
 gfp:
-	g++ $(GCC_FLAGS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
+	g++ $(GCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
 	
 clean:
 	#make clean -C ./MyProjects/
