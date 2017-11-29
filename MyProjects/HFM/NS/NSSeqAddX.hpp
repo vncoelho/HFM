@@ -17,13 +17,11 @@ class MoveNEIGHAddX: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int r, o;
-	bool sign;
 	double applyValue;
+	bool sign;
 	int vectorType;
 public:
 
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::apply; // prevents name hiding
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::canBeApplied; // prevents name hiding
 
 	MoveNEIGHAddX(int _r, int _o, double _applyValue, bool _sign, int _vectorType) :
 			r(_r), o(_o), applyValue(_applyValue), sign(_sign), vectorType(_vectorType)
@@ -35,7 +33,7 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		/*
 		 if(sign == false)
@@ -49,7 +47,7 @@ public:
 
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
+	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		// apply this move to 'rep'
 
@@ -135,7 +133,7 @@ public:
 
 	virtual ~NSIteratorNEIGHAddX()
 	{
-		for (int i = index + 1; i < moves.size(); i++)
+		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
 
 	}
@@ -151,7 +149,7 @@ public:
 		for (int sign = 0; sign < 2; sign++)
 			for (int r = 0; r < NCOLUMNATRIBUTES; r++)
 				for (int o = 0; o < options; o++)
-					for (int v = 0; v < values.size(); v++)
+					for (int v = 0; v < (int) values.size(); v++)
 					{
 						moves.push_back(new MoveNEIGHAddX(r, o, values[v], sign, 0));
 					}
@@ -161,7 +159,7 @@ public:
 		for (int sign = 0; sign < 2; sign++)
 			for (int r = 0; r < NCOLUMNATRIBUTES; r++)
 				for (int o = 0; o < options; o++)
-					for (int v = 0; v < values.size(); v++)
+					for (int v = 0; v < (int) values.size(); v++)
 					{
 						moves.push_back(new MoveNEIGHAddX(r, o, values[v], sign, 1));
 					}
@@ -171,7 +169,7 @@ public:
 		for (int sign = 0; sign < 2; sign++)
 			for (int r = 0; r < NCOLUMNATRIBUTES; r++)
 				for (int o = 0; o < options; o++)
-					for (int v = 0; v < values.size(); v++)
+					for (int v = 0; v < (int) values.size(); v++)
 					{
 						moves.push_back(new MoveNEIGHAddX(r, o, values[v], sign, 2));
 					}
@@ -187,7 +185,7 @@ public:
 	virtual void next()
 	{
 		index++;
-		if (index < moves.size())
+		if (index < (int) moves.size())
 		{
 			m = moves[index];
 		}
@@ -200,7 +198,7 @@ public:
 		return m == NULL;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& current()
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -209,7 +207,7 @@ public:
 			exit(1);
 		}
 
-		return *m;
+		return m;
 	}
 
 };
@@ -217,12 +215,11 @@ public:
 class NSSeqNEIGHAddX: public NSSeq<RepEFP>
 {
 private:
-	RandGen& rg;
 	ProblemInstance& pEFP;
+	RandGen& rg;
 	double applyValue;
 public:
 
-	using NSSeq<RepEFP>::move; // prevents name hiding
 
 	NSSeqNEIGHAddX(ProblemInstance& _pEFP, RandGen& _rg, double _applyValue) :
 			pEFP(_pEFP), rg(_rg), applyValue(_applyValue)
@@ -233,7 +230,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
 		int vectorType = rg.rand(3);
@@ -280,14 +277,12 @@ public:
 
 		if (tries == maxTries)
 		{
-			return *new MoveNEIGHAddX(-1, -1, -1, -1, -1); // return a random move
+			return new MoveNEIGHAddX(-1, -1, -1, -1, -1); // return a random move
 		}
-
-		int construtive = 1;
 
 		bool sign = rg.rand(2);
 
-		return *new MoveNEIGHAddX(r, o, applyValue, sign, vectorType); // return a random move
+		return new MoveNEIGHAddX(r, o, applyValue, sign, vectorType); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)

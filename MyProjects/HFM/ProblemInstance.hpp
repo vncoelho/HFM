@@ -22,9 +22,8 @@ private:
 	//int options;
 	//int function;
 	int stepsHead;
-	ProblemParameters problemParam;
 	vector<vector<double> > forecastings;
-
+	ProblemParameters problemParam;
 
 public:
 	ProblemInstance(vector<vector<double> > _forecastings, ProblemParameters& _problemParam) :

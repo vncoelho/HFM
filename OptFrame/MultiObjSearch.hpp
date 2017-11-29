@@ -207,9 +207,9 @@ public:
 	void exportParetoFront(string output, const char* exportType)
 	{
 		FILE* fPF = fopen(output.c_str(), exportType);
-		for (int i = 0; i < paretoFront.size(); i++)
+		for (int i = 0; i < (int) paretoFront.size(); i++)
 		{
-			for (int e = 0; e < paretoFront[i]->size(); e++)
+			for (int e = 0; e < (int) paretoFront[i]->size(); e++)
 				fprintf(fPF, "%.7f\t", paretoFront[i]->at(e).evaluation());
 			fprintf(fPF, "\n");
 		}
@@ -556,7 +556,7 @@ public:
 
 	bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate)
 	{
-		const MultiEvaluation& mev = multiEval.evaluate(candidate);
+		const MultiEvaluation& mev = multiEval.evaluateSolution(candidate);
 		bool added = addSolution(p, candidate, mev);
 
 		delete &mev;
@@ -565,7 +565,7 @@ public:
 
 	bool addSolution(Pareto<R, ADS>& p, MultiEvaluation& candidateMev, const Solution<R, ADS>& candidate)
 	{
-		multiEval.evaluate(candidateMev, candidate);
+		multiEval.reevaluateSolutionMEV(candidateMev, candidate);
 		bool added = addSolution(p, candidate, candidateMev);
 
 		return added;
@@ -574,7 +574,7 @@ public:
 	virtual bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
 		bool added = true;
-		for (int ind = 0; ind < p.size(); ind++)
+		for (int ind = 0; ind < (int) p.size(); ind++)
 		{
 			const MultiEvaluation& popIndFitness = p.getIndMultiEvaluation(ind);
 
@@ -603,7 +603,7 @@ public:
 			addSolution(pFiltered, p.getNonDominatedSol(ind), p.getIndMultiEvaluation(ind));
 		}
 
-		if (pFiltered.size() == nInd)
+		if ((int) pFiltered.size() == nInd)
 			return true;
 
 		cout << "CheckDominance, inside MOSearch, found dominated solution inside the Pareto!" << endl;
@@ -1114,6 +1114,31 @@ public:
 	}
 };
 
+
+// Multi Objective Stopping Criteria
+// Must include GENERAL stopping criteria
+// specific stopping criteria for metaheuristics can be included in their constructors
+class MOSC : public Component
+{
+public:
+	// maximum timelimit (seconds)
+	double timelimit;
+
+	MOSC(double _timelimit = 100000000.0):
+		timelimit(_timelimit)
+	{
+	}
+
+	virtual ~MOSC()
+	{
+	}
+
+	virtual string id() const
+	{
+		return "MOSC";
+	}
+};
+
 template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 class MultiObjSearch: public Component
 {
@@ -1127,7 +1152,7 @@ public:
 	{
 	}
 
-	virtual Pareto<R, ADS>* search(double timelimit = 100000000, double target_f = 0, Pareto<R, ADS>* _pf = NULL) = 0;
+	virtual Pareto<R, ADS>* search(MOSC& stopCriteria, Pareto<R, ADS>* _pf = NULL) = 0;
 
 	virtual string log()
 	{

@@ -1,22 +1,22 @@
 all: gfp
 	@echo "BUILT SUCCESSFULLY!"
 
-CPLEXDIR      = /opt/ibm/ILOG/CPLEX_Studio1251/cplex
-CONCERTDIR    = /opt/ibm/ILOG/CPLEX_Studio1251/concert
+CPLEXDIR    = /opt/ibm/ILOG/CPLEX_Studio1251/cplex
+CONCERTDIR  = /opt/ibm/ILOG/CPLEX_Studio1251/concert
 CCLNFLAGS = -L$(CPLEXDIR)/lib/x86-64_sles10_4.1/static_pic -DIL_STD -lilocplex -lcplex -L$(CONCERTDIR)/lib/x86-64_sles10_4.1/static_pic -lconcert -m64 -lm -pthread
 CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include 
 
 
 #OpenMP Multi-Core Multi-Thread flags
-OPENMP_FLAGS = -fopenmp -lpthread
+OPENMP_FLAGS = #-fopenmp -lpthread
 
-RESTSDK_FGLAS = -lboost_system -lcrypto -lssl -lcpprest
+RESTSDK_FGLAS = #-lboost_system -lcrypto -lssl -lcpprest
 
 #Raspberry WiringPi Flags (Package GPIO, Copyright (c) 2012-2017 Gordon Henderson, is required)
 LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
-GCC_FLAGS = -Ofast --std=c++11  -lsndfile
+GCC_FLAGS = -g -Wall  --std=c++11  -lsndfile
 
 SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 #GCC_FLAGS = -Ofast -g --std=c++11

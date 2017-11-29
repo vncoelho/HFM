@@ -72,7 +72,7 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 	vector<int> nFuzzyFunction(NFUZZYFUNCTIONS, 0);
 	double counter = 0;
 
-	for (int i = 0; i < rep.singleIndex.size(); i++)
+	for (int i = 0; i < (int) rep.singleIndex.size(); i++)
 	{
 		s << "(" << rep.singleIndex[i].first << "," << rep.singleIndex[i].second << ")" << endl;
 		s << "\t (" << rep.singleFuzzyRS[i][GREATER] << "->" << rep.singleFuzzyRS[i][GREATER_WEIGHT] << ")";
@@ -88,10 +88,10 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 	}
 
 	s << "Averaged Inputs" << endl;
-	for (int i = 0; i < rep.averageIndex.size(); i++)
+	for (int i = 0; i < (int) rep.averageIndex.size(); i++)
 	{
 		s << "([" << rep.averageIndex[i][0].first << "," << rep.averageIndex[i][0].second << "]";
-		for (int j = 1; j < rep.averageIndex[i].size(); j++)
+		for (int j = 1; j < (int) rep.averageIndex[i].size(); j++)
 		{
 			s << "\t [" << rep.averageIndex[i][j].first << "," << rep.averageIndex[i][j].second << "]";
 		}
@@ -109,10 +109,10 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 	}
 
 	s << "Derivative Inputs" << endl;
-	for (int i = 0; i < rep.derivativeIndex.size(); i++)
+	for (int i = 0; i < (int) rep.derivativeIndex.size(); i++)
 	{
 		s << "([" << rep.derivativeIndex[i][0].first << "," << rep.derivativeIndex[i][0].second << "]";
-		for (int j = 1; j < rep.derivativeIndex[i].size(); j++)
+		for (int j = 1; j < (int) rep.derivativeIndex[i].size(); j++)
 		{
 			s << "\t [" << rep.derivativeIndex[i][j].first << "," << rep.derivativeIndex[i][j].second << "]";
 		}

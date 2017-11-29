@@ -87,38 +87,40 @@ public:
 		weight = w;
 	}
 
-	Evaluation& evaluate(const Solution<R, ADS>& s)
+	Evaluation evaluateSolution(const Solution<R, ADS>& s)
 	{
-		return evaluate(s.getR(), s.getADS());
+		return evaluate(s.getR(), s.getADSptr());
 	}
 
-//protected:
-public:
+protected:
 	// because of MultiEvaluator... otherwise, make it 'friend'
 
-	virtual Evaluation& evaluate(const R& r) = 0;
+	// TODO: make it obligatory to have two implementations? beautiful (only R should be used if it's correct), but not practical!
+	//virtual Evaluation evaluate(const R& r) = 0;
 
-	virtual Evaluation& evaluate(const R& r, const ADS&)
+	virtual Evaluation evaluate(const R& r, const ADS*) = 0;
+	/*
 	{
+		// ignoring ADS
 		return evaluate(r);
 	}
+	*/
 
 public:
-	void evaluate(Evaluation& e, const Solution<R, ADS>& s)
+	void reevaluateSolution(Evaluation e, const Solution<R, ADS>& s)
 	{
-		evaluate(e, s.getR(), s.getADS());
+		reevaluate(e, s.getR(), s.getADSptr());
 	}
 
-//protected:
-public:
+protected:
 	// because of MultiEvaluator... otherwise, make it 'friend'
-	virtual void evaluate(Evaluation& e, const R& r, const ADS& ads)
+
+	virtual void reevaluate(Evaluation e, const R& r, const ADS* ads)
 	{
 		if (e.outdated)
 		{
-			Evaluation& e1 = evaluate(r, ads);
-			e = e1;
-			delete &e1;
+			Evaluation e1 = evaluate(r, ads);
+			e = std::move(e1);
 		}
 	}
 
@@ -129,41 +131,44 @@ public:
 	Move<R, ADS>* applyMove(Evaluation& e, Move<R, ADS>& m, Solution<R, ADS>& s)
 	{
 		// apply move and get reverse move
-		Move<R, ADS>* rev = m.apply(e, s);
+		Move<R, ADS>* rev = m.applyUpdateSolution(e, s);
 		// for now, must be not NULL
 		assert(rev != NULL);
 		// consolidate 'outdated' evaluation data on 'e'
-		evaluate(e, s);
+		reevaluateSolution(e, s);
 		// create pair
 		return rev;
 	}
 
 	// Apply movement without considering a previous evaluation => Slower.
 	// Return new evaluation 'e'
-	pair<Move<R, ADS>&, Evaluation&>& applyMove(Move<R, ADS>& m, Solution<R, ADS>& s)
+	pair<Move<R, ADS>*, Evaluation> applyMove(Move<R, ADS>& m, Solution<R, ADS>& s)
 	{
 		// apply move and get reverse move
-		Move<R, ADS>* rev = m.apply(s);
+		Move<R, ADS>* rev = m.applySolution(s);
 		// for now, must be not NULL
 		assert(rev != NULL);
 		// TODO: include management for 'false' hasReverse()
 		assert(m.hasReverse() && rev);
 		// create pair
-		return *new pair<Move<R, ADS>&, Evaluation&>(*rev, evaluate(s));
+		return pair<Move<R, ADS>*, Evaluation>(rev, evaluateSolution(s));
 	}
 
 	// Movement cost based on reevaluation of 'e'
-	MoveCost& moveCost(Evaluation& e, Move<R, ADS>& m, Solution<R, ADS>& s, bool allowEstimated = false)
+	MoveCost* moveCost(Evaluation& e, Move<R, ADS>& m, Solution<R, ADS>& s, bool allowEstimated = false)
 	{
 		// TODO: in the future, consider 'allowEstimated' parameter
+		// TODO: in the future, consider 'e' and 's' as 'const', and use 'const_cast' to remove it.
 
 		MoveCost* p = NULL;
 		if (allowCosts)
-			p = m.cost(e, s.getR(), s.getADS(), allowEstimated);
+		{
+			p = m.cost(e, s.getR(), s.getADSptr(), allowEstimated);
+		}
 
 		// if p not null, do not update 's' => much faster (using cost)
 		if (p)
-			return *p;
+			return p;
 		else
 		{
 			// need to update 's' together with reevaluation of 'e' => slower (may perform reevaluation)
@@ -174,7 +179,7 @@ public:
 			// saving 'outdated' status to avoid inefficient re-evaluations
 			bool outdated = e.outdated;
 			// apply move to both Evaluation and Solution
-			Move<R, ADS>& rev = *applyMove(e, m, s);
+			Move<R, ADS>* rev = applyMove(e, m, s);
 			// get final values
 			pair<evtype, evtype> e_end = make_pair(e.getObjFunction(), e.getInfMeasure());
 			// get final values for lexicographic part
@@ -185,7 +190,7 @@ public:
 				alternatives[i].second = e.getAlternativeCosts()[i].second;
 			}
 			// apply reverse move in order to get the original solution back
-			Move<R, ADS>& ini = *applyMove(e, rev, s);
+			Move<R, ADS>* ini = applyMove(e, *rev, s);
 			// if Evaluation wasn't 'outdated' before, restore its previous status
 			if (!outdated)
 				e.outdated = outdated;
@@ -198,30 +203,31 @@ public:
 				alternatives[i].second -= e.getAlternativeCosts()[i].second;
 			}
 			// destroy reverse move
-			delete &rev;
+			delete rev;
 			// destroy initial move
-			delete &ini;
+			delete ini;
 			// create a MoveCost object...
 			p = new MoveCost(e_end.first - e_ini.first, e_end.second - e_ini.second, e.weight);
 			// ... and set the lexicographic costs
 			p->setAlternativeCosts(alternatives);
 			// return a MoveCost object pointer
-			return *p;
+			return p;
 		}
 	}
 
 	// Movement cost based on complete evaluation
 	// USE ONLY FOR VALIDATION OF CODE! OTHERWISE, USE moveCost(e, m, s)
-	MoveCost& moveCost(Move<R, ADS>& m, Solution<R, ADS>& s, bool allowEstimated = false)
+	MoveCost* moveCost(Move<R, ADS>& m, Solution<R, ADS>& s, bool allowEstimated = false)
 	{
 		// TODO: in the future, consider 'allowEstimated' parameter
+		// TODO: in the future, consider 'e' and 's' as 'const', and use 'const_cast' to remove it.
 
 		// TODO: in the future, consider moves with NULL reverse (must save original solution/evaluation)
 		assert(m.hasReverse());
 
-		pair<Move<R, ADS>&, Evaluation&>& rev = applyMove(m, s);
+		pair<Move<R, ADS>*, Evaluation> rev = applyMove(m, s);
 
-		pair<Move<R, ADS>&, Evaluation&>& ini = applyMove(rev.first, s);
+		pair<Move<R, ADS>*, Evaluation> ini = applyMove(*rev.first, s);
 
 		// Difference: new - original
 
@@ -239,15 +245,10 @@ public:
 		MoveCost* p = new MoveCost(obj, inf);
 		p->setAlternativeCosts(alternatives);
 
-		delete &rev.first;
-		delete &rev.second;
-		delete &ini.first;
-		delete &ini.second;
+		delete rev.first;
+		delete ini.first;
 
-		delete &rev;
-		delete &ini;
-
-		return *p;
+		return p;
 	}
 
 	// Accept and apply move if it improves parameter moveCost
@@ -259,7 +260,9 @@ public:
 		MoveCost* p = NULL;
 		// try to get a cost (should consider estimated moves in the future)
 		if (allowCosts)
-			p = m.cost(e, s.getR(), s.getADS(), allowEstimated);
+		{
+			p = m.cost(e, s.getR(), s.getADSptr(), allowEstimated);
+		}
 
 		// if p not null => much faster (using cost)
 		if (p)
@@ -268,7 +271,7 @@ public:
 			if (isImprovement(*p))
 			{
 				// apply move and get reverse
-				Move<R, ADS>* rev = m.apply(s);
+				Move<R, ADS>* rev = m.applySolution(s);
 				if (rev)
 					delete rev;
 				// update evaluation with MoveCost
@@ -326,7 +329,8 @@ public:
 			// must return to original situation
 
 			// apply reverse move in order to get the original solution back
-			pair<Move<R, ADS>&, Evaluation&>& ini = applyMove(*rev, s);
+			pair<Move<R, ADS>*, Evaluation> ini = applyMove(*rev, s);
+			delete rev;
 
 			// if Evaluation wasn't 'outdated' before, restore its previous status
 			if (!outdated)
@@ -335,9 +339,7 @@ public:
 			// go back to original evaluation
 			e = ini.second;
 
-			delete &ini.first;
-			delete &ini.second;
-			delete &ini;
+			delete ini.first;
 
 			return false;
 		}
@@ -358,11 +360,9 @@ public:
 	//virtual bool betterThan(evtype a, evtype b) = 0;
 	virtual bool betterThan(const Solution<R, ADS>& s1, const Solution<R, ADS>& s2)
 	{
-		Evaluation& e1 = evaluate(s1);
-		Evaluation& e2 = evaluate(s2);
+		Evaluation e1 = evaluateSolution(s1);
+		Evaluation e2 = evaluateSolution(s2);
 		bool r = betterThan(e1, e2);
-		delete &e1;
-		delete &e2;
 		return r;
 	}
 

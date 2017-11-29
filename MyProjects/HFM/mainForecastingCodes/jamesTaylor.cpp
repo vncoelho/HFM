@@ -35,7 +35,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 	const char* caminhoOutput = argv[1];
 	int argvTargetTimeSeries = atoi(argv[2]);
 	int argvNumberOfRules = atoi(argv[3]);
-	int argvTimeES = atoi(argv[4]);
+//	int argvTimeES = atoi(argv[4]);
 
 	//double argvAlphaACF = atof(argv[4]);
 
@@ -104,8 +104,8 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 	 validationSet.push_back(rF.getPartsForecastsEndToBegin(2, beginValidationSet, nTotalForecastingsValidationSet + stepsAhead));
 	 */
 
-	int mu = 100;
-	int lambda = mu * 6;
+//	int mu = 100;
+//	int lambda = mu * 6;
 	double initialDesv;
 	double mutationDesv;
 
@@ -175,7 +175,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 
 //		cout<<"Teste Linear Regression"<<endl;
 //		sol = forecastObject.runOLR();
@@ -237,7 +237,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			cout << vfoIndicatorCalibration[n][i] << "\t";
 
 		cout << endl;
@@ -249,7 +249,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
 		fprintf(fResults, "\n");
 	}

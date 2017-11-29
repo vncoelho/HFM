@@ -35,7 +35,7 @@ int hosseinBlindForecasts(int argc, char **argv)
 	cout << "argvTimeES=" << argvTimeES << endl;
 	cout << "argvFH=" << argvFH << endl;
 
-	File* fileWCCIInstances;
+//	File* fileWCCIInstances;
 	string hosseinInstance = "./MyProjects/HFM/Instance/hosseinEnergy/hosseinLoadData";
 
 	vector<string> hosseinBlindLoad;
@@ -131,7 +131,7 @@ int hosseinBlindForecasts(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 		sol = forecastObject.run(timeES, 0, 0);
 //		cout<<sol->first.getR()<<endl;
 //		getchar();

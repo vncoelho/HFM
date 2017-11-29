@@ -202,7 +202,7 @@ int rainMain(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 
 		int optMethod = rg.rand(2);
 		optMethod = 0;
@@ -271,7 +271,7 @@ int rainMain(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			cout << vfoIndicatorCalibration[n][i] << "\t";
 
 		cout << endl;
@@ -283,7 +283,7 @@ int rainMain(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
 		fprintf(fResults, "\n");
 	}

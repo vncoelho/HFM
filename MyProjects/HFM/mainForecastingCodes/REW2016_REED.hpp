@@ -139,7 +139,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
-		int maxUpperLag = problemParam.getMaxUpperLag();
+//		int maxUpperLag = problemParam.getMaxUpperLag();
 		//=================================================
 
 		int numberOfTrainingPoints = 24 * pointsPerHour * nTrainningDays; //24hour * 7days * 4 points per hour
@@ -172,7 +172,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>&, Evaluation&>* sol;
+			pair<Solution<RepEFP>, Evaluation>* sol;
 			sol = forecastObject.run(timeES, 0, 0);
 
 			vector<vector<double> > validationSet; //validation set for calibration
@@ -185,7 +185,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 			averageError += foIndicatorsWeeks[MAPE_INDEX];
 
 			vector<double> currentForecasts = forecastObject.returnForecasts(sol, validationSet);
-			for (int cF = 0; cF < currentForecasts.size(); cF++)
+			for (int cF = 0; cF < (int) currentForecasts.size(); cF++)
 				vectorOfForecasts.push_back(currentForecasts[cF]);
 
 			cout << foIndicatorCalibration << "\t average:" << averageError / (countSlidingWindows + 1) << endl;
@@ -194,7 +194,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 		cout << foIndicatorCalibration << endl;
 
 		double finalAverage = 0;
-		for (int e = 0; e < foIndicatorCalibration.size(); e++)
+		for (int e = 0; e < (int) foIndicatorCalibration.size(); e++)
 			finalAverage += foIndicatorCalibration[e];
 		finalAverage /= foIndicatorCalibration.size();
 
@@ -214,10 +214,10 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 
 		FILE* fResults = fopen(calibrationFile.c_str(), "a");
 
-		for (int i = 0; i < parametersResults.size(); i++)
+		for (int i = 0; i < (int) parametersResults.size(); i++)
 			fprintf(fResults, "%.7f\t", parametersResults[i]);
 
-		for (int i = 0; i < vectorOfForecasts.size(); i++)
+		for (int i = 0; i < (int) vectorOfForecasts.size(); i++)
 			fprintf(fResults, "%.3f\t", vectorOfForecasts[i]);
 
 		fprintf(fResults, "\n");
@@ -329,7 +329,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 		problemParam.setStepsAhead(nSA);
 		int stepsAhead = problemParam.getStepsAhead();
 
-		int nTrainningDays = 10;
+//		int nTrainningDays = 10;
 		double pointsPerHour = 60.0 / granularityMin;
 
 		cout << "pointsPerHour:" << pointsPerHour << endl;
@@ -342,7 +342,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
-		int maxUpperLag = problemParam.getMaxUpperLag();
+//		int maxUpperLag = problemParam.getMaxUpperLag();
 		//=================================================
 
 		int nTotalForecastingsTrainningSet =  argSamplesTrainingSet - nSA;
@@ -380,7 +380,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>&, Evaluation&>* sol;
+			pair<Solution<RepEFP>, Evaluation>* sol;
 			sol = forecastObject.run(timeES, 0, 0);
 
 			vector<vector<double> > validationSet; //validation set for calibration
@@ -393,16 +393,15 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 			averageError += foIndicatorsWeeks[MAPE_INDEX];
 
 			vector<double> currentForecasts = forecastObject.returnForecasts(sol, validationSet);
-			for (int cF = 0; cF < currentForecasts.size(); cF++)
+			for (int cF = 0; cF < (int) currentForecasts.size(); cF++)
 				vectorOfForecasts.push_back(currentForecasts[cF]);
 
 			cout << foIndicatorCalibration << "\t average:" << averageError / (countSlidingWindows + 1) << endl;
 
 			countSlidingWindows++;
 		}
-
-		cout << "REW apen SI finished!" << endl;
-		return 0;
 	}
 
+	cout << "REW apen SI finished!" << endl;
+	return 0;
 }

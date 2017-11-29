@@ -52,10 +52,10 @@ public:
 
 	}
 
-	BasicSimulatedAnnealing(Evaluator<R, ADS>& _evaluator, Constructive<R, ADS>& _constructive, NS<R, ADS>* _neighbors, double _alpha, int _SAmax, double _Ti, RandGen& _rg) :
+	BasicSimulatedAnnealing(Evaluator<R, ADS>& _evaluator, Constructive<R, ADS>& _constructive, NS<R, ADS>& _neighbors, double _alpha, int _SAmax, double _Ti, RandGen& _rg) :
 		evaluator(_evaluator), constructive(_constructive), rg(_rg)
 	{
-		neighbors.push_back(_neighbors);
+		neighbors.push_back(&_neighbors);
 		alpha = (_alpha);
 		SAmax = (_SAmax);
 		Ti = (_Ti);
@@ -65,14 +65,16 @@ public:
 	{
 	}
 
-	pair<Solution<R, ADS>&, Evaluation&>* search(double timelimit = 100000000, double target_f = 0, const Solution<R, ADS>* _s = NULL,  const Evaluation* _e = NULL)
+	pair<Solution<R, ADS>, Evaluation>* search(SOSC& stopCriteria, const Solution<R, ADS>* _s = NULL,  const Evaluation* _e = NULL)
 	{
+		double timelimit = stopCriteria.timelimit;
+		double target_f = stopCriteria.target_f;
 		cout << "SA search(" << target_f << "," << timelimit << ")" << endl;
 
 		Timer tnow;
 
-		Solution<R, ADS>& s = constructive.generateSolution();
-		Evaluation& e = evaluator.evaluate(s);
+		Solution<R, ADS> s = constructive.generateSolution();
+		Evaluation e = evaluator.evaluateSolution(s);
 
 		double T = Ti;
 		int iterT = 0;
@@ -84,18 +86,19 @@ public:
 			while ((iterT < SAmax) && (tnow.now() < timelimit))
 			{
 				int n = rg.rand(neighbors.size());
-				Move<R, ADS>* move = &(neighbors[n]->move(s));
+				Move<R, ADS>* move = neighbors[n]->validRandomMoveSolution(s);
 
-				while (!(move->canBeApplied(s)))
+				if(!move)
 				{
-					delete move;
-					move = &(neighbors[n]->move(s));
+					if(Component::warning)
+						cout << "SA warning: no move in iter=" << iterT << " T=" << T << "! continue..." << endl;
+					continue;
 				}
 
 				Solution<R, ADS>* sCurrent = &s.clone();
 				Evaluation* eCurrent = &e.clone();
-				Component::safe_delete(move->apply(*eCurrent, *sCurrent));
-				evaluator.evaluate(*eCurrent, *sCurrent);
+				Component::safe_delete(move->applyUpdateSolution(*eCurrent, *sCurrent));
+				evaluator.reevaluateSolution(*eCurrent, *sCurrent);
 
 				if (evaluator.betterThan(*eCurrent, e))
 				{
@@ -135,6 +138,7 @@ public:
 				}
 
 				iterT++;
+				delete move;
 			}
 			T = alpha * T;
 			iterT = 0;
@@ -146,7 +150,7 @@ public:
 		delete sStar;
 		delete eStar;
 
-		return new pair<Solution<R, ADS>&, Evaluation&> (s, e);
+		return new pair<Solution<R, ADS>, Evaluation> (s, e);
 	}
 
 	virtual string id() const
@@ -159,9 +163,7 @@ public:
 		stringstream ss;
 		ss << SingleObjSearch<R, ADS>::idComponent() << ":SA:BasicSA";
 		return ss.str();
-
 	}
-
 };
 
 template<class R, class ADS = OPTFRAME_DEFAULT_ADS>

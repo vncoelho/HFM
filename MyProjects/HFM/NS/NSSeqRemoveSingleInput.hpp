@@ -23,8 +23,6 @@ private:
 
 public:
 
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::apply; // prevents name hiding
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::canBeApplied; // prevents name hiding
 
 	MoveNEIGHRemoveSingleInput(int _rule, bool _reverse, pair<int, int> _singleIndexOld, vector<double> _singleFuzzyRSOld) :
 			rule(_rule), reverse(_reverse), singleIndexOld(_singleIndexOld), singleFuzzyRSOld(_singleFuzzyRSOld)
@@ -36,12 +34,12 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return ((rule >= 0) && (rule < rep.singleIndex.size()) && (rep.singleIndex.size() > 1));
+		return ((rule >= 0) && (rule < (int) rep.singleIndex.size()) && ((int) rep.singleIndex.size() > 1));
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
+	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		pair<int, int> tempSingleIndexOld;
 		vector<double> tempSingleFuzzyRSOld;
@@ -101,7 +99,7 @@ public:
 
 	virtual ~NSIteratorNEIGHRemoveSingleInput()
 	{
-		for (int i = index + 1; i < moves.size(); i++)
+		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
 	}
 
@@ -110,7 +108,7 @@ public:
 		pair<int, int> tempSingleIndexOld;
 		vector<double> tempSingleFuzzyRSOld;
 
-		for (int rule = 0; rule < rep.singleIndex.size(); rule++)
+		for (int rule = 0; rule < (int) rep.singleIndex.size(); rule++)
 		{
 			moves.push_back(new MoveNEIGHRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld));
 		}
@@ -126,7 +124,7 @@ public:
 	virtual void next()
 	{
 		index++;
-		if (index < moves.size())
+		if (index < (int) moves.size())
 		{
 			m = moves[index];
 		}
@@ -139,7 +137,7 @@ public:
 		return m == NULL;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& current()
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -148,7 +146,7 @@ public:
 			exit(1);
 		}
 
-		return *m;
+		return m;
 	}
 
 };
@@ -160,7 +158,6 @@ private:
 
 public:
 
-	using NSSeq<RepEFP>::move; // prevents name hiding
 
 	NSSeqNEIGHRemoveSingleInput(RandGen& _rg) :
 			rg(_rg)
@@ -171,7 +168,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
 		int rule = -1;
@@ -181,12 +178,12 @@ public:
 		pair<int, int> tempSingleIndexOld;
 		vector<double> tempSingleFuzzyRSOld;
 
-		return *new MoveNEIGHRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld); // return a random move
+		return new MoveNEIGHRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return *new NSIteratorNEIGHRemoveSingleInput(rep); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorNEIGHRemoveSingleInput(rep); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const

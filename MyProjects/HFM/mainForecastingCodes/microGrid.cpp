@@ -177,7 +177,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
-		int maxUpperLag = problemParam.getMaxUpperLag();
+//		int maxUpperLag = problemParam.getMaxUpperLag();
 		//=================================================
 
 		int maxTrainningRounds = 20;
@@ -209,7 +209,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 
 		int timeES = argvTimeES;
 		int timeVND = 0;
@@ -283,7 +283,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			cout << vfoIndicatorCalibration[n][i] << "\t";
 
 		cout << endl;
@@ -296,7 +296,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 	for (int n = 0; n < nBatches; n++)
 	{
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
 		fprintf(fResults, "\n");
 	}

@@ -21,8 +21,6 @@ private:
 	bool sign;
 public:
 
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::apply; // prevents name hiding
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::canBeApplied; // prevents name hiding
 
 	MoveNEIGHVAlpha(int _index, double _applyValue, bool _sign) :
 			index(_index), applyValue(_applyValue), sign(_sign)
@@ -34,12 +32,12 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return true;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
+	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		if (sign == 0)
 			rep.vAlpha[index] += applyValue;
@@ -82,7 +80,7 @@ public:
 
 	virtual ~NSIteratorNEIGHVAlpha()
 	{
-		for (int i = index + 1; i < moves.size(); i++)
+		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
 
 	}
@@ -105,7 +103,7 @@ public:
 
 		for (int sign = 0; sign < 2; sign++)
 			for (int i = 0; i < nIndex; i++)
-				for (int v = 0; v < values.size(); v++)
+				for (int v = 0; v < (int) values.size(); v++)
 				{
 					moves.push_back(new MoveNEIGHVAlpha(i, values[v], sign));
 				}
@@ -121,7 +119,7 @@ public:
 	virtual void next()
 	{
 		index++;
-		if (index < moves.size())
+		if (index < (int) moves.size())
 		{
 			m = moves[index];
 		}
@@ -134,7 +132,7 @@ public:
 		return m == NULL;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& current()
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -143,7 +141,7 @@ public:
 			exit(1);
 		}
 
-		return *m;
+		return m;
 	}
 
 };
@@ -151,12 +149,11 @@ public:
 class NSSeqNEIGHVAlpha: public NSSeq<RepEFP>
 {
 private:
-	RandGen& rg;
 	ProblemInstance& pEFP;
+	RandGen& rg;
 	int nIntervals;
 public:
 
-	using NSSeq<RepEFP>::move; // prevents name hiding
 
 	NSSeqNEIGHVAlpha(ProblemInstance& _pEFP, RandGen& _rg, int _nIntervals) :
 			pEFP(_pEFP), rg(_rg), nIntervals(_nIntervals)
@@ -167,7 +164,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
 		int i = rg.rand(rep.vAlpha.size());
@@ -197,7 +194,7 @@ public:
 		if (applyRand == 7)
 			applyValue = mean * 2;
 
-		return *new MoveNEIGHVAlpha(i, applyValue, sign); // return a random move
+		return new MoveNEIGHVAlpha(i, applyValue, sign); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)

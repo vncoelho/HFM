@@ -194,7 +194,7 @@ int GAPSO_SKU(int argc, char **argv)
 
 //		forecastObject.runMultiObjSearch();
 //		getchar();
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 		sol = forecastObject.run(timeES, 0, 0);
 		cout << sol->first.getR() << endl;
 //		getchar();
@@ -261,7 +261,7 @@ int GAPSO_SKU(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 		fprintf(fResultsForecasts, "%d\t", argvTargetTimeSeries);
-		for (int i = 0; i < vForecasts.size(); i++)
+		for (int i = 0; i <  (int) vForecasts.size(); i++)
 			fprintf(fResultsForecasts, "%.7f\t", vForecasts[i]);
 		fprintf(fResultsForecasts, "\n");
 	}

@@ -166,7 +166,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
 		ProblemParameters problemParam;
 		//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
-		int nVR = 168;
+//		int nVR = 168;
 		int nSA = 24;
 		problemParam.setStepsAhead(nSA);
 		int stepsAhead = problemParam.getStepsAhead();
@@ -176,7 +176,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
-		int maxUpperLag = problemParam.getMaxUpperLag();
+//		int maxUpperLag = problemParam.getMaxUpperLag();
 		//=================================================
 
 		int nTrainningRounds = argvNTR;
@@ -196,7 +196,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 			trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet, nTotalForecastingsTrainningSet));
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>&, Evaluation&>* sol;
+			pair<Solution<RepEFP>, Evaluation>* sol;
 			sol = forecastObject.run(timeES, 0, 0);
 
 			vector<double> foIndicatorCalibration;
@@ -214,7 +214,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 
 
 	double averageError = 0;
-	for (int t = 0; t < (vfoIndicatorCalibration[0].size() - 1); t++)
+	for (int t = 0; t <  (int) (vfoIndicatorCalibration[0].size() - 1); t++)
 	{
 		averageError += vfoIndicatorCalibration[0][t];
 	}
@@ -225,7 +225,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			cout << vfoIndicatorCalibration[n][i] << "\t";
 
 		cout << endl;
@@ -238,7 +238,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 	for (int n = 0; n < nBatches; n++)
 	{
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
 		fprintf(fResults, "\n");
 	}

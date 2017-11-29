@@ -18,13 +18,12 @@ class MoveNEIGHChangeSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 private:
 	int rule;
 	bool sign;
-	int X;
 	int maxLag, maxUpperLag;
+	int X;
+
 
 public:
 
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::apply; // prevents name hiding
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::canBeApplied; // prevents name hiding
 
 	MoveNEIGHChangeSingleInput(int _rule, bool _sign, int _maxLag, int _maxUpperLag, int _X) :
 			rule(_rule), sign(_sign), maxLag(_maxLag), maxUpperLag(_maxUpperLag), X(_X)
@@ -36,13 +35,13 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		bool minimumLag = false;
 		bool maxLagCheck = false;
 		bool notNull1 = false;
 		bool notNull2 = false;
-		if ((rule >= 0) && (rule < rep.singleIndex.size()))
+		if ((rule >= 0) && (rule < (int) rep.singleIndex.size()))
 		{
 			maxLagCheck = ((rep.singleIndex[rule].second + X) <= maxLag);
 			minimumLag = ((rep.singleIndex[rule].second - X) > maxUpperLag);
@@ -50,10 +49,10 @@ public:
 			notNull2 = ((rep.singleIndex[rule].second + X) != 0);
 		}
 
-		return minimumLag && maxLagCheck && (rule >= 0) && (rule < rep.singleIndex.size()) && notNull1 && notNull2;
+		return minimumLag && maxLagCheck && (rule >= 0) && (rule < (int) rep.singleIndex.size()) && notNull1 && notNull2;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
+	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 
 		if (sign == false)
@@ -100,14 +99,14 @@ public:
 
 	virtual ~NSIteratorNEIGHChangeSingleInput()
 	{
-		for (int i = index + 1; i < moves.size(); i++)
+		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
 	}
 
 	virtual void first()
 	{
 		int X = 1;
-		for (int rule = 0; rule < rep.singleIndex.size(); rule++)
+		for (int rule = 0; rule < (int) rep.singleIndex.size(); rule++)
 		{
 			moves.push_back(new MoveNEIGHChangeSingleInput(rule, false, maxLag, maxUpperLag, X));
 			moves.push_back(new MoveNEIGHChangeSingleInput(rule, true, maxLag, maxUpperLag, X));
@@ -124,7 +123,7 @@ public:
 	virtual void next()
 	{
 		index++;
-		if (index < moves.size())
+		if (index < (int) moves.size())
 		{
 			m = moves[index];
 		}
@@ -137,7 +136,7 @@ public:
 		return m == NULL;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& current()
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -146,7 +145,7 @@ public:
 			exit(1);
 		}
 
-		return *m;
+		return m;
 	}
 
 };
@@ -154,13 +153,11 @@ public:
 class NSSeqNEIGHChangeSingleInput: public NSSeq<RepEFP>
 {
 private:
-	RandGen& rg;
 	ProblemInstance& pEFP;
+	RandGen& rg;
 	int maxLag, maxUpperLag;
 
 public:
-
-	using NSSeq<RepEFP>::move; // prevents name hiding
 
 	NSSeqNEIGHChangeSingleInput(ProblemInstance& _pEFP, RandGen& _rg, int _maxLag, int _maxUpperLag) :
 			pEFP(_pEFP), rg(_rg), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
@@ -171,7 +168,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		int MAXCHANGE = 5;
 		int X = rg.rand(MAXCHANGE) + 1;
@@ -181,12 +178,12 @@ public:
 
 		int sign = rg.rand(2);
 
-		return *new MoveNEIGHChangeSingleInput(rule, sign, maxLag, maxUpperLag, X); // return a random move
+		return new MoveNEIGHChangeSingleInput(rule, sign, maxLag, maxUpperLag, X); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return *new NSIteratorNEIGHChangeSingleInput(rep, maxLag, maxUpperLag); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorNEIGHChangeSingleInput(rep, maxLag, maxUpperLag); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const

@@ -133,8 +133,9 @@ int readWAV(int argc, char **argv)
 	    if (bytesRead > 0)
 	    {
 	        //Read the data
-	        uint16_t bytesPerSample = wavHeader.bitsPerSample / 8;      //Number     of bytes per sample
-	        uint64_t numSamples = wavHeader.ChunkSize / bytesPerSample; //How many samples are in the wav file?
+//	        uint16_t bytesPerSample = wavHeader.bitsPerSample / 8;      //Number     of bytes per sample
+	        //TODO check the use
+//	        uint64_t numSamples = wavHeader.ChunkSize / bytesPerSample; //How many samples are in the wav file?
 	        static const uint16_t BUFFER_SIZE = 4096;
 	        int8_t* buffer = new int8_t[BUFFER_SIZE];
 	        while ((bytesRead = fread(buffer, sizeof buffer[0], BUFFER_SIZE / (sizeof buffer[0]), wavFile)) > 0)

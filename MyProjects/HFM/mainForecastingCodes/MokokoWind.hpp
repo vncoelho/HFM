@@ -166,7 +166,7 @@ int mokokoWindSotavento(int argc, char **argv)
 
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>&, Evaluation&>* sol;
+			pair<Solution<RepEFP>, Evaluation>* sol;
 			int timeES = argvTimeES; // online training time
 			sol = forecastObject.run(timeES, 0, 0);
 

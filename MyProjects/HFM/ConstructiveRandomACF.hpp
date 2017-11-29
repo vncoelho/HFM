@@ -1,9 +1,8 @@
 #ifndef EFP_CONTRUCTIVE_ACF_HPP_
 #define EFP_CONTRUCTIVE_ACF_HPP_
 
-#include "../../OptFrame/Constructive.h"
-#include "../../OptFrame/Util/TestSolution.hpp"
-#include "../../OptFrame/Heuristics/GRASP/GRConstructive.h"
+#include "../../OptFrame/Constructive.hpp"
+//#include "../../OptFrame/Heuristics/GRASP/GRConstructive.hpp"
 
 #include "ProblemInstance.hpp"
 
@@ -28,7 +27,7 @@ using namespace std;
 namespace EFP
 {
 
-class ConstructiveACF: public GRConstructive<RepEFP>
+class ConstructiveACF: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
@@ -159,9 +158,9 @@ public:
 
 	}
 
-	Solution<RepEFP>& generateSolution()
+	Solution<RepEFP> generateSolution()
 	{
-		return generateSolution(0);
+		return generateSolutionACF(0);
 	}
 
 	vector<vector<pair<double, int> > > returnRLCUsingACF()
@@ -170,7 +169,7 @@ public:
 		vector<vector<double> > data = pEFP.getForecastingsVector();
 		int numberExplanatoryVariables = data.size();
 
-		if (alphaACF.size() != numberExplanatoryVariables)
+		if ((int) alphaACF.size() != numberExplanatoryVariables)
 		{
 			cout << "error on limits of ACF builder!" << endl;
 //			cout << "forcing some values...." << endl;
@@ -207,7 +206,7 @@ public:
 			while (acfGreedy[nEXV].size() == 0)
 			{
 				vector<pair<double, int> > acfGreedyPoints;
-				for (int k = 0; k < acfPoints[nEXV].size(); k++)
+				for (int k = 0; k < (int) acfPoints[nEXV].size(); k++)
 				{
 					if ((acfPoints[nEXV][k] >= alphaACF[nEXV]) && (acfPoints[nEXV][k] != 1))
 					{
@@ -243,7 +242,7 @@ public:
 		return trivialLagsRLC;
 	}
 
-	Solution<RepEFP>& generateSolution(float notUsed)
+	Solution<RepEFP,OPTFRAME_DEFAULT_ADS> generateSolutionACF(float notUsed)
 	{
 
 		//cout << "ACF generating solution.." << endl;
@@ -445,7 +444,7 @@ public:
 		 */
 		//cout << "End of ACF sol generation!" << endl;
 		//getchar();
-		return *new Solution<RepEFP>(newRep);
+		return Solution<RepEFP,OPTFRAME_DEFAULT_ADS>(newRep);
 	}
 
 };

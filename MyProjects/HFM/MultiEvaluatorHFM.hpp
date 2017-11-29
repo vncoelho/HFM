@@ -23,6 +23,7 @@
 
 
 #include <iostream>
+#include "../../OptFrame/MultiEvaluator.hpp"
 
 using namespace std;
 using namespace scannerpp;

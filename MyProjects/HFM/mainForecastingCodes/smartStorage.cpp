@@ -174,7 +174,7 @@ int smartStorage(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 
 		int optMethod = rg.rand(2);
 		optMethod = 0;

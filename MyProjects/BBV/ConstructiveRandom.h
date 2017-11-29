@@ -1,8 +1,7 @@
 #ifndef BBV_CONSTRUCTIVE_Random_H_
 #define BBV_CONSTRUCTIVE_Random_H_
 
-#include "../../OptFrame/Constructive.h"
-#include "../../OptFrame/Util/TestSolution.hpp"
+#include "../../OptFrame/Constructive.hpp"
 
 #include "ProblemInstance.h"
 

@@ -143,7 +143,7 @@ public:
 
 	vector<double> getPartsForecastsBeginToEnd(int file, int b, int nPoints)
 	{
-		if (file >= forecastings.size())
+		if (file >= (int) forecastings.size())
 		{
 			cout << "Error on getPartsForecastsBeginToEnd!" << endl;
 			exit(1);
@@ -164,7 +164,7 @@ public:
 
 	vector<double> getPartsForecastsEndToBegin(int file, int e, int nPoints)
 	{
-		if (file >= forecastings.size())
+		if (file >= (int)  forecastings.size())
 		{
 			cout << "Error on getPartsForecastsEndToBegin!" << endl;
 			exit(1);
@@ -207,7 +207,7 @@ public:
 	}
 	vector<double> getLastForecasts(int file, int nPoints)
 	{
-		if (file >= forecastings.size())
+		if (file >= (int) forecastings.size())
 		{
 			cout << "Error on getLastForecasts!" << endl;
 			exit(1);
@@ -226,7 +226,7 @@ public:
 	}
 	vector<double> getFirstForecasts(int file, int nPoints)
 	{
-		if (file >= forecastings.size())
+		if (file >= (int)  forecastings.size())
 		{
 			cout << "Error on getFirstForecasts!" << endl;
 			exit(1);
@@ -302,7 +302,7 @@ public:
 	double getMape(vector<double> forecasts, vector<double> realValue)
 	{
 		double mape = 0;
-		for (int samples = 0; samples < forecasts.size(); samples++)
+		for (int samples = 0; samples < (int) forecasts.size(); samples++)
 		{
 			mape += (abs(forecasts[samples] - realValue[samples]) / abs(realValue[samples]));
 		}
@@ -316,7 +316,7 @@ public:
 	{
 		double pinball = 0;
 
-		for (int samples = 0; samples < quantisForecasts.size(); samples++)
+		for (int samples = 0; samples < (int) quantisForecasts.size(); samples++)
 		{
 			double pinballFunctionQuantils = 0;
 			for (int a = 0; a < 99; a++)
@@ -349,7 +349,7 @@ public:
 			for (int d = 0; d < 7; d++)
 				for (int h = 0; h < 24; h++)
 				{
-					if (finalResult.size() < samplesToMix)
+					if ((int) finalResult.size() < samplesToMix)
 						finalResult.push_back(forecasts[d][h + iter * 24]);
 				}
 			iter++;
@@ -364,7 +364,7 @@ public:
 		for (double quantilError = 0; quantilError <= 1; quantilError = quantilError + 0.05)
 		{
 			vector < vector<double> > forecastings;
-			for (int i = 0; i < forecasts.size(); i++)
+			for (int i = 0; i < (int) forecasts.size(); i++)
 			{
 				double prev;
 				prev = forecasts[i];
@@ -386,7 +386,7 @@ public:
 			string output = ss.str();
 
 			FILE* fResults = fopen(output.c_str(), "w");
-			for (int i = 0; i < forecastings.size(); i++)
+			for (int i = 0; i < (int) forecastings.size(); i++)
 			{
 				for (int a = 0; a < 99; a++)
 				{
@@ -404,7 +404,7 @@ public:
 	{
 		vector < vector<double> > vQuantisResults;
 
-		for (int i = 0; i < forecasts.size(); i++)
+		for (int i = 0; i < (int) forecasts.size(); i++)
 		{
 			double prev;
 			prev = forecasts[i];
@@ -431,7 +431,7 @@ public:
 		for (double quantilError = 0; quantilError <= 1; quantilError = quantilError + 0.05)
 		{
 			vector < vector<double> > forecastings;
-			for (int i = 0; i < forecasts.size(); i++)
+			for (int i = 0; i < (int) forecasts.size(); i++)
 			{
 				double prev;
 				prev = forecasts[i];
@@ -458,9 +458,9 @@ public:
 	{
 
 		FILE* fResults = fopen(outFile.c_str(), "w");
-		for (int i = 0; i < quantis.size(); i++)
+		for (int i = 0; i < (int) quantis.size(); i++)
 		{
-			for (int a = 0; a < quantis[0].size(); a++)
+			for (int a = 0; a < (int) quantis[0].size(); a++)
 			{
 				fprintf(fResults, "%.7f\t", quantis[i][a]);
 
@@ -475,9 +475,9 @@ public:
 	{
 
 		FILE* fResults = fopen(outFile.c_str(), "w");
-		for (int i = 0; i < batchesVector.size(); i++)
+		for (int i = 0; i < (int) batchesVector.size(); i++)
 		{
-			for (int a = 0; a < batchesVector[0].size(); a++)
+			for (int a = 0; a < (int) batchesVector[0].size(); a++)
 			{
 				fprintf(fResults, "%.7f\t", batchesVector[i][a]);
 

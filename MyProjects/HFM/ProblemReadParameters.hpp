@@ -185,7 +185,7 @@ public:
 		int oldestStep = 0;
 		nFiles = 0;
 
-		for (int i = 0; i < oForesSP.size(); i++)
+		for (int i = 0; i < (int) oForesSP.size(); i++)
 		{
 			if (oForesSP[i].first > nFiles)
 				nFiles = oForesSP[i].first;
@@ -194,28 +194,28 @@ public:
 				oldestStep = oForesSP[i].second;
 		}
 
-		for (int i = 0; i < oForesMP.size(); i++)
+		for (int i = 0; i < (int) oForesMP.size(); i++)
 		{
 			vector<int> means = oForesMP[i].second;
 
 			if (oForesMP[i].first > nFiles)
 				nFiles = oForesMP[i].first;
 
-			for (int m = 0; m < means.size(); m++)
+			for (int m = 0; m < (int) means.size(); m++)
 			{
 				if (means[m] > oldestStep)
 					oldestStep = means[m];
 			}
 		}
 
-		for (int i = 0; i < oForesDP.size(); i++)
+		for (int i = 0; i < (int) oForesDP.size(); i++)
 		{
 			vector<int> means = oForesDP[i].second;
 
 			if (oForesDP[i].first > nFiles)
 				nFiles = oForesDP[i].first;
 
-			for (int m = 0; m < means.size(); m++)
+			for (int m = 0; m < (int) means.size(); m++)
 			{
 				if (means[m] > oldestStep)
 					oldestStep = means[m];
@@ -228,26 +228,26 @@ public:
 		//cout << "notUsedForTest = " << notUsedForTest << endl;
 		vNotUsedForTests.resize(nFiles);
 
-		for (int i = 0; i < oForesSP.size(); i++)
+		for (int i = 0; i < (int) oForesSP.size(); i++)
 		{
 			vNotUsedForTests[oForesSP[i].first - 1] = max(oForesSP[i].second, vNotUsedForTests[oForesSP[i].first - 1]);
 		}
 
-		for (int i = 0; i < oForesMP.size(); i++)
+		for (int i = 0; i < (int) oForesMP.size(); i++)
 		{
 			vector<int> means = oForesMP[i].second;
 
-			for (int m = 0; m < means.size(); m++)
+			for (int m = 0; m < (int) means.size(); m++)
 			{
 				vNotUsedForTests[oForesMP[i].first - 1] = max(means[m], vNotUsedForTests[oForesMP[i].first - 1]);
 			}
 		}
 
-		for (int i = 0; i < oForesDP.size(); i++)
+		for (int i = 0; i < (int) oForesDP.size(); i++)
 		{
 			vector<int> means = oForesDP[i].second;
 
-			for (int m = 0; m < means.size(); m++)
+			for (int m = 0; m < (int) means.size(); m++)
 			{
 				vNotUsedForTests[oForesDP[i].first - 1] = max(means[m], vNotUsedForTests[oForesDP[i].first - 1]);
 			}

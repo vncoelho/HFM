@@ -22,10 +22,10 @@
 #define OPTFRAME_INITIALPARETO_H_
 
 #include "Component.hpp"
+#include "Constructive.hpp"
+#include "Heuristics/GRASP/GRConstructive.hpp"
 #include "RandGen.hpp"
 #include "MultiObjSearch.hpp"
-#include "Constructive.h"
-#include "Heuristics/GRASP/GRConstructive.h"
 #include "MultiEvaluator.hpp"
 #include "MultiEvaluation.hpp"
 #include "Timer.hpp"
@@ -81,7 +81,7 @@ public:
 	{
 		Pareto<R, ADS>* p = new Pareto<R, ADS>;
 		for (unsigned i = 0; i < populationSize; i++)
-			pMan.addSolution(*p, &constructive.generateSolution());
+			pMan.addSolution(*p, constructive.generateSolution());
 		return *p;
 	}
 
@@ -134,7 +134,7 @@ public:
 			if (alpha == 0)
 				alpha = 0.00001;
 
-			pMan.addSolution(*p, constructive.generateSolution(alpha));
+			pMan.addSolution(*p, constructive.generateGRSolution(alpha));
 			i++;
 		}
 		return *p;

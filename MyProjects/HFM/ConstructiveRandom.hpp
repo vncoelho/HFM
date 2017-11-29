@@ -1,9 +1,8 @@
 #ifndef EFP_CONTRUCTIVE_RANDOM_HPP_
 #define EFP_CONTRUCTIVE_RANDOM_HPP_
 
-#include "../../OptFrame/Constructive.h"
-#include "../../OptFrame/Util/TestSolution.hpp"
-#include "../../OptFrame/Heuristics/GRASP/GRConstructive.h"
+#include "../../OptFrame/Constructive.hpp"
+#include "../../OptFrame/Heuristics/GRASP/GRConstructive.hpp"
 
 #include "ProblemInstance.hpp"
 
@@ -23,10 +22,11 @@ using namespace std;
 namespace EFP
 {
 
-class ConstructiveRandom: public GRConstructive<RepEFP>
+class ConstructiveRandom: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
+	ProblemParameters problemParam;
 	RandGen& rg;
 
 	int precisionSP;
@@ -34,7 +34,7 @@ private:
 	int precisionDP;
 	int precision;
 	// Your private vars
-	ProblemParameters problemParam;
+
 
 	int maxLag, maxUpperLag;
 
@@ -63,12 +63,12 @@ public:
 	{
 	}
 
-	Solution<RepEFP>& generateSolution()
+	Solution<RepEFP> generateSolution()
 	{
-		return generateSolution(0);
+		return std::move(generateSolutionAlpha(0));
 	}
 
-	Solution<RepEFP>& generateSolution(float notUsed)
+	Solution<RepEFP> generateSolutionAlpha(float notUsed)
 	{
 
 		//cout << "ACF generating solution.." << endl;
@@ -252,7 +252,7 @@ public:
 			int K = rg.rand(maxLag);
 
 			vIndex.push_back(K);
-			double std = rg.rand(300) / 1000;
+//			double std = rg.rand(300) / 1000; //TODO check the use of this variable
 			vIndexAlphas.push_back(rg.randG(0, 0.1));
 		}
 
@@ -270,7 +270,7 @@ public:
 
 //		cout << "End of Random Hybrid Fuzzy Model Sol generation!" << endl;
 //		getchar();
-		return *new TestSolution<RepEFP>(newRep);
+		return *new Solution<RepEFP>(newRep);
 	}
 
 };

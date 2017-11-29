@@ -61,12 +61,12 @@ float sigmoid(float x)
 	return return_value;
 }
 
-static bool compara(double d1, double d2)
-{
-	return d1 < d2;
-}
+//static bool compara(double d1, double d2)
+//{
+//	return d1 < d2;
+//}
 
-class EFPEvaluator: public Evaluator<RepEFP>
+class EFPEvaluator: public Evaluator<RepEFP,OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
@@ -397,14 +397,14 @@ public:
 		}
 	}
 
-	EvaluationEFP& evaluate(const RepEFP& rep)
+	EvaluationEFP evaluate(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		//Fo vector with different metrics calculations
 		vector<double> foIndicator = evaluateAll(rep, optMetric);
 
 		double fo = foIndicator[optMetric];		// Evaluation Function Value
 
-		return *new EvaluationEFP(fo);
+		return EvaluationEFP(fo);
 	}
 
 	vector<double> evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
@@ -484,7 +484,7 @@ public:
 				vector<pair<int, int> > derivateK = rep.derivativeIndex[nDP];
 
 				double d = 0;
-				for (int dK = 0; dK < derivateK.size(); dK++)
+				for (int dK = 0; dK < (int) derivateK.size(); dK++)
 				{
 					int file = derivateK[dK].first;
 					int K = derivateK[dK].second;
@@ -559,8 +559,8 @@ public:
 				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
 			}
 
-			for (int aV = 0; aV < allForecastsVectors.size(); aV++)
-				for (int k = 0; k < allForecastsVectors[aV].size(); k++)
+			for (int aV = 0; aV < (int) allForecastsVectors.size(); aV++)
+				for (int k = 0; k < (int) allForecastsVectors[aV].size(); k++)
 				{
 					allForecasts.push_back(allForecastsVectors[aV][k]);
 					allTargets.push_back(allForecastsTarget[aV][k]);
@@ -589,7 +589,7 @@ public:
 	{
 
 		int nSamples = targetValues.size();
-		if (nSamples != estimatedValues.size())
+		if (nSamples != (int) estimatedValues.size())
 		{
 			cout << "ERROR on GetAccuracy! Different sizes!" << endl;
 			cout << "targetValues.size() = " << targetValues.size() << "\t";

@@ -17,13 +17,13 @@ using namespace EFP;
 
 struct HFMModelAndParam
 {
-	pair<Solution<RepEFP>&, Evaluation&>* HFMModel;
+	pair<Solution<RepEFP>, Evaluation>* HFMModel;
 	vector<double> forecastingErrors;
 	int fH;
 	int v; //volunteer which was used to train the data
 	int channel; //volunteer channel which was used to train the data
 
-	HFMModelAndParam(pair<Solution<RepEFP>&, Evaluation&>* _HFMModel, vector<double> _forecastingErrors, int _fH, int _v, int _channel) :
+	HFMModelAndParam(pair<Solution<RepEFP>, Evaluation>* _HFMModel, vector<double> _forecastingErrors, int _fH, int _v, int _channel) :
 			HFMModel(_HFMModel), forecastingErrors(_forecastingErrors), fH(_fH), v(_v), channel(_channel)
 	{
 	}
@@ -262,7 +262,7 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 
 		int minColIndex = -1;
 
-		for (int v = 0; v < results.getNumCols(); v++)
+		for (int v = 0; v <  (int) results.getNumCols(); v++)
 		{
 			if (minOrMax == true)
 			{
@@ -290,7 +290,7 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 	return bestPairs;
 }
 
-pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int fh)
+pair<Solution<RepEFP>, Evaluation>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int fh)
 {
 
 	int evalFOMinimizer = evalFO;
@@ -382,12 +382,12 @@ pair<Solution<RepEFP>&, Evaluation&>* learnModel(treatForecasts& tFTraining, int
 
 	//		forecastObject.runMultiObjSearch();
 	//		getchar();
-	pair<Solution<RepEFP>&, Evaluation&>* sol;
+	pair<Solution<RepEFP>, Evaluation>* sol;
 	sol = forecastObject.run(timeES, 0, 0);
 	return sol;
 }
 
-vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<RepEFP>&, Evaluation&>* sol, RandGen& rg, int fh)
+vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<RepEFP>, Evaluation>* sol, RandGen& rg, int fh)
 {
 
 	int mu = 100;
@@ -616,14 +616,14 @@ int EEGBiometricSystem(int argc, char **argv)
 			treatForecasts tFTraining(explanatoryVariables);
 			tFTraining.setTSFile(tFTraining.getPercentageFromBeginToEnd(0, 0, trainingSetPercentage), 0);
 
-			pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, fH);
+			pair<Solution<RepEFP>, Evaluation>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, fH);
 //			cout << "sol->first.getR().earliestInput: " << HFMmodel->first.getR().earliestInput << endl;
 //			cout<<HFMmodel->first.getR()<<endl;
 //			getchar();
 
 			vector<double> allErrors = checkLearningAbility(tFTraining, HFMmodel, rg, fH);
 			vector<double> biometricSystemMeasures;
-			for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
+			for (int iq = 0; iq <  (int) listOfIndicatorOfQuality.size(); iq++)
 				biometricSystemMeasures.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
 //			cout << allErrors << endl;
 //			cout << biometricSystemMeasures << endl;
@@ -664,9 +664,9 @@ int EEGBiometricSystem(int argc, char **argv)
 				resultsMin(m, v) = bigM;
 			}
 
-		for (int nM = 0; nM < setOfHFMLearningModels.size(); nM++)
+		for (int nM = 0; nM <  (int) setOfHFMLearningModels.size(); nM++)
 		{
-			pair<Solution<RepEFP>&, Evaluation&>* HFMmodel = setOfHFMLearningModels[nM]->HFMModel;
+			pair<Solution<RepEFP>, Evaluation>* HFMmodel = setOfHFMLearningModels[nM]->HFMModel;
 			vector<double> modelStandardErrors = setOfHFMLearningModels[nM]->forecastingErrors;
 			int modelFH = setOfHFMLearningModels[nM]->fH;
 			int variableChannelV = setOfHFMLearningModels[nM]->channel;
@@ -699,7 +699,7 @@ int EEGBiometricSystem(int argc, char **argv)
 			vector<double> allErrors = checkLearningAbility(tFValidation, HFMmodel, rg, modelFH);
 			vector<double> currentErrors;
 
-			for (int iq = 0; iq < listOfIndicatorOfQuality.size(); iq++)
+			for (int iq = 0; iq < (int) listOfIndicatorOfQuality.size(); iq++)
 				currentErrors.push_back(allErrors[listOfIndicatorOfQuality[iq]]);
 
 			for (int m = 0; m < nIndicatorsOfQuality; m++)

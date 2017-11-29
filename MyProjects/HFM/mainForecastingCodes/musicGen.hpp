@@ -37,7 +37,7 @@ int musicGen(int argc, char **argv)
 //		exit(1);
 //	}
 
-	const char* caminhoOutput = argv[1];
+//	const char* caminhoOutput = argv[1];
 
 //	string inputTimeSeries = caminhoOutput;
 //	inputTimeSeries = "MyProjects/HFM/Instance/mp3/bluesMonoChannel_10_20";
@@ -135,26 +135,26 @@ int musicGen(int argc, char **argv)
 
 	int multiplier = 1;
 
-	for (int n = 0; n < trainningSet[0].size(); n++)
+	for (int n = 0; n < (int) trainningSet[0].size(); n++)
 		trainningSet[0][n] *= multiplier;
 
 	ForecastClass* forecastObject;
 
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-	pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
+	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
 	pair<vector<double>, vector<double> > forecastsAndTargets;
-	for (int m = 0; m < timeSeriesToBeForecasted.size(); m++)
+	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector
 		validationSet.push_back(tFToBeForecasted.getPartsForecastsBeginToEnd(m, 0, tFToBeForecasted.getForecastsSize(m)));
 
-		for (int n = 0; n < validationSet[0].size(); n++)
+		for (int n = 0; n < (int) validationSet[0].size(); n++)
 			validationSet[0][n] *= multiplier;
 
 		forecastsAndTargets = forecastObject->returnForecastsAndTargets(sol->first.getR(), validationSet);
 
-		for (int n = 0; n < forecastsAndTargets.first.size(); n++)
+		for (int n = 0; n < (int) forecastsAndTargets.first.size(); n++)
 		{
 			forecastsAndTargets.first[n] /= multiplier;
 			forecastsAndTargets.second[n] /= multiplier;
@@ -194,7 +194,7 @@ int musicGenMidiCSV(int argc, char **argv)
 //		exit(1);
 //	}
 
-	const char* caminhoOutput = argv[1];
+//	const char* caminhoOutput = argv[1];
 
 //	string inputTimeSeries = caminhoOutput;
 //	inputTimeSeries = "MyProjects/HFM/Instance/mp3/bluesMonoChannel_10_20";
@@ -287,10 +287,10 @@ int musicGenMidiCSV(int argc, char **argv)
 	ForecastClass* forecastObject;
 
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-	pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
+	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
 	pair<vector<double>, vector<double> > forecastsAndTargets;
-	for (int m = 0; m < timeSeriesToBeForecasted.size(); m++)
+	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector
 		validationSet.push_back(tFToBeForecasted.getPartsForecastsBeginToEnd(m, 0, tFToBeForecasted.getForecastsSize(m)));

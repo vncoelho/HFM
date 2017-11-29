@@ -68,7 +68,7 @@ typedef EVALUATION_TYPE evtype;
 // such as (int, evtype, long long) you can use PackTypes in Utils or overload
 // manually each of the numeric operators +, -, *
 
-class Evaluation: public Component
+class Evaluation final: public Component
 {
 protected:
 	// ==== Objective Space type: pair<evtype, evtype> ====
@@ -87,6 +87,12 @@ protected:
 	{
 		gos_yes, gos_no, gos_unknown
 	} gos;
+
+	// LocalOptimumStatus
+	enum LOS
+	{
+		los_yes, los_no, los_unknown
+	}; // do not declare here (keep in ADS or R)
 
 public:
 	// boolean field to indicate if Evaluation needs an update

@@ -23,9 +23,6 @@ private:
 
 public:
 
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::apply; // prevents name hiding
-	using Move<RepEFP, OPTFRAME_DEFAULT_ADS>::canBeApplied; // prevents name hiding
-
 	MoveNEIGHAddSingleInput(int _file, int _K, bool _reverse, ProblemInstance& _pEFP, RandGen& _rg) :
 			file(_file), K(_K), reverse(_reverse), pEFP(_pEFP), rg(_rg)
 	{
@@ -36,12 +33,12 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return true;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS&)
+	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		if (!reverse)
 		{
@@ -97,13 +94,16 @@ public:
 class NSIteratorNEIGHAddSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
+	const RepEFP& rep;
+	int maxLag, maxUpperLag;
+	ProblemInstance& pEFP;
+	RandGen& rg;
+
 	MoveNEIGHAddSingleInput* m;
 	vector<MoveNEIGHAddSingleInput*> moves;
 	int index;
-	const RepEFP& rep;
-	int maxLag, maxUpperLag;
-	RandGen& rg;
-	ProblemInstance& pEFP;
+
+
 
 public:
 	NSIteratorNEIGHAddSingleInput(const RepEFP& _rep, int _maxLag, int _maxUpperLag, ProblemInstance& _pEFP, RandGen& _rg) :
@@ -115,7 +115,7 @@ public:
 
 	virtual ~NSIteratorNEIGHAddSingleInput()
 	{
-		for (int i = index + 1; i < moves.size(); i++)
+		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
 	}
 
@@ -138,7 +138,7 @@ public:
 	virtual void next()
 	{
 		index++;
-		if (index < moves.size())
+		if (index < (int) moves.size())
 		{
 			m = moves[index];
 		}
@@ -151,7 +151,7 @@ public:
 		return m == NULL;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& current()
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -160,7 +160,7 @@ public:
 			exit(1);
 		}
 
-		return *m;
+		return m;
 	}
 
 };
@@ -168,13 +168,12 @@ public:
 class NSSeqNEIGHAddSingleInput: public NSSeq<RepEFP>
 {
 private:
-	RandGen& rg;
 	ProblemInstance& pEFP;
+	RandGen& rg;
+
 	int maxLag, maxUpperLag;
 
 public:
-
-	using NSSeq<RepEFP>::move; // prevents name hiding
 
 	NSSeqNEIGHAddSingleInput(ProblemInstance& _pEFP, RandGen& _rg, int _maxLag, int _maxUpperLag) :
 			pEFP(_pEFP), rg(_rg), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
@@ -185,18 +184,18 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>& move(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		//TODO - Check the possibility of add negative K values
 		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
 		int file = rg.rand(pEFP.getNumberExplanatoryVariables());
 
-		return *new MoveNEIGHAddSingleInput(file, K, false, pEFP, rg); // return a random move
+		return new MoveNEIGHAddSingleInput(file, K, false, pEFP, rg); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return *new NSIteratorNEIGHAddSingleInput(rep, maxLag, maxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorNEIGHAddSingleInput(rep, maxLag, maxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const

@@ -92,8 +92,6 @@ private:
 
 public:
 
-    using NSSeq< RepBBV , MY_ADS  >::move; // prevents name hiding
-
     // YOU MAY REMOVE THESE PARAMETERS IF YOU DON'T NEED (BUT PROBABLY WILL...)
     NSSeqBuySellPaper(ProblemInstanceBBV& _pBBV, RandGen& _rg):
         pBBV(_pBBV), rg(_rg)

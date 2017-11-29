@@ -66,7 +66,7 @@ int AETwoVariables(int argc, char **argv)
 	int timeES = 180;
 	int timeVND = 0;
 	int timeILS = 0;
-	int timeGRASP = 0;
+//	int timeGRASP = 0;
 
 	vector<vector<double> > vfoIndicatorCalibration; //vector with the FO of each batch
 
@@ -86,7 +86,7 @@ int AETwoVariables(int argc, char **argv)
 			alphaACF = alphaACF * -1;
 
 		// ============ FORCES ======================
-		int randomParametersFiles = 0; // best file
+//		int randomParametersFiles = 0; // best file
 		mu = 10;
 		lambda = mu * 6;
 		initialDesv = 10;
@@ -151,7 +151,7 @@ int AETwoVariables(int argc, char **argv)
 
 		ForecastClass pFC(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>&, Evaluation&>* sol;
+		pair<Solution<RepEFP>, Evaluation>* sol;
 		sol = pFC.run(timeES, timeVND, timeILS);
 
 		vector<double> foIndicatorCalibration;
@@ -184,7 +184,7 @@ int AETwoVariables(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			cout << vfoIndicatorCalibration[n][i] << "\t";
 
 		cout << endl;
@@ -197,7 +197,7 @@ int AETwoVariables(int argc, char **argv)
 	FILE* fResults = fopen(calibrationFile.c_str(), "a");
 	for (int n = 0; n < nBatches; n++)
 	{
-		for (int i = 0; i < vfoIndicatorCalibration[n].size(); i++)
+		for (int i = 0; i <  (int) vfoIndicatorCalibration[n].size(); i++)
 			fprintf(fResults, "%.7f\t", vfoIndicatorCalibration[n][i]);
 		fprintf(fResults, "\n");
 	}

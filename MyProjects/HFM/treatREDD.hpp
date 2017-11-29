@@ -27,7 +27,7 @@ public:
 
 		output << data.size() << endl;
 
-		for (int indexData = 0; indexData < data.size(); indexData++)
+		for (int indexData = 0; indexData < (int) data.size(); indexData++)
 		{
 			output << setprecision(5) << data[indexData].second << endl;
 		}
@@ -50,7 +50,7 @@ public:
 
 		vector<double> wattsVector;
 
-		for (int indexData = 0; indexData < data.size(); indexData++)
+		for (int indexData = 0; indexData < (int) data.size(); indexData++)
 		{
 
 			times = data[indexData].first;
@@ -108,12 +108,12 @@ public:
 		double times;
 		double timesPast;
 		double interpolation;
-		int i = 0, size = 0;
+//		int i = 0, size = 0;
 
 		timesPast = data[0].first;
 		wattsPast = data[0].second;
 
-		for (int i = 1; i < data.size(); i++)
+		for (int i = 1; i < (int) data.size(); i++)
 		{
 
 			times = data[i].first;
@@ -157,13 +157,13 @@ public:
 		ifstream input;
 		ofstream output;
 		double watts;
-		double wattsPast;
+//		double wattsPast;
 		double times;
-		double timesPast;
-		double interpolation;
-		bool initialize = true;
-		int i = 0, size = 0;
-		int interval = 60;
+//		double timesPast;
+//		double interpolation;
+//		bool initialize = true;
+//		int i = 0, size = 0;
+//		int interval = 60;
 
 //		cout << inputName.c_str() << endl;
 		input.open(inputName.c_str());

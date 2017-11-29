@@ -10,7 +10,7 @@
 #include <numeric>
 #include "../../../OptFrame/RandGen.hpp"
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
-#include "../../BBV/BBVTolls.hpp"
+//#include "../../BBV/BBVTolls.hpp"
 
 
 using namespace std;
@@ -23,11 +23,9 @@ extern int nThreads;
 int stockMarketForecasting(int argc, char **argv)
 {
 
-
-
 	nThreads = 1;
 	cout << "Welcome to stock market forecasting!" << endl;
-	getchar();
+
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(NULL); //CalibrationMode
@@ -43,10 +41,10 @@ int stockMarketForecasting(int argc, char **argv)
 //		exit(1);
 //	}
 
-	const char* caminhoOutput = argv[1];
+//	const char* caminhoOutput = argv[1];
+//	string nomeOutput = caminhoOutput;
 
-	string nomeOutput = caminhoOutput;
-	nomeOutput = "MyProjects/HFM/Instance/dadosBovespa/bovespa";
+	string nomeOutput = "MyProjects/HFM/Instance/dadosBovespa/bovespa";
 
 	//===================================
 	cout << "Parametros:" << endl;
@@ -64,7 +62,7 @@ int stockMarketForecasting(int argc, char **argv)
 	treatForecasts rF(explanatoryVariables);
 
 	//Parametros do metodo
-	int mu = 100;
+	int mu = 10;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
 	int contructiveNumberOfRules = 100;
@@ -139,20 +137,21 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 10;
+	int timeES = 60;
 	int timeGPLS = 20;
-	for (int b = 0; b < 2; b++)
+	for (int b = 0; b < 1; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
+		pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+		exit(1);
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
 		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
-		delete &sol->first;
-		delete &sol->second;
+//		delete &sol->first;
+//		delete &sol->second;
 		delete sol;
 		delete forecastObject;
 	}
@@ -177,7 +176,7 @@ int stockMarketForecasting(int argc, char **argv)
 	{
 		cout << setprecision(2);
 		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
-		for (int f = 0; f < blindForecasts.size(); f++)
+		for (int f = 0; f < (int) blindForecasts.size(); f++)
 			cout << blindForecasts[f] << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts[f]) << "\t";
 
 		cout << endl;
@@ -192,7 +191,7 @@ int stockMarketForecasting(int argc, char **argv)
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		cout << setprecision(5);
-		for (int e = 0; e < vEvalPF[i]->size(); e++)
+		for (int e = 0; e < (int) vEvalPF[i]->size(); e++)
 			cout << vEvalPF[i]->at(e).getObjFunction() << "\t\t";
 		cout << endl;
 	}
@@ -206,7 +205,7 @@ int stockMarketForecasting(int argc, char **argv)
 
 	//	===========================================
 	//	TIME FOR BRINCANDO COM A BOLSA DE VALORES (BBV)
-	BBVTools bbvTools;
+//	BBVTools bbvTools;
 
 	return 0;
 }

@@ -139,7 +139,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		pair<Solution<RepEFP>&, Evaluation&>* sol = forecastObject->run(timeES, 0, 0);
+		pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
 		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
@@ -170,7 +170,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 	{
 		cout << setprecision(2);
 		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
-		for (int f = 0; f < blindForecasts.size(); f++)
+		for (int f = 0; f < (int) blindForecasts.size(); f++)
 			cout << blindForecasts[f] << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts[f]) << "\t";
 
 		cout << endl;
@@ -185,7 +185,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		cout << setprecision(5);
-		for (int e = 0; e < vEvalPF[i]->size(); e++)
+		for (int e = 0; e < (int) vEvalPF[i]->size(); e++)
 			cout << vEvalPF[i]->at(e).getObjFunction() << "\t\t";
 		cout << endl;
 	}
