@@ -12,13 +12,10 @@
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
 //#include "../../BBV/BBVTolls.hpp"
 
-
 using namespace std;
 using namespace optframe;
 using namespace EFP;
 extern int nThreads;
-
-
 
 int stockMarketForecasting(int argc, char **argv)
 {
@@ -43,7 +40,7 @@ int stockMarketForecasting(int argc, char **argv)
 //	const char* caminhoOutput = argv[1];
 //	string nomeOutput = caminhoOutput;
 
-	string nomeOutput = "MyProjects/HFM/Instance/dadosBovespa/bovespa";
+	string nomeOutput = "./HFM/Instance/dadosBovespa/bovespa";
 
 	//===================================
 	cout << "Parametros:" << endl;
@@ -133,35 +130,30 @@ int stockMarketForecasting(int argc, char **argv)
 //		forecastObject.runMultiObjSearch();
 //		getchar();
 
-	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
+	Pareto < RepEFP > *pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 30;
+	int timeES = 10;
 	int timeGPLS = 20;
 	for (int b = 0; b < 1; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
-		cout<<"Bye bye..see u soon."<<endl;
-		delete sol;
-		delete pf;
+		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
-		exit(1);
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
-		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
+		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
-//		delete &sol->first;
-//		delete &sol->second;
-		delete sol;
 		delete forecastObject;
+//		cout<<"Bye bye..see u soon."<<endl;
+//		getchar();
 	}
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 
 	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
-	vector<Solution<RepEFP>*> vSolPF = pf->getParetoSet();
+	vector<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>*> vSolPF = pf->getParetoSet();
 	int nObtainedParetoSol = vEvalPF.size();
 
 	int targetFile = problemParam.getTargetFile();
@@ -173,7 +165,7 @@ int stockMarketForecasting(int argc, char **argv)
 //	vector<vector<double> > validationSet;
 //	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
 
-	vector<vector<double>* > ensembleBlindForecasts;
+	vector<vector<double>*> ensembleBlindForecasts;
 	cout << "\nPrinting obtained sets of predicted values..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
@@ -203,6 +195,9 @@ int stockMarketForecasting(int argc, char **argv)
 
 	delete pf;
 	delete forecastObject;
+
+	for (int i = 0; i < nObtainedParetoSol; i++)
+		delete ensembleBlindForecasts[i];
 
 	cout << "MO Stock Market forecasting finished!" << endl;
 

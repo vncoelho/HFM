@@ -54,6 +54,7 @@ private:
 
 //	EFPESContinous* EsCOpt;
 	ES<RepEFP, OPTFRAME_DEFAULT_ADS>* es;
+	NGESParams* ngesParams;
 
 	vector<LocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vLS;
 
@@ -153,7 +154,7 @@ public:
 		double mutationRate = 0.1;
 		int selectionType = 1;
 		string outputFile = "LogPopFOPlus";
-		NGESParams* ngesParams = new NGESParams(vNSeqMax, selectionType, mutationRate, mu, lambda, esGMaxWithoutImp, outputFile, 0);
+		ngesParams = new NGESParams(vNSeqMax, selectionType, mutationRate, mu, lambda, esGMaxWithoutImp, outputFile, 0);
 		es = new ES<RepEFP>(*eval, *c, vNSeq, emptyLS, rg, *ngesParams);
 		es->setMessageLevel(3);
 
@@ -193,6 +194,7 @@ public:
 		mev->clear();
 		delete mev;
 		delete es;
+		delete ngesParams;
 	}
 
 //	//add solution to pareto front evaluating with forecasting class evaluators
@@ -202,17 +204,17 @@ public:
 //	}
 
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS)
+	void addSolToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS)
 	{
 		paretoManager<RepEFP, OPTFRAME_DEFAULT_ADS> paretoMan(*mev);
 		paretoMan.addSolution(pf, candidateS);
 	}
 
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS, const MultiEvaluation& candidateMev)
+	void addSolWithMevToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS, MultiEvaluation& candidateMev)
 	{
 		paretoManager<RepEFP> paretoMan(*mev);
-		paretoMan.addSolution(pf, candidateS, candidateMev);
+		paretoMan.addSolutionWithMEV(pf, candidateS, candidateMev);
 	}
 
 	Pareto<RepEFP>* runMultiObjSearch(double timeGPLS, Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* _pf = NULL)
@@ -236,13 +238,13 @@ public:
 //			}
 //		}
 
-		int initial_population_size = 10;
+		int initial_population_size = 30;
 //		GRInitialPopulation<RepEFP,OPTFRAME_DEFAULT_ADS> bip(*c, rg, 1);
 		BasicInitialPopulation<RepEFP, OPTFRAME_DEFAULT_ADS> bip(*c);
 //		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 //		GRInitialPareto<RepEFP,OPTFRAME_DEFAULT_ADS> grIP(*c, rg, 1, *mev);
 		BasicInitialPareto<RepEFP, OPTFRAME_DEFAULT_ADS> grIP(*c, *mev);
-		int maxTriesRI = 100;
+		int maxTriesRI = 200;
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriMFR(*mev, *vNSeq[0], maxTriesRI);
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriCSI(*mev, *vNSeq[1], maxTriesRI);
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriRSI(*mev, *vNSeq[2], maxTriesRI);

@@ -386,7 +386,7 @@ public:
 		iterWithoutImprovement = 0;
 		while ((iterWithoutImprovement < ngesParams.gMaxWithoutImprovement) && ((tnow.now()) < stopCriteria.timelimit) && eval.betterThan(stopCriteria.target_f, (double) eStar->evaluation()))
 		{
-			NGESPopulation popOffsprings;
+			NGESPopulation popOffsprings(ngesParams.lambda);
 			double fo_filhos = 0;
 
 			//GERA OS OFFSPRINGS
@@ -415,7 +415,7 @@ public:
 
 				NGESInd<R, ADS>* ind = new NGESInd<R, ADS>(filho, e, vt, vNSOffspring); //TODO MAKE MOVE
 
-				popOffsprings.push_back(ind);
+				popOffsprings[l] = ind;
 			}
 
 			//cout << "Offspring mean FO, iter " << gAtual << ":\t" << fo_filhos / mi << endl;

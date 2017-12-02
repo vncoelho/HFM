@@ -1,4 +1,4 @@
-all: gfp
+all: HFM
 	@echo "BUILT SUCCESSFULLY!"
 
 CPLEXDIR    = /opt/ibm/ILOG/CPLEX_Studio1251/cplex
@@ -17,13 +17,13 @@ LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
 LLIBSMP3 = -lsndfile 
-GCC_FLAGS = -Ofast -Wall  --std=c++11  
+GCC_FLAGS = -g -Ofast -Wall  --std=c++11  
 
 SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 #GCC_FLAGS = -Ofast -g --std=c++11
 
 #-Wall 
-gfp:
+HFM:
 	g++ $(GCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
 	
 clean:
