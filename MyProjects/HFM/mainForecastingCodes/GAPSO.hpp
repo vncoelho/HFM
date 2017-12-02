@@ -206,8 +206,8 @@ int GAPSO_SKU(int argc, char **argv)
 		cout << validationSet << endl;
 //		getchar();
 
-		vector<double> errors = forecastObject.returnErrors(sol->first.getR(), validationSet);
-		vForecasts = forecastObject.returnForecasts(sol, validationSet);
+		vector<double> errors = *forecastObject.returnErrors(sol->first.getR(), validationSet);
+		vForecasts = *forecastObject.returnForecasts(sol, validationSet);
 		cout << "Vector of forecasts: \n " << vForecasts << endl;
 		vector<vector<double> > blind = validationSet;
 		blind[0].erase(blind[0].end() - stepsAhead, blind[0].end());

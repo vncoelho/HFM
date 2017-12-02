@@ -202,7 +202,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 			vector<double> foIndicatorCalibration;
 			vector<vector<double> > validationSet;
 			validationSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet - stepsAhead, maxLag + stepsAhead));
-			vector<double> errors = forecastObject.returnErrors(sol->first.getR(), validationSet);
+			vector<double> errors = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 			foIndicators.push_back(errors[MAPE_INDEX]);
 		}
 

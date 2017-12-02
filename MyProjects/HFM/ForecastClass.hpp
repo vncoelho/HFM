@@ -14,7 +14,6 @@
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
 #include "treatForecasts.hpp"
-#include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/ES.hpp"
 #include "../../OptFrame/Heuristics/Empty.hpp"
 #include "../../OptFrame/NSSeq.hpp"
 #include "../../OptFrame/Heuristics/LocalSearches/VND.h"
@@ -26,6 +25,7 @@
 #include "../../OptFrame/Heuristics/GRASP/BasicGRASP.hpp"
 //#include "../../OptFrame/Heuristics/VNS/MOVNSLevels.hpp"
 #include "../../OptFrame/Heuristics/2PPLS.hpp"
+#include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/NGES.hpp"
 #include "../../OptFrame/MultiEvaluator.hpp"
 #include "../../OptFrame/MultiObjSearch.hpp"
 #include "../../OptFrame/Util/UnionNDSets.hpp"
@@ -44,7 +44,6 @@ private:
 	RandGen& rg;
 	methodParameters& methodParam;
 
-
 	ProblemInstance* p;
 	EFPEvaluator* eval;
 	Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>* c;
@@ -56,8 +55,6 @@ private:
 //	EFPESContinous* EsCOpt;
 	ES<RepEFP, OPTFRAME_DEFAULT_ADS>* es;
 
-
-
 	vector<LocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vLS;
 
 	VariableNeighborhoodDescent<RepEFP, OPTFRAME_DEFAULT_ADS>* vnd;
@@ -67,7 +64,6 @@ private:
 	vector<pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>*> vFinalSol;
 
 	ILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>* ilsPert;
-
 
 	//OptimalLinearRegression* olr;
 	MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>* mev;
@@ -80,7 +76,6 @@ public:
 
 		p = new ProblemInstance(tForecastings, problemParam);
 		eval = new EFPEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), methodParam.getEvalAprox());
-
 
 		NSSeqNEIGHModifyRules* nsModifyFuzzyRules = new NSSeqNEIGHModifyRules(*p, rg);
 		NSSeqNEIGHChangeSingleInput* nsChangeSingleInput = new NSSeqNEIGHChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
@@ -129,11 +124,10 @@ public:
 //		int initialDesv = methodParam.getESInitialDesv(); //Parameter for ESContinous - Used in Clemson's Paper
 //		int mutationDesv = methodParam.getESMutationDesv(); //Parameter for ESContinous - Used in Clemson's Paper
 
+//cout<<mu<<"\t"<<lambda<<"\t"<<esMaxG<<"\t"<<initialDesv<<"\t"<<mutationDesv<<endl;
+//getchar();
 
-		//cout<<mu<<"\t"<<lambda<<"\t"<<esMaxG<<"\t"<<initialDesv<<"\t"<<mutationDesv<<endl;
-		//getchar();
-
-		//Old continous Evolution Strategy - Deprecated
+//Old continous Evolution Strategy - Deprecated
 //		EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, esMaxG, rg, initialDesv, mutationDesv);
 
 		//olr = new OptimalLinearRegression(*eval, *p);
@@ -172,6 +166,7 @@ public:
 //		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
 //		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
 		mev = new MultiEvaluator<RepEFP>(v_e);
+
 	}
 
 	virtual ~ForecastClass()
@@ -320,7 +315,7 @@ public:
 		double targetValue = 3.879748973;
 		targetValue = 0.123;
 
-		SOSC* stopCriteria = new SOSC(timeES,targetValue);
+		SOSC* stopCriteria = new SOSC(timeES, targetValue);
 		finalSol = es->search(*stopCriteria);
 		delete stopCriteria;
 		//finalSol = EsCOpt->search(timeES); //Continous ES -- Deprecated
@@ -362,12 +357,12 @@ public:
 
 	//return blind forecasts for the required steps ahead of problemParam class
 	//this function feed a trainedModel with the last samples from the vector of TimeSeries
-	vector<double> returnBlind(const RepEFP& trainedModel, vector<vector<double> >& vTimeSeries)
+	vector<double>* returnBlind(const RepEFP& trainedModel, vector<vector<double> >& vTimeSeries)
 	{
 		return eval->returnForecasts(trainedModel, vTimeSeries, vTimeSeries[problemParam.getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
-	vector<double> returnErrors(const RepEFP& rep, vector<vector<double> >& vForecastingsValidation)
+	vector<double>* returnErrors(const RepEFP& rep, vector<vector<double> >& vForecastingsValidation)
 	{
 		return eval->evaluateAll(rep, ALL_EVALUATIONS, &vForecastingsValidation);
 
@@ -390,27 +385,27 @@ public:
 	}
 
 	//return all possible forecasting measures
-	vector<double> callEvalGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
+	vector<double>* callEvalGetAccuracy(vector<double> targetValues, vector<double> estimatedValues)
 	{
 		return eval->getAccuracy(targetValues, estimatedValues, ALL_EVALUATIONS);
 	}
 //
 
 	//Return forecasts with pre-defined sliding window strategy with FH
-	vector<double> returnForecasts(pair<SolutionEFP, Evaluation>* sol, vector<vector<double> > vForecastingsValidation)
+	vector<double>* returnForecasts(pair<SolutionEFP, Evaluation>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-		pair<vector<double>, vector<double> > targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
-		return targetAndForecasts.second;
+		pair<vector<double>*, vector<double>* >* targetAndForecasts  = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
+		return targetAndForecasts->second;
 	}
 
 	/*Target and forecasts
 	 Return forecasts with pre-defined sliding window strategy with FH*/
-	pair<vector<double>, vector<double> > returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
+	pair<vector<double>*, vector<double>* >* returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
 	{
 		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());
 	}
 
-	vector<double> returnErrorsPersistance(vector<double> targetValues, int fH)
+	vector<double>* returnErrorsPersistance(vector<double> targetValues, int fH)
 	{
 
 		vector<double> estimatedValues;

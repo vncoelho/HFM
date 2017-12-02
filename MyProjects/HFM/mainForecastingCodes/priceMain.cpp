@@ -174,7 +174,7 @@ int priceCompetitionBlind(int argc, char **argv)
 
 
 		vector<double> blindResults;
-		blindResults = forecastObject.returnBlind(sol->first.getR(), validationBlindForecastings);
+		blindResults = *forecastObject.returnBlind(sol->first.getR(), validationBlindForecastings);
 		batchOfBlindResults.push_back(blindResults);
 		//cout << blindResults << endl;
 
@@ -435,7 +435,7 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 		//intervalNumber++;
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
+		foIndicatorCalibration = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(randomPrecision);
 		foIndicatorCalibration.push_back(randomParametersFiles);
 		foIndicatorCalibration.push_back(nTrainningRounds);

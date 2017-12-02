@@ -400,25 +400,29 @@ public:
 	EvaluationEFP evaluate(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		//Fo vector with different metrics calculations
-		vector<double> foIndicator = evaluateAll(rep, optMetric);
+		vector<double>* foIndicator = evaluateAll(rep, optMetric);
 
-		double fo = foIndicator[optMetric];		// Evaluation Function Value
-
+		double fo = foIndicator->at(optMetric);		// Evaluation Function Value
+		delete foIndicator;
 		return EvaluationEFP(fo);
 	}
 
-	vector<double> evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
+	vector<double>* evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
 	{
 		if (vForecastings == NULL)
 			vForecastings = &pEFP.getForecastingsVector();
 
-		pair<vector<double>, vector<double> > targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
-		vector<double> foIndicator = getAccuracy(targetAndForecasts.first, targetAndForecasts.second, accIndicator);
+		pair<vector<double>*, vector<double>* >* targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
+		vector<double>* foIndicator = getAccuracy(*targetAndForecasts->first, *targetAndForecasts->second, accIndicator);
+
+		delete targetAndForecasts->first;
+		delete targetAndForecasts->second;
+		delete targetAndForecasts;
 
 		return foIndicator;
 	}
 
-	vector<double> returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
+	vector<double>* returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
 	{
 		int sizeSP = rep.singleIndex.size();
 		int sizeAP = rep.averageIndex.size();
@@ -426,10 +430,10 @@ public:
 
 		int maxLag = problemParam.getMaxLag();
 
-		vector<double> predicteds;
+		vector<double>* predicteds = new vector<double>(fh);
 
-		for (int pa = 0; pa < fh; pa++)			// passos a frente
 		//for (int pa = 0; ((pa < stepsAhead) && (pa + begin < nForTargetFile)); pa++) //auxiliar loop for steps ahead
+		for (int pa = 0; pa < fh; pa++)	 // passos a frente
 		{
 			//vector<double> fuzzyWeights;
 			//forecasting estimation
@@ -442,7 +446,7 @@ public:
 				int file = rep.singleIndex[nSP].first;
 				int K = rep.singleIndex[nSP].second;
 
-				double singleValue = getKValue(K, file, begin, pa, vForecastings, predicteds);
+				double singleValue = getKValue(K, file, begin, pa, vForecastings, *predicteds);
 
 				double ruleGreater = rep.singleFuzzyRS[nSP][GREATER];
 				double greaterWeight = rep.singleFuzzyRS[nSP][GREATER_WEIGHT];
@@ -465,7 +469,7 @@ public:
 					int file = meansK[mK].first;
 					int K = meansK[mK].second;
 
-					mean += getKValue(K, file, begin, pa, vForecastings, predicteds);
+					mean += getKValue(K, file, begin, pa, vForecastings, *predicteds);
 				}
 				mean = mean / nAveragePoints;
 
@@ -489,7 +493,7 @@ public:
 					int file = derivateK[dK].first;
 					int K = derivateK[dK].second;
 
-					double value = getKValue(K, file, begin, pa, vForecastings, predicteds);
+					double value = getKValue(K, file, begin, pa, vForecastings, *predicteds);
 
 					if (dK == 0)
 						d += value;
@@ -514,14 +518,14 @@ public:
 
 			//Approximations using time series backshift operators
 			if (aprox != 0)
-				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, predicteds, maxLag);
+				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, *predicteds, maxLag);
 
 			//================================================
 			//Apply special operators, rounding, binary, on estimated value
 			modifyEstimation(estimation);
 			//================================================
 
-			predicteds.push_back(estimation);
+			predicteds->at(pa) = estimation;
 
 		} //Forecasting horizon loop -- Steps Ahead
 
@@ -529,10 +533,10 @@ public:
 	}
 
 //return a pair -- first vector contain the real values while the second has the forecasted ones - StepsSize=slidingWindowStepSize
-	pair<vector<double>, vector<double> > generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
+	pair<vector<double>*, vector<double>* >* generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
 	{
-		vector<double> allForecasts;
-		vector<double> allTargets;
+		vector<double>* allForecasts = new vector<double>;
+		vector<double>* allTargets = new vector<double>;
 
 		int nForTargetFile = vForecastings[targetFile].size();
 		int maxLag = problemParam.getMaxLag();
@@ -550,20 +554,21 @@ public:
 #pragma omp parallel for num_threads(nThreads)
 			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
 			{
-				vector<double> forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
+				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
 
 				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
 				int index = (beginParallel - maxLag) / stepSize;
 
-				allForecastsVectors[index].insert(allForecastsVectors[index].end(), forecasts.begin(), forecasts.begin() + fhSize);
+				allForecastsVectors[index].insert(allForecastsVectors[index].end(), forecasts->begin(), forecasts->begin() + fhSize);
 				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+				delete forecasts;
 			}
 
 			for (int aV = 0; aV < (int) allForecastsVectors.size(); aV++)
 				for (int k = 0; k < (int) allForecastsVectors[aV].size(); k++)
 				{
-					allForecasts.push_back(allForecastsVectors[aV][k]);
-					allTargets.push_back(allForecastsTarget[aV][k]);
+					allForecasts->push_back(allForecastsVectors[aV][k]);
+					allTargets->push_back(allForecastsTarget[aV][k]);
 				}
 			//		PARALELL CODE FOR MULTI CPU
 			//===================================================================
@@ -573,19 +578,28 @@ public:
 
 			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
 			{
-				vector<double> forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
+				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
 				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
 
-				allForecasts.insert(allForecasts.end(), forecasts.begin(), forecasts.begin() + fhSize);
-				allTargets.insert(allTargets.end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+				for(int i=0;i<fhSize;i++)
+				{
+					allForecasts->push_back(forecasts->at(i));
+					allTargets->push_back(vForecastings[targetFile][beginParallel + i]);
+				}
+
+//				allForecasts->insert(allForecasts->end(), forecasts->begin(), forecasts->begin() + fhSize);
+//				allTargets->insert(allTargets->end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+				delete forecasts;
 			}
 		}
-		return make_pair(allTargets, allForecasts);
+
+
+		return new pair<vector<double>*, vector<double>*>(make_pair(allTargets, allForecasts));
 	}
 
 //return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
 //if equals to -1 it calls all indicators calculus
-	const vector<double> getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, const int accIndicator)
+	vector<double>* getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, const int accIndicator)
 	{
 
 		int nSamples = targetValues.size();
@@ -595,7 +609,7 @@ public:
 			cout << "targetValues.size() = " << targetValues.size() << "\t";
 			cout << "estimatedValues.size() = " << estimatedValues.size() << endl;
 		}
-		vector<double> foIndicator(EVALUTORS_NMETRICS_ENUM_COUNT, 0);
+		vector<double>* foIndicator= new vector<double>(EVALUTORS_NMETRICS_ENUM_COUNT, 0);
 
 		double sumTarget = 0;
 		double avgTarget = 0;
@@ -618,7 +632,7 @@ public:
 			double absDiff = abs(estimation - forecastingTarget);
 
 			if (accIndicator == MAPE_INDEX || accIndicator == ALL_EVALUATIONS)
-				foIndicator[MAPE_INDEX] += (absDiff / abs(forecastingTargetNotNull));
+				foIndicator->at(MAPE_INDEX) += (absDiff / abs(forecastingTargetNotNull));
 
 			if (accIndicator == MAPE_INV_INDEX || accIndicator == ALL_EVALUATIONS)
 			{
@@ -626,14 +640,14 @@ public:
 				double tsMaxValues = pEFP.getMax(targetFile);
 				if (forecastingTargetNotMax == tsMaxValues)
 					forecastingTargetNotMax = tsMaxValues - 0.0001;
-				foIndicator[MAPE_INV_INDEX] += (absDiff / abs(tsMaxValues - forecastingTargetNotMax));
+				foIndicator->at(MAPE_INV_INDEX) += (absDiff / abs(tsMaxValues - forecastingTargetNotMax));
 			}
 
 			if (accIndicator == MAE_INDEX || accIndicator == ALL_EVALUATIONS)
-				foIndicator[MAE_INDEX] += absDiff;
+				foIndicator->at(MAE_INDEX) += absDiff;
 
 			if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
-				foIndicator[MSE_INDEX] += pow(absDiff, 2);
+				foIndicator->at(MSE_INDEX) += pow(absDiff, 2);
 
 			if (accIndicator == SMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 			{
@@ -641,14 +655,14 @@ public:
 				if (forecastingTargetNotNullSMAPE == 0)
 					forecastingTargetNotNullSMAPE = 0.0001;
 
-				foIndicator[SMAPE_INDEX] += (absDiff / forecastingTargetNotNullSMAPE / 2);
+				foIndicator->at(SMAPE_INDEX) += (absDiff / forecastingTargetNotNullSMAPE / 2);
 			}
 
 			if (accIndicator == WMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
-				foIndicator[WMAPE_INDEX] += (absDiff / sumTarget);
+				foIndicator->at(WMAPE_INDEX) += (absDiff / sumTarget);
 
 			if (accIndicator == MMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
-				foIndicator[MMAPE_INDEX] += (absDiff / avgTarget);
+				foIndicator->at(MMAPE_INDEX) += (absDiff / avgTarget);
 
 			//PinballFunction
 			if (accIndicator == PINBALL_INDEX || accIndicator == ALL_EVALUATIONS)
@@ -668,7 +682,7 @@ public:
 						pinballFunctionQuantils += (a / 100.0) * (forecastingTarget - qa);
 				}
 				pinballFunctionQuantils /= 99;
-				foIndicator[PINBALL_INDEX] += pinballFunctionQuantils;
+				foIndicator->at(PINBALL_INDEX) += pinballFunctionQuantils;
 			}
 
 		}
@@ -676,46 +690,46 @@ public:
 		//MAPE FINAL CALC
 		if (accIndicator == MAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
-			foIndicator[MAPE_INDEX] *= 100;
-			foIndicator[MAPE_INDEX] /= nSamples;
+			foIndicator->at(MAPE_INDEX) *= 100;
+			foIndicator->at(MAPE_INDEX) /= nSamples;
 		}
 
 		if (accIndicator == MAPE_INV_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
-			foIndicator[MAPE_INV_INDEX] *= 100;
-			foIndicator[MAPE_INV_INDEX] /= nSamples;
+			foIndicator->at(MAPE_INV_INDEX) *= 100;
+			foIndicator->at(MAPE_INV_INDEX) /= nSamples;
 		}
 
 		if (accIndicator == SMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
-			foIndicator[SMAPE_INDEX] *= 100;
-			foIndicator[SMAPE_INDEX] /= nSamples;
+			foIndicator->at(SMAPE_INDEX) *= 100;
+			foIndicator->at(SMAPE_INDEX)/= nSamples;
 		}
 
 		if (accIndicator == WMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
-			foIndicator[WMAPE_INDEX] *= 100;
-			foIndicator[WMAPE_INDEX] /= nSamples;
+			foIndicator->at(WMAPE_INDEX) *= 100;
+			foIndicator->at(WMAPE_INDEX) /= nSamples;
 		}
 
 		if (accIndicator == MMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
-			foIndicator[MMAPE_INDEX] *= 100;
-			foIndicator[MMAPE_INDEX] /= nSamples;
+			foIndicator->at(MMAPE_INDEX) *= 100;
+			foIndicator->at(MMAPE_INDEX) /= nSamples;
 		}
 
 		if (accIndicator == PINBALL_INDEX || accIndicator == ALL_EVALUATIONS)
-			foIndicator[PINBALL_INDEX] /= nSamples;
+			foIndicator->at(PINBALL_INDEX) /= nSamples;
 
 		if (accIndicator == MAE_INDEX || accIndicator == ALL_EVALUATIONS)
-			foIndicator[MAE_INDEX] /= nSamples;
+			foIndicator->at(MAE_INDEX)/= nSamples;
 
 		if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
-			foIndicator[MSE_INDEX] /= nSamples;
+			foIndicator->at(MSE_INDEX) /= nSamples;
 
 			if (accIndicator == RMSE_INDEX || accIndicator == -1)
-				foIndicator[RMSE_INDEX] = sqrt(foIndicator[MSE_INDEX]);
+				foIndicator->at(RMSE_INDEX) = sqrt(foIndicator->at(MSE_INDEX));
 		}
 
 		// ===================  MAPE FOR EACH STEP AHEAD ========================

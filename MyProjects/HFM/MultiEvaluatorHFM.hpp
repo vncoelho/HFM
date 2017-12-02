@@ -50,13 +50,13 @@ public:
 	{
 		MultiEvaluation* nev = new MultiEvaluation;
 
-		vector<double> foIndicator = evalEFP.evaluateAll(r, -1);
+		vector<double>* foIndicator = evalEFP.evaluateAll(r, -1);
 
-		nev->addEvaluation(*new EvaluationEFP(foIndicator[MAPE_INDEX]));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator[RMSE_INDEX]));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator[WMAPE_INDEX]));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator[SMAPE_INDEX]));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator[MMAPE_INDEX]));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(MAPE_INDEX)));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(RMSE_INDEX)));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(WMAPE_INDEX)));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(SMAPE_INDEX)));
+		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(MMAPE_INDEX)));
 
 		return *nev;
 	}

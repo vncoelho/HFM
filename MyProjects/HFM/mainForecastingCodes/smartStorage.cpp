@@ -189,7 +189,7 @@ int smartStorage(int argc, char **argv)
 		validationSet.clear();
 		validationSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet-stepsAhead, needInputs));
 		//validationSet.push_back(validationSetPure);
-		batchOfResults.push_back(forecastObject.returnForecasts(sol, validationSet));
+		batchOfResults.push_back(*forecastObject.returnForecasts(sol, validationSet));
 
 	}
 

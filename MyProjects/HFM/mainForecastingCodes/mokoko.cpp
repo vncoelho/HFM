@@ -170,11 +170,11 @@ int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 		//validation set for calibration
 		vector<vector<double> > validationSet;
 		validationSet.push_back(rF.getLastForecasts(0, maxLag + stepsAhead));
-		batchOfResults.push_back(forecastObject.returnForecasts(sol, validationSet));
+		batchOfResults.push_back(*forecastObject.returnForecasts(sol, validationSet));
 
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
+		foIndicatorCalibration = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(modelInitialNumberOfRules);
 		foIndicatorCalibration.push_back(nTrainningRounds);
 		foIndicatorCalibration.push_back(beginTrainingSet);

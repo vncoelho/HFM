@@ -138,7 +138,7 @@ int hosseinBlindForecasts(int argc, char **argv)
 
 		vector<vector<double> > dataForBlindForecasts;
 		dataForBlindForecasts.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag));
-		vector<double> blindForecasts = forecastObject.returnBlind(sol->first.getR(), dataForBlindForecasts);
+		vector<double>* blindForecasts = forecastObject.returnBlind(sol->first.getR(), dataForBlindForecasts);
 
 		cout << blindForecasts << endl;
 
@@ -148,7 +148,7 @@ int hosseinBlindForecasts(int argc, char **argv)
 		fprintf(fResults, "%d\t%d\n", argvTimeES,argvMaxLagRate);
 		for (int n = 0; n < stepsAhead; n++)
 		{
-			fprintf(fResults, "%f;", blindForecasts[n]);
+			fprintf(fResults, "%f;", blindForecasts->at(n));
 		}
 		fprintf(fResults, "\n");
 

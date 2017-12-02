@@ -180,11 +180,11 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 
 			validationSet.push_back(rF.getPartsForecastsBeginToEnd(0, nTotalForecastingsTrainningSet + begin - maxLag, maxLag + stepsAhead));
 			vector<double> foIndicatorsWeeks;
-			foIndicatorsWeeks = forecastObject.returnErrors(sol->first.getR(), validationSet);
+			foIndicatorsWeeks = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 			foIndicatorCalibration.push_back(foIndicatorsWeeks[MAPE_INDEX]);
 			averageError += foIndicatorsWeeks[MAPE_INDEX];
 
-			vector<double> currentForecasts = forecastObject.returnForecasts(sol, validationSet);
+			vector<double> currentForecasts = *forecastObject.returnForecasts(sol, validationSet);
 			for (int cF = 0; cF < (int) currentForecasts.size(); cF++)
 				vectorOfForecasts.push_back(currentForecasts[cF]);
 
@@ -388,11 +388,11 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 
 			validationSet.push_back(rF.getPartsForecastsBeginToEnd(0, nTotalForecastingsTrainningSet + begin - maxLag, maxLag + stepsAhead));
 			vector<double> foIndicatorsWeeks;
-			foIndicatorsWeeks = forecastObject.returnErrors(sol->first.getR(), validationSet);
+			foIndicatorsWeeks = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 			foIndicatorCalibration.push_back(foIndicatorsWeeks[MAPE_INDEX]);
 			averageError += foIndicatorsWeeks[MAPE_INDEX];
 
-			vector<double> currentForecasts = forecastObject.returnForecasts(sol, validationSet);
+			vector<double> currentForecasts = *forecastObject.returnForecasts(sol, validationSet);
 			for (int cF = 0; cF < (int) currentForecasts.size(); cF++)
 				vectorOfForecasts.push_back(currentForecasts[cF]);
 

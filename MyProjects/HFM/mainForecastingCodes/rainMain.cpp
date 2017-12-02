@@ -220,10 +220,10 @@ int rainMain(int argc, char **argv)
 
 		double intervalOfBeginTrainningSet = double(beginTrainingSet) / double(rF.getForecastsDataSize());
 
-		batchOfResults.push_back(forecastObject.returnForecasts(sol, validationSet));
+		batchOfResults.push_back(*forecastObject.returnForecasts(sol, validationSet));
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
+		foIndicatorCalibration = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(randomPrecision);
 		foIndicatorCalibration.push_back(randomParametersFiles);
 		foIndicatorCalibration.push_back(nTrainningRounds);

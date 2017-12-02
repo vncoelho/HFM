@@ -197,7 +197,7 @@ int CIFWCCICalibration(int argc, char **argv)
 		vector<double> foIndicatorCalibration;
 		vector<vector<double> > validationSet;
 		validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag + stepsAhead));
-		vector<double> errors = forecastObject.returnErrors(sol->first.getR(), validationSet);
+		vector<double> errors = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 
 		foIndicators.push_back(errors[SMAPE_INDEX]);
 		foIndicators.push_back(sol->second.evaluation());
@@ -437,7 +437,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 		vector<double> foIndicatorCalibration;
 		vector<vector<double> > dataForBlindForecasts;
 		dataForBlindForecasts.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag));
-		vector<double> blindForecasts = forecastObject.returnBlind(sol->first.getR(), dataForBlindForecasts);
+		vector<double>* blindForecasts = forecastObject.returnBlind(sol->first.getR(), dataForBlindForecasts);
 
 
 		cout<<blindForecasts<<endl;
@@ -448,7 +448,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 		fprintf(fResults, "ts%d", argvTargetTimeSeries);
 		for (int n = 0; n < stepsAhead; n++)
 		{
-				fprintf(fResults, ";%f", blindForecasts[n]);
+				fprintf(fResults, ";%f", blindForecasts->at(n));
 		}
 		fprintf(fResults, "\n");
 

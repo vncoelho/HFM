@@ -201,13 +201,13 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 		double intervalOfBeginTrainningSet = double(beginTrainingSet) / double(rF.getForecastsDataSize());
 
-		vector<double> vForecasts = forecastObject.returnForecasts(sol, validationSet);
-		cout<<vForecasts<<endl;
-		cout<<vForecasts.size()<<endl;
+		vector<double>* vForecasts = forecastObject.returnForecasts(sol, validationSet);
+		cout<<*vForecasts<<endl;
+		cout<<vForecasts->size()<<endl;
 
 
 		vector<double> foIndicatorCalibration;
-		foIndicatorCalibration = forecastObject.returnErrors(sol->first.getR(), validationSet);
+		foIndicatorCalibration = *forecastObject.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(nTrainningRounds);
 		foIndicatorCalibration.push_back(beginTrainingSet);
 		foIndicatorCalibration.push_back(intervalOfBeginTrainningSet);

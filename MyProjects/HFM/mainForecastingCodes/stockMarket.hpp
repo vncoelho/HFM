@@ -22,7 +22,6 @@ extern int nThreads;
 
 int stockMarketForecasting(int argc, char **argv)
 {
-
 	nThreads = 1;
 	cout << "Welcome to stock market forecasting!" << endl;
 
@@ -62,7 +61,7 @@ int stockMarketForecasting(int argc, char **argv)
 	treatForecasts rF(explanatoryVariables);
 
 	//Parametros do metodo
-	int mu = 10;
+	int mu = 200;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
 	int contructiveNumberOfRules = 100;
@@ -137,7 +136,7 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 60;
+	int timeES = 30;
 	int timeGPLS = 20;
 	for (int b = 0; b < 1; b++)
 	{
@@ -145,6 +144,10 @@ int stockMarketForecasting(int argc, char **argv)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 		pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+		cout<<"Bye bye..see u soon."<<endl;
+		delete sol;
+		delete pf;
+
 		exit(1);
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
 		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
@@ -170,14 +173,14 @@ int stockMarketForecasting(int argc, char **argv)
 //	vector<vector<double> > validationSet;
 //	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
 
-	vector<vector<double> > ensembleBlindForecasts;
+	vector<vector<double>* > ensembleBlindForecasts;
 	cout << "\nPrinting obtained sets of predicted values..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		cout << setprecision(2);
-		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
-		for (int f = 0; f < (int) blindForecasts.size(); f++)
-			cout << blindForecasts[f] << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts[f]) << "\t";
+		vector<double>* blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
+		for (int f = 0; f < (int) blindForecasts->size(); f++)
+			cout << blindForecasts->at(f) << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts->at(f)) << "\t";
 
 		cout << endl;
 

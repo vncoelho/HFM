@@ -175,7 +175,7 @@ int loadCompetitionBlind(int argc, char **argv)
 			vector<vector<double> > validationBlindForecastings;
 			validationBlindForecastings.push_back(dayValidation);
 
-			dayBlindForecasts = pFC.returnBlind(sol->first.getR(), validationBlindForecastings);
+			dayBlindForecasts = *pFC.returnBlind(sol->first.getR(), validationBlindForecastings);
 
 			vBlindForecastDayByDay.push_back(dayBlindForecasts);
 
@@ -402,7 +402,7 @@ int loadCompetitionCalibrationMode(int argc, char **argv)
 			pair<Solution<RepEFP>, Evaluation>* sol;
 			sol = pFC.run(timeES, timeVND, timeILS);
 			vector<double> dayBlindForecasts;
-			dayBlindForecasts = pFC.returnBlind(sol->first.getR(), validationBlindForecastingsDay);
+			dayBlindForecasts = *pFC.returnBlind(sol->first.getR(), validationBlindForecastingsDay);
 
 			vBlindForecastDayByDay.push_back(dayBlindForecasts);
 

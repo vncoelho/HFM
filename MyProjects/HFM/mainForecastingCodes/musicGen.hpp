@@ -143,7 +143,7 @@ int musicGen(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
-	pair<vector<double>, vector<double> > forecastsAndTargets;
+	pair<vector<double>*, vector<double>* >* forecastsAndTargets;
 	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector
@@ -154,18 +154,18 @@ int musicGen(int argc, char **argv)
 
 		forecastsAndTargets = forecastObject->returnForecastsAndTargets(sol->first.getR(), validationSet);
 
-		for (int n = 0; n < (int) forecastsAndTargets.first.size(); n++)
+		for (int n = 0; n < (int) forecastsAndTargets->first->size(); n++)
 		{
-			forecastsAndTargets.first[n] /= multiplier;
-			forecastsAndTargets.second[n] /= multiplier;
+			forecastsAndTargets->first->at(n) /= multiplier;
+			forecastsAndTargets->second->at(n) /= multiplier;
 		}
 
 		stringstream ss;
 		ss << "forecast_Params_FH" << fh << "_max" << maxLag << "_Tr" << timeES << "_Times" << nSecondsOfTraining << "_" << nSecondsForFeeding << "_" << nSecondsOfForecasts << "_TS" << "_TS" << m << ".txt";
-		forecastObject->exportForecasts(forecastsAndTargets.second, ss.str());
+		forecastObject->exportForecasts(*forecastsAndTargets->second, ss.str());
 	}
 
-	forecastObject->exportForecasts(forecastsAndTargets.first, "./targetSmall.txt");
+	forecastObject->exportForecasts(*forecastsAndTargets->first, "./targetSmall.txt");
 
 	cout << "Music has been created." << endl;
 
@@ -289,7 +289,7 @@ int musicGenMidiCSV(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
-	pair<vector<double>, vector<double> > forecastsAndTargets;
+	pair<vector<double>*, vector<double>* >* forecastsAndTargets;
 	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector
@@ -299,10 +299,10 @@ int musicGenMidiCSV(int argc, char **argv)
 
 		stringstream ss;
 		ss << "forecast_Params_FH_TrTs1_" << fh << "_max" << maxLag << "_Tr" << timeES << "nS" << nTotalForecastingsTrainningSet << "_TS" << m << ".txt";
-		forecastObject->exportForecasts(forecastsAndTargets.second, ss.str());
+		forecastObject->exportForecasts(*forecastsAndTargets->second, ss.str());
 	}
 
-	forecastObject->exportForecasts(forecastsAndTargets.first, "./midiExportTest.txt");
+	forecastObject->exportForecasts(*forecastsAndTargets->first, "./midiExportTest.txt");
 
 	cout << "Music has been created." << endl;
 

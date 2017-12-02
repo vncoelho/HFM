@@ -166,7 +166,7 @@ int AETwoVariables(int argc, char **argv)
 		}
 
 		vector<double> foIndicatorsWeeks;
-		foIndicatorsWeeks = pFC.returnErrors(sol->first.getR(), validationSet);
+		foIndicatorsWeeks = *pFC.returnErrors(sol->first.getR(), validationSet);
 		foIndicatorCalibration.push_back(foIndicatorsWeeks[MAPE_INDEX]);
 		foIndicatorCalibration.push_back(foIndicatorsWeeks[RMSE_INDEX]);
 		foIndicatorCalibration.push_back(nTrainningRounds);

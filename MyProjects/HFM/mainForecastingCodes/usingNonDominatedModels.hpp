@@ -169,7 +169,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
 		cout << setprecision(2);
-		vector<double> blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
+		vector<double> blindForecasts = *forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
 		for (int f = 0; f < (int) blindForecasts.size(); f++)
 			cout << blindForecasts[f] << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts[f]) << "\t";
 

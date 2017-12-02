@@ -174,7 +174,7 @@ int mokokoWindSotavento(int argc, char **argv)
 			for (int nEXP = 0; nEXP < argvNEXP; nEXP++)
 				validationSet.push_back(rFComplete.getPartsForecastsBeginToEnd(nEXP, begin - maxLag, nSA + maxLag));
 
-			vector<double> obtainedForecasts = forecastObject.returnForecasts(sol, validationSet);
+			vector<double> obtainedForecasts = *forecastObject.returnForecasts(sol, validationSet);
 			for (int fh = 0; fh < nSA; fh++)
 				predictedValues.push_back(obtainedForecasts[fh]);
 			cout << predictedValues << endl;
@@ -226,13 +226,13 @@ int mokokoWindSotavento(int argc, char **argv)
 			notUsedSet.push_back(rFComplete.getPartsForecastsEndToBegin(nEXP, 0, nValidationRounds * nSA));
 		ForecastClass forecastingClassOBJ(notUsedSet, problemParam, rg, methodParam);
 
-		vector<double> persistanceMethodErrors = forecastingClassOBJ.returnErrorsPersistance(rFComplete.getPartsForecastsEndToBegin(0, 0, nValidationRounds * nSA + 1), nSA);
+		vector<double> persistanceMethodErrors =* forecastingClassOBJ.returnErrorsPersistance(rFComplete.getPartsForecastsEndToBegin(0, 0, nValidationRounds * nSA + 1), nSA);
 		cout << "persistanceMethod errors MMAPE and RMSE:" << endl;
 		cout << persistanceMethodErrors[MMAPE_INDEX] << "\t" << persistanceMethodErrors[RMSE_INDEX] << endl;
 //
 
 		vector<double> targetValues = rFComplete.getPartsForecastsEndToBegin(0, 0, nValidationRounds * nSA);
-		vector<double> errors = forecastingClassOBJ.callEvalGetAccuracy(targetValues, predictedValues);
+		vector<double> errors = *forecastingClassOBJ.callEvalGetAccuracy(targetValues, predictedValues);
 		cout << "HFM errors MMAPE and RMSE:" << endl;
 		cout << errors[MMAPE_INDEX] << "\t" << errors[RMSE_INDEX] << endl;
 
