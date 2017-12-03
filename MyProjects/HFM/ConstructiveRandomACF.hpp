@@ -158,9 +158,9 @@ public:
 
 	}
 
-	Solution<RepEFP> generateSolution()
+	Solution<RepEFP>* generateSolution(double timelimit)
 	{
-		return generateSolutionACF(0);
+		return generateSolutionACF(0.0, timelimit);
 	}
 
 	vector<vector<pair<double, int> > > returnRLCUsingACF()
@@ -242,7 +242,7 @@ public:
 		return trivialLagsRLC;
 	}
 
-	Solution<RepEFP,OPTFRAME_DEFAULT_ADS> generateSolutionACF(float notUsed)
+	Solution<RepEFP>* generateSolutionACF(float notUsed, double timelimit)
 	{
 
 		//cout << "ACF generating solution.." << endl;
@@ -444,7 +444,7 @@ public:
 		 */
 		//cout << "End of ACF sol generation!" << endl;
 		//getchar();
-		return Solution<RepEFP,OPTFRAME_DEFAULT_ADS>(newRep);
+		return new Solution<RepEFP,OPTFRAME_DEFAULT_ADS>(newRep);
 	}
 
 };

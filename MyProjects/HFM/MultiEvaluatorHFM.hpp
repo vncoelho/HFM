@@ -21,7 +21,6 @@
 #ifndef HFM_MULTI_EVALUATOR_HPP_
 #define HFM_MULTI_EVALUATOR_HPP_
 
-
 #include <iostream>
 #include "../../OptFrame/MultiEvaluator.hpp"
 
@@ -37,33 +36,37 @@ class HFMMultiEvaluator: public MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
 public:
 
 	HFMMultiEvaluator(EFPEvaluator& _evalEFP) :
-		evalEFP(_evalEFP)
+			evalEFP(_evalEFP)
 	{
 	}
-
 
 	~HFMMultiEvaluator()
 	{
+
 	}
 
-	MultiEvaluation& evaluate(const RepEFP& r)
+
+	MultiEvaluation* evaluate(const RepEFP& r, const OPTFRAME_DEFAULT_ADS* ads)
 	{
 		MultiEvaluation* nev = new MultiEvaluation;
 
-		vector<double>* foIndicator = evalEFP.evaluateAll(r, -1);
+		vector<double>* foIndicator = evalEFP.evaluateAll(r, ALL_EVALUATIONS);
 
-		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(MAPE_INDEX)));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(RMSE_INDEX)));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(WMAPE_INDEX)));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(SMAPE_INDEX)));
-		nev->addEvaluation(*new EvaluationEFP(foIndicator->at(MMAPE_INDEX)));
+		nev->addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INDEX)));
+//		nev->addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INV_INDEX)));
+		nev->addEvaluation(EvaluationEFP(foIndicator->at(SMAPE_INDEX)));
+		nev->addEvaluation(EvaluationEFP(foIndicator->at(RMSE_INDEX)));
+		nev->addEvaluation(EvaluationEFP(foIndicator->at(WMAPE_INDEX)));
+		nev->addEvaluation(EvaluationEFP(foIndicator->at(MMAPE_INDEX)));
 
-		return *nev;
+		delete foIndicator;
+		return nev;
 	}
 
-	MultiEvaluation& evaluate(const RepEFP& r, const OPTFRAME_DEFAULT_ADS&)
+	void addEvaluator(Evaluator<RepEFP, OPTFRAME_DEFAULT_ADS>& ev)
 	{
-		return evaluate(r);
+		cout<<"I should not add anyone! HFM MEV"<<endl;
+		getchar();
 	}
 
 	unsigned size() const
@@ -81,9 +84,7 @@ public:
 		return evalEFP.equals(ev1, ev2);
 	}
 
-
 protected:
-
 
 	static string idComponent()
 	{
@@ -98,7 +99,6 @@ protected:
 	}
 
 };
-
 
 }
 

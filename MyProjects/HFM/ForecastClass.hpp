@@ -67,8 +67,8 @@ private:
 	ILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>* ilsPert;
 
 	//OptimalLinearRegression* olr;
-	MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>* mev;
-
+//	MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>* mev;
+	HFMMultiEvaluator* mev;
 public:
 
 	ForecastClass(vector<vector<double> >& _tForecastings, ProblemParameters& _problemParam, RandGen& _rg, methodParameters& _methodParam) :
@@ -158,15 +158,16 @@ public:
 		es = new ES<RepEFP>(*eval, *c, vNSeq, emptyLS, rg, *ngesParams);
 		es->setMessageLevel(3);
 
-		//MO
-		vector<Evaluator<RepEFP>*> v_e;
-		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INV_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
-		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
-//		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
-//		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
-		mev = new MultiEvaluator<RepEFP>(v_e);
+		//MO -- HFM MULTI IS ABLE TO ONLY "EVALUATE" once
+//		vector<Evaluator<RepEFP>*> v_e;
+//		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+//		v_e.push_back(new EFPEvaluator(*p, problemParam, MAPE_INV_INDEX, 0));
+//		v_e.push_back(new EFPEvaluator(*p, problemParam, RMSE_INDEX, 0));
+//		v_e.push_back(new EFPEvaluator(*p, problemParam, SMAPE_INDEX, 0));
+////		v_e.push_back(new EFPEvaluator(*p, problemParam, WMAPE_INDEX, 0));
+////		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
+//		mev = new MultiEvaluator<RepEFP>(v_e);
+		mev = new HFMMultiEvaluator(*eval);
 
 	}
 
@@ -191,7 +192,7 @@ public:
 		delete vnd;
 //		delete EsCOpt;
 
-		mev->clear();
+//		mev->clear();
 		delete mev;
 		delete es;
 		delete ngesParams;
@@ -204,14 +205,14 @@ public:
 //	}
 
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS)
+	void addSolToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS)
 	{
 		paretoManager<RepEFP, OPTFRAME_DEFAULT_ADS> paretoMan(*mev);
 		paretoMan.addSolution(pf, candidateS);
 	}
 
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolWithMevToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS, MultiEvaluation& candidateMev)
+	void addSolWithMevToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS, const MultiEvaluation& candidateMev)
 	{
 		paretoManager<RepEFP> paretoMan(*mev);
 		paretoMan.addSolutionWithMEV(pf, candidateS, candidateMev);
@@ -220,7 +221,7 @@ public:
 	Pareto<RepEFP>* runMultiObjSearch(double timeGPLS, Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* _pf = NULL)
 	{
 		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pf = new Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>();
-//		HFMMultiEvaluator mev(*new EFPEvaluator(*p, problemParam, MAPE_INDEX, 0));
+
 
 //		if (vS != NULL)
 //		{
@@ -244,7 +245,7 @@ public:
 //		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 //		GRInitialPareto<RepEFP,OPTFRAME_DEFAULT_ADS> grIP(*c, rg, 1, *mev);
 		BasicInitialPareto<RepEFP, OPTFRAME_DEFAULT_ADS> grIP(*c, *mev);
-		int maxTriesRI = 200;
+		int maxTriesRI = 100;
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriMFR(*mev, *vNSeq[0], maxTriesRI);
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriCSI(*mev, *vNSeq[1], maxTriesRI);
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriRSI(*mev, *vNSeq[2], maxTriesRI);

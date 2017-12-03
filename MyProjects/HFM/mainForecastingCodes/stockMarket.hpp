@@ -134,8 +134,8 @@ int stockMarketForecasting(int argc, char **argv)
 
 	ForecastClass* forecastObject;
 	int timeES = 10;
-	int timeGPLS = 20;
-	for (int b = 0; b < 1; b++)
+	int timeGPLS = 30;
+	for (int b = 0; b < 2; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
@@ -147,6 +147,7 @@ int stockMarketForecasting(int argc, char **argv)
 		delete pf;
 		pf = pfNew;
 		delete forecastObject;
+		delete sol;
 //		cout<<"Bye bye..see u soon."<<endl;
 //		getchar();
 	}

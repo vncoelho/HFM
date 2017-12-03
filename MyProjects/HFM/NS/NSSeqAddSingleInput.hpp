@@ -43,8 +43,8 @@ public:
 		if (!reverse)
 		{
 			rep.singleIndex.push_back(make_pair(file, K));
-			if (K > rep.earliestInput)
-				rep.earliestInput = K;
+//			if (K > rep.earliestInput)
+//				rep.earliestInput = K;
 
 			int nEXV = file;
 			int mean = pEFP.getMean(nEXV);

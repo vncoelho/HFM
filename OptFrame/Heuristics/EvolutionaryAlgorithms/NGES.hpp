@@ -36,8 +36,7 @@
 
 #include "../../Timer.hpp"
 
-//ESTRUTURA DA ESTRATEGIA EVOLUTIVA
-//CONSTITUIDA POR PROBABILIDADE DE APLICACAO, N APLICACOES, MOVIMENTO]
+// NGES - Neighborhood Guided Evolution Strategies
 
 namespace optframe
 {
@@ -332,8 +331,8 @@ public:
 	{
 		Timer tnow;
 		NGESPopulation pop;
-		Solution<R, ADS>* sStar;
-		Evaluation* eStar;
+		Solution<R, ADS>* sStar = nullptr;
+		Evaluation* eStar = nullptr;
 
 		int iterWithoutImprovement = 0, gCurrent = 0;
 
@@ -345,15 +344,15 @@ public:
 		for (int i = 0; i < ngesParams.mi; i++)
 		{
 			//PartialGreedyInitialSolutionOPM is(opm, 0.4, 0.4, 0.4); // waste, ore, shovel
-			Solution<R, ADS> s = constructive.generateSolution(); //MAKE MOVE TODO
+			Solution<R, ADS>* s = constructive.generateSolution(stopCriteria.timelimit); //MAKE MOVE TODO
 			vector<NGESIndStructure<R, ADS> > m;
 
 			//probability, application, sigmaNomal, sigmaBinomial
 			for (int aux = 0; aux < nNS; aux++)
 				m.push_back(NGESIndStructure<R, ADS>(rg.rand01(), rg.randBinomial(0.5, 10) + 1, rg.rand01(), rg.rand01()));
 
-			Evaluation e = eval.evaluateSolution(s);
-			NGESInd<R, ADS>* ind = new NGESInd<R, ADS>(s, e, m, nNS); //TODO MAKE MOVE
+			Evaluation e = eval.evaluateSolution(*s);
+			NGESInd<R, ADS>* ind = new NGESInd<R, ADS>(*s, e, m, nNS); //TODO MAKE MOVE
 			pop.push_back(ind);
 
 			if (i == 0)
@@ -371,6 +370,7 @@ public:
 			}
 
 			inititPopFitness += pop[i]->e.evaluation();
+			delete s;
 		}
 
 		if (Component::information)

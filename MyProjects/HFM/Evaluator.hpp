@@ -27,7 +27,7 @@ namespace EFP
 
 enum PerformanceIndicator
 {
-	MAPE_INDEX, MAE_INDEX, MSE_INDEX, RMSE_INDEX, MAPE_INV_INDEX, SMAPE_INDEX, MMAPE_INDEX, WMAPE_INDEX, PINBALL_INDEX, PINBALL_ERROR_INDEX, EVALUTORS_NMETRICS_ENUM_COUNT
+	MAPE_INDEX, MAE_INDEX, MSE_INDEX, RMSE_INDEX, MAPE_INV_INDEX, SMAPE_INDEX, MMAPE_INDEX, WMAPE_INDEX, PINBALL_INDEX, PINBALL_ERROR_INDEX, EVALUTORS_NMETRICS_ENUM_COUNT,ALL_EVALUATIONS
 };
 
 //TODO -- Change to ENUM
@@ -45,7 +45,7 @@ enum PerformanceIndicator
 
 //const int NMETRICS = 10;
 
-const int ALL_EVALUATIONS = -1;
+//const int ALL_EVALUATIONS = -1;
 
 float sigmoid(float x)
 {
@@ -66,7 +66,7 @@ float sigmoid(float x)
 //	return d1 < d2;
 //}
 
-class EFPEvaluator: public Evaluator<RepEFP,OPTFRAME_DEFAULT_ADS>
+class EFPEvaluator: public Evaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
@@ -111,7 +111,11 @@ public:
 
 		if (((begin + pa - K) < 0))
 		{
+			cout<<"oi:"<<K<<endl;
+			getchar();
 			cout << "BUG Evaluator (function getKValue): (i + pa - K) = " << begin + pa - K << endl;
+			getchar();
+			cout<<vForecastings.size()<<endl;
 			cout << "vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
 			getchar();
 		}
@@ -129,9 +133,13 @@ public:
 				cout << "Go Ahead! Sample learning mode on! " << endl;
 				getchar(); //TODO
 				if (file == targetFile)
+				{
 					value = 0;
+				}
 				else
+				{
 					value = vForecastings[file][begin];
+				}
 
 				return value;
 			}
@@ -294,12 +302,14 @@ public:
 						valueIndexK += vForecastings[targetFile][i + pa - indexK];
 
 					ajusts += vIndexAlphas[ind] * (estimation - valueIndexK);
-					if ((vIndex[ind] <= 0) || (vIndex[ind] > maxLag))
-					{
-						cout << "vIndex[ind]:" << vIndex[ind] << "maxLag:" << maxLag << endl;
-						cout << "Erro on INDEX of the adjustment";
-						getchar();
-					}
+					assert(vIndex[ind] > 0);
+					assert(vIndex[ind] <= maxLag);
+//					if ((vIndex[ind] <= 0) || (vIndex[ind] > maxLag))
+//					{
+//						cout << "vIndex[ind]:" << vIndex[ind] << "maxLag:" << maxLag << endl;
+//						cout << "Erro on INDEX of the adjustment";
+//						getchar();
+//					}
 				}
 
 			}
@@ -412,7 +422,7 @@ public:
 		if (vForecastings == NULL)
 			vForecastings = &pEFP.getForecastingsVector();
 
-		pair<vector<double>*, vector<double>* >* targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
+		pair<vector<double>*, vector<double>*>* targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
 		vector<double>* foIndicator = getAccuracy(*targetAndForecasts->first, *targetAndForecasts->second, accIndicator);
 
 		delete targetAndForecasts->first;
@@ -533,7 +543,7 @@ public:
 	}
 
 //return a pair -- first vector contain the real values while the second has the forecasted ones - StepsSize=slidingWindowStepSize
-	pair<vector<double>*, vector<double>* >* generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
+	pair<vector<double>*, vector<double>*>* generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
 	{
 		vector<double>* allForecasts = new vector<double>;
 		vector<double>* allTargets = new vector<double>;
@@ -581,7 +591,7 @@ public:
 				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
 				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
 
-				for(int i=0;i<fhSize;i++)
+				for (int i = 0; i < fhSize; i++)
 				{
 					allForecasts->push_back(forecasts->at(i));
 					allTargets->push_back(vForecastings[targetFile][beginParallel + i]);
@@ -592,7 +602,6 @@ public:
 				delete forecasts;
 			}
 		}
-
 
 		return new pair<vector<double>*, vector<double>*>(make_pair(allTargets, allForecasts));
 	}
@@ -609,7 +618,7 @@ public:
 			cout << "targetValues.size() = " << targetValues.size() << "\t";
 			cout << "estimatedValues.size() = " << estimatedValues.size() << endl;
 		}
-		vector<double>* foIndicator= new vector<double>(EVALUTORS_NMETRICS_ENUM_COUNT, 0);
+		vector<double>* foIndicator = new vector<double>(EVALUTORS_NMETRICS_ENUM_COUNT, 0);
 
 		double sumTarget = 0;
 		double avgTarget = 0;
@@ -703,7 +712,7 @@ public:
 		if (accIndicator == SMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{
 			foIndicator->at(SMAPE_INDEX) *= 100;
-			foIndicator->at(SMAPE_INDEX)/= nSamples;
+			foIndicator->at(SMAPE_INDEX) /= nSamples;
 		}
 
 		if (accIndicator == WMAPE_INDEX || accIndicator == ALL_EVALUATIONS)
@@ -722,7 +731,7 @@ public:
 			foIndicator->at(PINBALL_INDEX) /= nSamples;
 
 		if (accIndicator == MAE_INDEX || accIndicator == ALL_EVALUATIONS)
-			foIndicator->at(MAE_INDEX)/= nSamples;
+			foIndicator->at(MAE_INDEX) /= nSamples;
 
 		if (accIndicator == MSE_INDEX || accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 		{

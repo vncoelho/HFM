@@ -92,7 +92,7 @@ public:
 		return evaluate(s.getR(), s.getADSptr());
 	}
 
-protected:
+public:
 	// because of MultiEvaluator... otherwise, make it 'friend'
 
 	// TODO: make it obligatory to have two implementations? beautiful (only R should be used if it's correct), but not practical!
@@ -117,6 +117,7 @@ protected:
 
 	virtual void reevaluate(Evaluation e, const R& r, const ADS* ads)
 	{
+		cout<<"e.outdated"<<e.outdated<<endl;
 		if (e.outdated)
 		{
 			Evaluation e1 = evaluate(r, ads);

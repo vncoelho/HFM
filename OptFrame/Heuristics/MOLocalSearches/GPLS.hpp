@@ -25,13 +25,14 @@
 
 #include "../../MultiObjSearch.hpp"
 #include "../../MOLocalSearch.hpp"
-#include "../../Heuristics/MOLocalSearches/MOBestImprovement.hpp"
 #include "../../Evaluator.hpp"
 #include "../../Population.hpp"
 #include "../../NSSeq.hpp"
 #include "../../ParetoDominance.hpp"
 #include "../../ParetoDominanceWeak.hpp"
 #include "../../InitialPareto.h"
+#include "../../Heuristics/MOLocalSearches/MOBestImprovement.hpp"
+
 
 template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 struct gplsStructure
@@ -65,7 +66,7 @@ public:
 	}
 
 	//Special addSolution used in the GPLS speedUp
-	bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
+	virtual bool addSolutionWithMEV(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
 		bool added = true;
 		for (unsigned ind = 0; ind < p.size(); ind++)
@@ -81,18 +82,19 @@ public:
 				gplsData.nsParetoOptimum.erase(gplsData.nsParetoOptimum.begin() + ind);
 				gplsData.newSol.erase(gplsData.newSol.begin() + ind);
 				ind--;
+
 			}
 
 		}
 
 		if (added)
 		{
-			p.push_back(candidate, candidateMev);
+			p.add_indWithMev(candidate, candidateMev);
 			vector<bool> neigh;
 			for (int n = 0; n < r; n++)
 				neigh.push_back(false);
 			gplsData.nsParetoOptimum.push_back(neigh);
-			gplsData.newSol.push_back(added);
+			gplsData.newSol.push_back(true);
 		}
 
 		return added;
@@ -206,6 +208,7 @@ public:
 			for (int ind = 0; ind < (int) p.size(); ind++)
 				vLS[k]->exec(x_e, &p.getNonDominatedSol(ind), &p.getIndMultiEvaluation(ind), &pMan2PPLS, *stopCriteriaLS);
 			delete stopCriteriaLS;
+
 //			for(int e=0;e<x_e.size();e++)
 //			{
 //				x_e.getIndMultiEvaluation(e).print();
@@ -214,14 +217,12 @@ public:
 
 			p.clear();
 
+			//TODO - This copy can be avoid and system optimized with some smart strategy
 			//Updated current Pareto p with the individuals added in this current iteration
 			for (int ind = 0; ind < (int) x_e.size(); ind++)
 				if (pMan2PPLS.gplsData.newSol[ind])
-				{
-					Solution<R, ADS>* sNew = new Solution<R, ADS>(x_e.getNonDominatedSol(ind));
-					MultiEvaluation* mevNew = new MultiEvaluation(x_e.getIndMultiEvaluation(ind));
-					p.add_ind(sNew, mevNew);
-				}
+					p.add_indWithMev(x_e.getNonDominatedSol(ind), x_e.getIndMultiEvaluation(ind));
+
 
 			if (p.size() != 0)
 			{
@@ -230,8 +231,9 @@ public:
 			else
 			{
 				k++;
-				p = x_e;
-				//speed-up - Thibauuuut Lust - Nice guy
+				p = x_e; //TODO - This copy can be avoid and system optimized with some smart strategy
+
+				//speed-up - Ideas from our great friend Thibaut Lust
 				if (k < r)
 				{
 

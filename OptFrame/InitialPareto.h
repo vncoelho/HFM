@@ -81,10 +81,7 @@ public:
 	{
 		Pareto<R, ADS> p;
 		for (unsigned i = 0; i < populationSize; i++)
-		{
-			Solution<R,ADS>* sToAdd = new Solution<R,ADS>(std::move(constructive.generateSolution()));
-			pMan.addSolution(p, *sToAdd);
-		}
+			pMan.addSolution(p, *constructive.generateSolution(timelimit));
 
 		return p;
 	}

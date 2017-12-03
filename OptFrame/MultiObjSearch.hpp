@@ -64,9 +64,10 @@ public:
 
 		for (unsigned i = 0; i < sizeNewPop; i++)
 		{
-			Solution<R, ADS>* sNew = new Solution<R, ADS>(_pf.getNonDominatedSol(i));
-			MultiEvaluation* mevNew = new MultiEvaluation(_pf.getIndMultiEvaluation(i));
-			this->add_ind(sNew, mevNew);
+			this->add_indWithMev(_pf.getNonDominatedSol(i), _pf.getIndMultiEvaluation(i));
+//			Solution<R, ADS>* sNew = new Solution<R, ADS>(_pf.getNonDominatedSol(i));
+//			MultiEvaluation* mevNew = new MultiEvaluation(_pf.getIndMultiEvaluation(i));
+//			this->add_indWithMev(sNew, mevNew);
 		}
 	}
 
@@ -84,11 +85,7 @@ public:
 		unsigned sizeNewPop = _pf.paretoSet.size();
 
 		for (unsigned i = 0; i < sizeNewPop; i++)
-		{
-			Solution<R, ADS>* sNew = new Solution<R, ADS>(_pf.getNonDominatedSol(i));
-			MultiEvaluation* mevNew = new MultiEvaluation(_pf.getIndMultiEvaluation(i));
-			this->add_ind(sNew, mevNew);
-		}
+			this->add_indWithMev(_pf.getNonDominatedSol(i), _pf.getIndMultiEvaluation(i));
 
 		return (*this);
 	}
@@ -106,16 +103,16 @@ public:
 //		paretoFront.push_back(new MultiEvaluation(v_e));
 //	}
 
-	void push_back(Solution<R, ADS>* s, MultiEvaluator<R, ADS>& mEval)
-	{
-		MultiEvaluation* mev = mEval.evaluateSolution(s);
-		add_ind(s, mev);
-	}
+//	void add_ind(const Solution<R, ADS>* s, const MultiEvaluator<R, ADS>& mEval)
+//	{
+//		MultiEvaluation* mev = mEval.evaluateSolution(s);
+//		add_ind(s, mev);
+//	}
 
-	void add_ind(Solution<R, ADS>* s, MultiEvaluation* mev)
+	void add_indWithMev(const Solution<R, ADS>& s, const MultiEvaluation& mev)
 	{
-		paretoSet.push_back(s);
-		paretoFront.push_back(mev);
+		paretoSet.push_back(new Solution<R, ADS>(s));
+		paretoFront.push_back(new MultiEvaluation(mev));
 	}
 
 	unsigned size() const
@@ -170,12 +167,12 @@ public:
 
 	MultiEvaluation& getIndMultiEvaluation(int ind) const
 	{
-		return *paretoFront[ind];
+		return *paretoFront.at(ind);
 	}
 
 	MultiEvaluation& getCloneIndMultiEvaluation(int ind) const
 	{
-		return paretoFront[ind]->clone();
+		return paretoFront.at(ind)->clone();
 	}
 
 	void erase(unsigned pos)
@@ -569,15 +566,16 @@ public:
 ////		return false;
 //	}
 
-	bool addSolution(Pareto<R, ADS>& p, Solution<R, ADS>& candidate)
+	bool addSolution(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate)
 	{
 		MultiEvaluation* mev = multiEval.evaluateSolution(candidate);
 		bool added = addSolutionWithMEV(p, candidate, *mev);
+		delete mev;
 
 		return added;
 	}
 
-	virtual bool addSolutionWithMEV(Pareto<R, ADS>& p, Solution<R, ADS>& candidate, MultiEvaluation& candidateMev)
+	virtual bool addSolutionWithMEV(Pareto<R, ADS>& p, const Solution<R, ADS>& candidate, const MultiEvaluation& candidateMev)
 	{
 		bool added = true;
 		for (int ind = 0; ind < (int) p.size(); ind++)
@@ -595,7 +593,7 @@ public:
 
 		}
 		if (added == true)
-			p.add_ind(&candidate, &candidateMev);
+			p.add_indWithMev(candidate, candidateMev);
 
 		return added;
 	}
@@ -613,11 +611,7 @@ public:
 		Pareto<R, ADS> pFiltered;
 		int nInd = p.size();
 		for (int ind = 0; ind < nInd; ind++)
-		{
-			Solution<R, ADS>* sNew = new Solution<R, ADS>(p.getNonDominatedSol(ind));
-			MultiEvaluation* mevNew = new MultiEvaluation(p.getIndMultiEvaluation(ind));
-			addSolutionWithMEV(pFiltered, *sNew, *mevNew);
-		}
+			addSolutionWithMEV(pFiltered, p.getNonDominatedSol(ind), p.getIndMultiEvaluation(ind));
 
 		if ((int) pFiltered.size() == nInd)
 			return true;

@@ -63,12 +63,12 @@ public:
 	{
 	}
 
-	Solution<RepEFP> generateSolution()
+	Solution<RepEFP>* generateSolution(double timelimit)
 	{
-		return std::move(generateSolutionAlpha(0));
+		return generateSolutionAlpha(0.0, timelimit);
 	}
 
-	Solution<RepEFP> generateSolutionAlpha(float notUsed)
+	Solution<RepEFP>* generateSolutionAlpha(float notUsed, double timelimit)
 	{
 
 		//cout << "ACF generating solution.." << endl;
@@ -270,7 +270,7 @@ public:
 
 //		cout << "End of Random Hybrid Fuzzy Model Sol generation!" << endl;
 //		getchar();
-		return *new Solution<RepEFP>(newRep);
+		return new Solution<RepEFP>(newRep);
 	}
 
 };
