@@ -8,7 +8,7 @@ CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include
 
 
 #OpenMP Multi-Core Multi-Thread flags
-OPENMP_FLAGS = -fopenmp -lpthread
+OPENMP_FLAGS = #-fopenmp -lpthread
 
 RESTSDK_FGLAS = #-lboost_system -lcrypto -lssl -lcpprest
 

@@ -23,16 +23,18 @@
 
 #include <algorithm>
 
-#include "../../MultiObjSearch.hpp"
+
 #include "../../MOLocalSearch.hpp"
 #include "../../Evaluator.hpp"
-#include "../../Population.hpp"
 #include "../../NSSeq.hpp"
+#include "../../Pareto.hpp"
 #include "../../ParetoDominance.hpp"
 #include "../../ParetoDominanceWeak.hpp"
-#include "../../InitialPareto.h"
 #include "../../Heuristics/MOLocalSearches/MOBestImprovement.hpp"
+#include "../../InitialPareto.hpp"
 
+//#include "../../MOMetrics.hpp"
+//#include "../../MultiObjSearch.hpp"
 
 template<class R, class ADS = OPTFRAME_DEFAULT_ADS>
 struct gplsStructure
@@ -162,18 +164,21 @@ public:
 		}
 		else
 		{
+			assert(_pf->size() > 0);
+
 			cout << "Extracting Pareto Front given as parameter..." << endl;
-			x_e = std::move(*_pf); //check this move with AIIIGOR
+			x_e = std::move(*_pf); //check this move with AIIIGOR todo
 
 			cout << "Extracting PF contains " << x_e.size() << " individuals." << endl;
+
 		}
 
 		//TODO - create a new method that does not copy
-		//instead, it updated p during loop and do not perform neighborhood search in indivuals that were dominated
+		//instead, it updated p during loop and do not perform neighborhood search in individuals that were dominated
 		//copy x_e to p
 		Pareto<R, ADS> p = x_e;
 
-		//Initializing auxiliar data structures -- Pareto Optimum and NewSol (guides auxiliar population p_a)
+		//Initializing data structures -- Pareto Optimum and NewSol (guides aux population p_a)
 		for (int i = 0; i < (int) x_e.size(); i++)
 		{
 			vector<bool> neigh;
@@ -197,7 +202,7 @@ public:
 				//Speed-up only if it is an exaustive search through the whole NS
 				if (localSearchId == "OptFrame:MOLocalSearch:MO-BI")
 					pMan2PPLS.gplsData.nsParetoOptimum[ind][k] = true;
-				//Ensure that all individuals are maked as old solutions - Only the new ones will be marked as true
+				//Ensure that all individuals are marked as old solutions - Only the new ones will be marked as true
 				pMan2PPLS.gplsData.newSol[ind] = false;
 			}
 
@@ -231,36 +236,39 @@ public:
 			else
 			{
 				k++;
-				p = x_e; //TODO - This copy can be avoid and system optimized with some smart strategy
-
 				//speed-up - Ideas from our great friend Thibaut Lust
-				if (k < r)
-				{
-
-					int removed = 0;
-					for (int i = 0; i < (int) pMan2PPLS.gplsData.nsParetoOptimum.size(); i++)
-						if (pMan2PPLS.gplsData.nsParetoOptimum[i][k - 1] == true)
-						{
-							p.erase(i - removed);
-							removed++;
-						}
-
-				}
+				//Instead of delete non-optimum, only include those that should be explored.
+				//TODO - This copy can be avoid and system optimized with some smart strategy
+				for (int ind = 0; ind < (int) x_e.size(); ind++)
+					if (!pMan2PPLS.gplsData.nsParetoOptimum[ind][k]) //speed-up - Thibauuuut Lust - Nice guy
+						p.add_indWithMev(x_e.getNonDominatedSol(ind), x_e.getIndMultiEvaluation(ind));
 				//end of the speed-up
 
-				//Another option for speed-up, which only add instead of delete
-				//for (int ind = 0; ind < pMan2PPLS.gplsData.x_e.size(); ind++)
-				//	if (pMan2PPLS.gplsData.nsParetoOptimum[ind][k] == false) //speed-up - Thibauuuut Lust - Nice guy
-				//		p.push_back(&pMan2PPLS.gplsData.x_e.getNonDominatedSol(ind), &pMan2PPLS.gplsData.x_e.getIndMultiEvaluation(ind));
+//				cout<<"Non-optimum regarding k and optimals:"<<p.size()<<"/"<<x_e.size()<<endl;
 
+				//OLD Copy/Delete - Deprecated
+//				p = x_e;
+//
+//				if (k < r)
+//				{
+//
+//					int removed = 0;
+//					for (int i = 0; i < (int) pMan2PPLS.gplsData.nsParetoOptimum.size(); i++)
+//						if (pMan2PPLS.gplsData.nsParetoOptimum[i][k - 1])
+//						{
+//							p.erase(i - removed);
+//							removed++;
+//						}
+//
+//				}
 			}
+
 			cout << "p.size() = " << p.size();
 			cout<<"\t pMan2PPLS.x_e.size() = " << x_e.size();
 			cout << "\t k = " << k << endl;
 		}
 
 		Pareto<R, ADS>* pReturn = new Pareto<R, ADS>(std::move(x_e));
-//		pReturn->print();
 		p.clear();
 
 		//checking possible dominance problems -- TODO - Remove for a faster code

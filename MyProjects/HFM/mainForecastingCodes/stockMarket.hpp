@@ -133,7 +133,7 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto < RepEFP > *pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 10;
+	int timeES = 30;
 	int timeGPLS = 30;
 	for (int b = 0; b < 2; b++)
 	{
@@ -141,14 +141,14 @@ int stockMarketForecasting(int argc, char **argv)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
-
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
-		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
+		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS,pf);
 		delete pf;
 		pf = pfNew;
 		delete forecastObject;
 		delete sol;
-//		cout<<"Bye bye..see u soon."<<endl;
+
+		//		cout<<"Bye bye..see u soon."<<endl;
 //		getchar();
 	}
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);

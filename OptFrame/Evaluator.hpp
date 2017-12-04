@@ -117,7 +117,6 @@ protected:
 
 	virtual void reevaluate(Evaluation e, const R& r, const ADS* ads)
 	{
-		cout<<"e.outdated"<<e.outdated<<endl;
 		if (e.outdated)
 		{
 			Evaluation e1 = evaluate(r, ads);

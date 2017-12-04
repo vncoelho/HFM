@@ -24,7 +24,6 @@
 #include "../../OptFrame/Heuristics/ILS/ILSLPerturbation.hpp"
 #include "../../OptFrame/Heuristics/GRASP/BasicGRASP.hpp"
 //#include "../../OptFrame/Heuristics/VNS/MOVNSLevels.hpp"
-#include "../../OptFrame/Heuristics/2PPLS.hpp"
 #include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/NGES.hpp"
 #include "../../OptFrame/MultiEvaluator.hpp"
 #include "../../OptFrame/MultiObjSearch.hpp"
@@ -241,7 +240,6 @@ public:
 
 		int initial_population_size = 30;
 //		GRInitialPopulation<RepEFP,OPTFRAME_DEFAULT_ADS> bip(*c, rg, 1);
-		BasicInitialPopulation<RepEFP, OPTFRAME_DEFAULT_ADS> bip(*c);
 //		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 //		GRInitialPareto<RepEFP,OPTFRAME_DEFAULT_ADS> grIP(*c, rg, 1, *mev);
 		BasicInitialPareto<RepEFP, OPTFRAME_DEFAULT_ADS> grIP(*c, *mev);
@@ -301,6 +299,7 @@ public:
 	{
 		SOSC* stopCriteria = new SOSC(timeGRASP);
 		pair<Solution<RepEFP>, Evaluation>* finalSol;
+		delete stopCriteria;
 //		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, nSol);
 //		g.setMessageLevel(3);
 

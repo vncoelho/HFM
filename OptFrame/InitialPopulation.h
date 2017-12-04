@@ -42,7 +42,7 @@ public:
 	{
 	}
 
-	virtual Population<R, ADS>& generatePopulation(unsigned populationSize, double timelimit) = 0;
+	virtual Population<R, ADS> generatePopulation(unsigned populationSize, double timelimit) = 0;
 
 	static string idComponent()
 	{
@@ -73,7 +73,7 @@ public:
 	{
 	}
 
-	virtual Population<R, ADS>& generatePopulation(unsigned populationSize, double timelimit)
+	virtual Population<R, ADS> generatePopulation(unsigned populationSize, double timelimit)
 	{
 		Population<R, ADS>* p = new Population<R, ADS>;
 		for (unsigned i = 0; i < populationSize; i++)
@@ -111,7 +111,7 @@ public:
 	{
 	}
 
-	virtual Population<R, ADS>& generatePopulation(unsigned populationSize, double timelimit)
+	virtual Population<R, ADS> generatePopulation(unsigned populationSize, double timelimit)
 	{
 		Population<R, ADS>* p = new Population<R, ADS>;
 		for (unsigned i = 0; i < populationSize; i++)

@@ -53,7 +53,7 @@ public:
 		vector<double>* foIndicator = evalEFP.evaluateAll(r, ALL_EVALUATIONS);
 
 		nev->addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INDEX)));
-//		nev->addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INV_INDEX)));
+		nev->addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INV_INDEX)));
 		nev->addEvaluation(EvaluationEFP(foIndicator->at(SMAPE_INDEX)));
 		nev->addEvaluation(EvaluationEFP(foIndicator->at(RMSE_INDEX)));
 		nev->addEvaluation(EvaluationEFP(foIndicator->at(WMAPE_INDEX)));
