@@ -31,6 +31,9 @@
 #include "../../OptFrame/Heuristics/MOLocalSearches/MOBestImprovement.hpp"
 #include "../../OptFrame/Heuristics/MOLocalSearches/MORandomImprovement.hpp"
 #include "../../OptFrame/Heuristics/MOLocalSearches/GPLS.hpp"
+#include "../../OptFrame/Heuristics/ILS/MO/MOILSLPerturbation.hpp"
+#include "../../OptFrame/Heuristics/ILS/MO/BasicMOILS.hpp"
+#include "../../OptFrame/Heuristics/ILS/MO/MOILSLevels.hpp"
 
 namespace EFP
 {
@@ -64,10 +67,12 @@ private:
 	vector<pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>*> vFinalSol;
 
 	ILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>* ilsPert;
-
+	MOILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>* moILSPert;
+	BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>* basicMOILSPert;
 	//OptimalLinearRegression* olr;
 //	MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>* mev;
 	HFMMultiEvaluator* mev;
+
 public:
 
 	ForecastClass(vector<vector<double> >& _tForecastings, ProblemParameters& _problemParam, RandGen& _rg, methodParameters& _methodParam) :
@@ -167,6 +172,11 @@ public:
 ////		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
 //		mev = new MultiEvaluator<RepEFP>(v_e);
 		mev = new HFMMultiEvaluator(*eval);
+		moILSPert = new MOILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, *nsModifyFuzzyRules, rg);
+		moILSPert->add_ns(*nsChangeSingleInput);
+
+		basicMOILSPert= new BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, 2,10,*nsModifyFuzzyRules, rg);
+		basicMOILSPert->add_ns(*nsChangeSingleInput);
 
 	}
 
@@ -256,17 +266,29 @@ public:
 		vMOLS.push_back(&moriCSI);
 
 		GeneralParetoLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS> generalPLS(*mev, grIP, initial_population_size, vMOLS);
+
+
+		BasicMOILS<RepEFP, OPTFRAME_DEFAULT_ADS> basicMOILS(*mev, grIP, initial_population_size, &moriASI,rg, *basicMOILSPert,100);
+		int moIlslevelMax = 10;
+		int moIlsIterMax = 100;
+		MOILSLevels<RepEFP, OPTFRAME_DEFAULT_ADS> moILSLevels(*mev, grIP, initial_population_size, &moriASI,rg, *moILSPert,moIlsIterMax,moIlslevelMax);
+//		moILSLevels.setMessageLevel(3);
+
+
+
 		MOSC moStopCriteriaGPLS;
 		moStopCriteriaGPLS.timelimit = timeGPLS;
 		if (_pf == NULL)
 		{
 			delete pf;
-			pf = generalPLS.search(moStopCriteriaGPLS);
+//			pf = generalPLS.search(moStopCriteriaGPLS);
+			pf = moILSLevels.search(moStopCriteriaGPLS);
 		}
 		else
 		{
 			delete pf;
-			pf = generalPLS.search(moStopCriteriaGPLS, _pf);
+//			pf = generalPLS.search(moStopCriteriaGPLS, _pf);
+			pf = moILSLevels.search(moStopCriteriaGPLS, _pf);
 		}
 
 //		vector<MultiEvaluation*> vEval = pf->getParetoFront();
