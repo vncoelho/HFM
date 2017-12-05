@@ -14,7 +14,7 @@
 
 using namespace std;
 using namespace optframe;
-using namespace EFP;
+using namespace HFM;
 extern int nThreads;
 
 int stockMarketForecasting(int argc, char **argv)

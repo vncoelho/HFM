@@ -5,8 +5,8 @@
  *      Author: vitor
  */
 
-#ifndef FORECASTCLASS_HPP_
-#define FORECASTCLASS_HPP_
+#ifndef HFM_FORECASTCLASS_HPP_
+#define HFM_FORECASTCLASS_HPP_
 
 #include "Evaluator.hpp"
 #include "MultiEvaluatorHFM.hpp"
@@ -14,6 +14,7 @@
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
 #include "treatForecasts.hpp"
+
 #include "../../OptFrame/Heuristics/Empty.hpp"
 #include "../../OptFrame/NSSeq.hpp"
 #include "../../OptFrame/Heuristics/LocalSearches/VND.h"
@@ -23,11 +24,9 @@
 #include "../../OptFrame/Heuristics/ILS/IteratedLocalSearchLevels.hpp"
 #include "../../OptFrame/Heuristics/ILS/ILSLPerturbation.hpp"
 #include "../../OptFrame/Heuristics/GRASP/BasicGRASP.hpp"
-//#include "../../OptFrame/Heuristics/VNS/MOVNSLevels.hpp"
 #include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/NGES.hpp"
 #include "../../OptFrame/MultiEvaluator.hpp"
 #include "../../OptFrame/MultiObjSearch.hpp"
-#include "../../OptFrame/Util/UnionNDSets.hpp"
 #include "../../OptFrame/Heuristics/MOLocalSearches/MOBestImprovement.hpp"
 #include "../../OptFrame/Heuristics/MOLocalSearches/MORandomImprovement.hpp"
 #include "../../OptFrame/Heuristics/MOLocalSearches/GPLS.hpp"
@@ -36,7 +35,7 @@
 #include "../../OptFrame/Heuristics/ILS/MO/MOILSLevels.hpp"
 #include "../../OptFrame/Util/CheckCommand.hpp"
 
-namespace EFP
+namespace HFM
 {
 
 class ForecastClass
@@ -180,6 +179,18 @@ public:
 		basicMOILSPert= new BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, 2,10,*nsModifyFuzzyRules, rg);
 //		basicMOILSPert->add_ns(*nsChangeSingleInput);
 
+
+		//Trying to checkmodule
+//		checkModule.add(*c);
+//		checkModule.add(*eval);
+//
+//		checkModule.add(*nsModifyFuzzyRules);
+//		checkModule.add(*nsRemoveSingleInput);
+//		checkModule.add(*nsChangeSingleInput);
+//		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
+//
+//		checkModule.run(1,2);
+//		getchar();
 	}
 
 	virtual ~ForecastClass()
@@ -469,5 +480,5 @@ public:
 
 };
 
-} /* namespace EFP */
-#endif /* FORECASTCLASS_HPP_ */
+}
+#endif /* HFM_FORECASTCLASS_HPP_ */

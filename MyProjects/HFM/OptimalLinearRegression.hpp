@@ -17,7 +17,7 @@ using namespace optframe;
 
 ILOSTLBEGIN
 
-namespace EFP
+namespace HFM
 {
 
 class OptimalLinearRegression: public LocalSearch<RepEFP>

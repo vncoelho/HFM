@@ -10,7 +10,7 @@
 #include "../Solution.h"
 
 using namespace std;
-namespace EFP
+namespace HFM
 {
 
 class MoveNEIGHVAlpha: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>

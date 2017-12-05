@@ -10,7 +10,7 @@
 #include "../Solution.h"
 
 using namespace std;
-namespace EFP
+namespace HFM
 {
 
 class MoveNEIGHAddSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
@@ -43,8 +43,8 @@ public:
 		if (!reverse)
 		{
 			rep.singleIndex.push_back(make_pair(file, K));
-//			if (K > rep.earliestInput)
-//				rep.earliestInput = K;
+			if (K > rep.earliestInput)
+				rep.earliestInput = K;
 
 			int nEXV = file;
 			int mean = pEFP.getMean(nEXV);
@@ -71,8 +71,8 @@ public:
 		}
 		else
 		{
-			rep.singleIndex.erase(rep.singleIndex.begin() + rep.singleIndex.size());
-			rep.singleFuzzyRS.erase(rep.singleFuzzyRS.begin() + rep.singleFuzzyRS.size());
+			rep.singleIndex.pop_back();
+			rep.singleFuzzyRS.pop_back();
 		}
 		return new MoveNEIGHAddSingleInput(file, K, !reverse, pEFP, rg);
 	}

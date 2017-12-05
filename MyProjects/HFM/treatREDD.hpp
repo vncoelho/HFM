@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <fstream>
 
-namespace EFP
+namespace HFM
 {
 
 class treatREEDDataset

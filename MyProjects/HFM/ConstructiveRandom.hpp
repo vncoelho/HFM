@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace EFP
+namespace HFM
 {
 
 class ConstructiveRandom: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>

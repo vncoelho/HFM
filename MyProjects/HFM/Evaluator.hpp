@@ -22,7 +22,7 @@ extern int nThreads;
 
 using namespace std;
 
-namespace EFP
+namespace HFM
 {
 
 enum PerformanceIndicator

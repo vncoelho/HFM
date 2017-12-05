@@ -10,7 +10,7 @@
 
 #include "../../OptFrame/Heuristics/EvolutionaryAlgorithms/ESContinuous.hpp"
 
-namespace EFP
+namespace HFM
 {
 
 struct esParameters

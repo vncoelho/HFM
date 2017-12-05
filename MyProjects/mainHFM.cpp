@@ -32,7 +32,7 @@
 
 using namespace std;
 using namespace optframe;
-using namespace EFP;
+using namespace HFM;
 
 //#include <tr1/random>
 //using namespace std::tr1;

@@ -27,7 +27,7 @@
 using namespace std;
 using namespace scannerpp;
 
-namespace EFP
+namespace HFM
 {
 
 class HFMMultiEvaluator: public MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>

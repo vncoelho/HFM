@@ -24,7 +24,7 @@
 
 using namespace std;
 
-namespace EFP
+namespace HFM
 {
 
 class ConstructiveACF: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>

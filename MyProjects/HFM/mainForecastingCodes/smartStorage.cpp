@@ -11,7 +11,7 @@
 
 using namespace std;
 using namespace optframe;
-using namespace EFP;
+using namespace HFM;
 
 int smartStorage(int argc, char **argv)
 {

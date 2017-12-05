@@ -10,7 +10,7 @@
 
 using namespace std;
 using namespace optframe;
-using namespace EFP;
+using namespace HFM;
 
 void selfUseMode()
 {

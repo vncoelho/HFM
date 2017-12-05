@@ -10,7 +10,7 @@
 #include "../Solution.h"
 
 using namespace std;
-namespace EFP
+namespace HFM
 {
 
 class MoveNEIGHChangeSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
@@ -74,7 +74,7 @@ public:
 
 	void print() const
 	{
-		cout << "MoveNEIGHChangeSingleInput( vector:  rule " << rule << " <=>  sign " << sign << "\t maxLag" << maxLag << "\t maxUpperLag" << maxUpperLag << "\t X" << X << " )";
+		cout << "MoveNEIGHChangeSingleInput( vector:  rule " << rule << " <=>  sign " << sign << "\t X:" << X << "\t maxLag " << maxLag << "\t maxUpperLag " << maxUpperLag <<  " )";
 		cout << endl;
 	}
 }

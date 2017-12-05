@@ -14,7 +14,7 @@
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
 using namespace std;
 using namespace optframe;
-using namespace EFP;
+using namespace HFM;
 extern int nThreads;
 
 int musicGen(int argc, char **argv)

@@ -13,7 +13,7 @@
 
 using namespace std;
 using namespace optframe;
-using namespace EFP;
+using namespace HFM;
 
 struct HFMModelAndParam
 {

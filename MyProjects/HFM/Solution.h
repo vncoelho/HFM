@@ -6,7 +6,7 @@
 
 using namespace optframe;
 
-namespace EFP
+namespace HFM
 {
 typedef Solution<RepEFP,OPTFRAME_DEFAULT_ADS> SolutionEFP;
 }

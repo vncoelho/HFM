@@ -8,7 +8,7 @@
 #ifndef TREATFORECASTS_H_
 #define TREATFORECASTS_H_
 
-namespace EFP
+namespace HFM
 {
 
 static bool comparaTreatQuantiles(double d1, double d2)
