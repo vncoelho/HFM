@@ -17,14 +17,13 @@ class MoveNEIGHAddSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int file, K;
+	vector<double> rulesAndWeights;
 	bool reverse;
-	ProblemInstance& pEFP;
-	RandGen& rg;
 
 public:
 
-	MoveNEIGHAddSingleInput(int _file, int _K, bool _reverse, ProblemInstance& _pEFP, RandGen& _rg) :
-			file(_file), K(_K), reverse(_reverse), pEFP(_pEFP), rg(_rg)
+	MoveNEIGHAddSingleInput(int _file, int _K, vector<double> _rulesAndWeights,bool _reverse) :
+			file(_file), K(_K), rulesAndWeights(_rulesAndWeights),reverse(_reverse)
 	{
 
 	}
@@ -46,26 +45,14 @@ public:
 			if (K > rep.earliestInput)
 				rep.earliestInput = K;
 
-			int nEXV = file;
-			int mean = pEFP.getMean(nEXV);
-			int stdDesv = pEFP.getStdDesv(nEXV);
-			double meanWeight = pEFP.getMean(0); //File 0 is the target file
-			double stdDesvWeight = pEFP.getStdDesv(0);
-
-			double greater = rg.randG(mean, stdDesv);
-			double lower = rg.randG(mean, stdDesv);
-			double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
-			double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
-
 			vector<double> fuzzyRules;
-			int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
 			fuzzyRules.resize(NCOLUMNATRIBUTES);
-			fuzzyRules[GREATER] = greater;
-			fuzzyRules[GREATER_WEIGHT] = greaterWeight;
-			fuzzyRules[LOWER] = lower;
-			fuzzyRules[LOWER_WEIGHT] = lowerWeight;
-			fuzzyRules[EPSILON] = 1; //TODO TEST FOR TRAPEZOID
-			fuzzyRules[PERTINENCEFUNC] = fuzzyFunction; //PERTINENCE FUNCTION
+			fuzzyRules[GREATER] = rulesAndWeights[GREATER];
+			fuzzyRules[GREATER_WEIGHT] = rulesAndWeights[GREATER_WEIGHT];
+			fuzzyRules[LOWER] = rulesAndWeights[LOWER];
+			fuzzyRules[LOWER_WEIGHT] = rulesAndWeights[LOWER_WEIGHT];
+			fuzzyRules[EPSILON] =  rulesAndWeights[EPSILON];
+			fuzzyRules[PERTINENCEFUNC] = rulesAndWeights[PERTINENCEFUNC];
 
 			rep.singleFuzzyRS.push_back(fuzzyRules);
 		}
@@ -74,18 +61,19 @@ public:
 			rep.singleIndex.pop_back();
 			rep.singleFuzzyRS.pop_back();
 		}
-		return new MoveNEIGHAddSingleInput(file, K, !reverse, pEFP, rg);
+		return new MoveNEIGHAddSingleInput(file, K, rulesAndWeights, !reverse);
 	}
 
 	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
 		const MoveNEIGHAddSingleInput& m = (const MoveNEIGHAddSingleInput&) _m;
-		return ((m.file == file) && (m.K == K));
+		return ((m.file == file) && (m.K == K) && (m.rulesAndWeights == rulesAndWeights));
 	}
 
 	void print() const
 	{
-		cout << "MoveNEIGHAddSingleInput( vector:  explatonary variable " << file << " <=>  k " << K << " )";
+		cout << "MoveNEIGHAddSingleInput( vector:  explatonary variable " << file << " <=>  k " << K;
+		cout<<"rules and weights "<<rulesAndWeights<< " )";
 		cout << endl;
 	}
 }
@@ -124,7 +112,22 @@ public:
 
 		for (int lag = 1; lag <= maxLag; lag++)
 		{
-			moves.push_back(new MoveNEIGHAddSingleInput(0, lag, false, pEFP, rg));
+			int nEXV = 0;
+			int mean = pEFP.getMean(nEXV);
+			int stdDesv = pEFP.getStdDesv(nEXV);
+			double meanWeight = pEFP.getMean(0); //File 0 is the target file
+			double stdDesvWeight = pEFP.getStdDesv(0);
+
+			double greater = rg.randG(mean, stdDesv);
+			double lower = rg.randG(mean, stdDesv);
+			double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
+			double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
+			double fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+			double epsilon = 1; //forcing to 1, trapezoid functions - TODO
+
+			vector<double> rulesAndWeights = {greater,greaterWeight,lower,lowerWeight, epsilon, fuzzyFunction};
+
+			moves.push_back(new MoveNEIGHAddSingleInput(0, lag,rulesAndWeights, false));
 		}
 
 		if (moves.size() > 0)
@@ -190,7 +193,21 @@ public:
 		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
 		int file = rg.rand(pEFP.getNumberExplanatoryVariables());
 
-		return new MoveNEIGHAddSingleInput(file, K, false, pEFP, rg); // return a random move
+		int nEXV = file;
+		int mean = pEFP.getMean(nEXV);
+		int stdDesv = pEFP.getStdDesv(nEXV);
+		double meanWeight = pEFP.getMean(0); //File 0 is the target file
+		double stdDesvWeight = pEFP.getStdDesv(0);
+
+		double greater = rg.randG(mean, stdDesv);
+		double lower = rg.randG(mean, stdDesv);
+		double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
+		double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
+		double fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+		double epsilon = 1; //forcing to 1, trapezoid functions - TODO
+
+		vector<double> rulesAndWeights = {greater,greaterWeight,lower,lowerWeight, epsilon, fuzzyFunction};
+		return new MoveNEIGHAddSingleInput(file, K, rulesAndWeights, false); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
