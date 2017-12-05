@@ -20,7 +20,7 @@ AZZZsZJVqZwfHUx55p6UdY1Vx7qCjhnjMy
 ~~~
 
 ## Main contributors
-v2.0
+v1.0
 Vitor Nazário Coelho
 Igor Machado Coelho
 
