@@ -217,7 +217,7 @@ public:
 
 	// Movement cost based on complete evaluation
 	// USE ONLY FOR VALIDATION OF CODE! OTHERWISE, USE moveCost(e, m, s)
-	MoveCost* moveCost(Move<R, ADS>& m, Solution<R, ADS>& s, bool allowEstimated = false)
+	MoveCost* moveCostComplete(Move<R, ADS>& m, Solution<R, ADS>& s, bool allowEstimated = false)
 	{
 		// TODO: in the future, consider 'allowEstimated' parameter
 		// TODO: in the future, consider 'e' and 's' as 'const', and use 'const_cast' to remove it.

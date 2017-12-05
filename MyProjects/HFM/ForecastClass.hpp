@@ -34,6 +34,7 @@
 #include "../../OptFrame/Heuristics/ILS/MO/MOILSLPerturbation.hpp"
 #include "../../OptFrame/Heuristics/ILS/MO/BasicMOILS.hpp"
 #include "../../OptFrame/Heuristics/ILS/MO/MOILSLevels.hpp"
+#include "../../OptFrame/Util/CheckCommand.hpp"
 
 namespace EFP
 {
@@ -72,6 +73,7 @@ private:
 	//OptimalLinearRegression* olr;
 //	MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>* mev;
 	HFMMultiEvaluator* mev;
+	CheckCommand<RepEFP, OPTFRAME_DEFAULT_ADS> checkModule;
 
 public:
 
