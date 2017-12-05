@@ -49,16 +49,17 @@ public:
 	MultiEvaluation evaluate(const RepEFP& r, const OPTFRAME_DEFAULT_ADS* ads)
 	{
 		MultiEvaluation nev;
-//		= new MultiEvaluation;
 
 		vector<double>* foIndicator = evalEFP.evaluateAll(r, ALL_EVALUATIONS);
 
+		//It has been verified that most part of INDEX minimizes Square Errors and are strongly correlated
+		//Instead of designed MAPE_INV
 		nev.addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INDEX)));
 		nev.addEvaluation(EvaluationEFP(foIndicator->at(MAPE_INV_INDEX)));
-		nev.addEvaluation(EvaluationEFP(foIndicator->at(SMAPE_INDEX)));
-		nev.addEvaluation(EvaluationEFP(foIndicator->at(RMSE_INDEX)));
-		nev.addEvaluation(EvaluationEFP(foIndicator->at(WMAPE_INDEX)));
-		nev.addEvaluation(EvaluationEFP(foIndicator->at(MMAPE_INDEX)));
+//		nev.addEvaluation(EvaluationEFP(foIndicator->at(SMAPE_INDEX)));
+//		nev.addEvaluation(EvaluationEFP(foIndicator->at(RMSE_INDEX)));
+//		nev.addEvaluation(EvaluationEFP(foIndicator->at(WMAPE_INDEX)));
+//		nev.addEvaluation(EvaluationEFP(foIndicator->at(MMAPE_INDEX)));
 
 		delete foIndicator;
 		return nev;
