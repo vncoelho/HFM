@@ -485,6 +485,7 @@ int EEGBiometricSystem(int argc, char **argv)
 	maxNM = 10;
 	argvTimeES = 10;
 	nVolunters = 4;
+	cout<<"Parameters [EXP,FH,maxNM,timeES,nVol]:"<<argEXP<<"\t"<<argvFH<<"\t"<<maxNM<<"\t"<<argvTimeES<<"\t"<<nVolunters<<endl;
 	int argvMaxLagRate = 3; // percentage of ts to be used
 	bool randomFH = true;
 	bool randomChannel = true;

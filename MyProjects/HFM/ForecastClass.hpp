@@ -173,10 +173,10 @@ public:
 //		mev = new MultiEvaluator<RepEFP>(v_e);
 		mev = new HFMMultiEvaluator(*eval);
 		moILSPert = new MOILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, *nsModifyFuzzyRules, rg);
-		moILSPert->add_ns(*nsChangeSingleInput);
+//		moILSPert->add_ns(*nsChangeSingleInput);
 
 		basicMOILSPert= new BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, 2,10,*nsModifyFuzzyRules, rg);
-		basicMOILSPert->add_ns(*nsChangeSingleInput);
+//		basicMOILSPert->add_ns(*nsChangeSingleInput);
 
 	}
 
@@ -205,6 +205,9 @@ public:
 		delete mev;
 		delete es;
 		delete ngesParams;
+		delete basicMOILSPert;
+		delete moILSPert;
+
 	}
 
 //	//add solution to pareto front evaluating with forecasting class evaluators
@@ -281,14 +284,14 @@ public:
 		if (_pf == NULL)
 		{
 			delete pf;
-//			pf = generalPLS.search(moStopCriteriaGPLS);
-			pf = moILSLevels.search(moStopCriteriaGPLS);
+			pf = generalPLS.searchWithOptionalPareto(moStopCriteriaGPLS);
+//			pf = moILSLevels.search(moStopCriteriaGPLS);
 		}
 		else
 		{
 			delete pf;
-//			pf = generalPLS.search(moStopCriteriaGPLS, _pf);
-			pf = moILSLevels.search(moStopCriteriaGPLS, _pf);
+			pf = generalPLS.searchWithOptionalPareto(moStopCriteriaGPLS, _pf);
+//			pf = moILSLevels.search(moStopCriteriaGPLS, _pf);
 		}
 
 //		vector<MultiEvaluation*> vEval = pf->getParetoFront();
@@ -320,7 +323,7 @@ public:
 	pair<Solution<RepEFP>, Evaluation>* runGRASP(int timeGRASP, int nSol)
 	{
 		SOSC* stopCriteria = new SOSC(timeGRASP);
-		pair<Solution<RepEFP>, Evaluation>* finalSol;
+		pair<Solution<RepEFP>, Evaluation>* finalSol = nullptr;
 		delete stopCriteria;
 //		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, nSol);
 //		g.setMessageLevel(3);

@@ -75,6 +75,7 @@ public:
 
 	virtual void acceptanceCriterion(const Pareto<R, ADS>& pf, BasicHistory& history)
 	{
+
 		if (pf.getNewNonDominatedSolutionsStatus())
 		{
 			cout << "New Pareto size: is "<<pf.size();

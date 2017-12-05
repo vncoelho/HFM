@@ -143,7 +143,7 @@ int musicGen(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
-	pair<vector<double>*, vector<double>* >* forecastsAndTargets;
+	pair<vector<double>*, vector<double>* >* forecastsAndTargets = nullptr;
 	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector
@@ -289,7 +289,7 @@ int musicGenMidiCSV(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
-	pair<vector<double>*, vector<double>* >* forecastsAndTargets;
+	pair<vector<double>*, vector<double>* >* forecastsAndTargets = nullptr;
 	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
 	{
 		vector<vector<double> > validationSet; // validationSetVector

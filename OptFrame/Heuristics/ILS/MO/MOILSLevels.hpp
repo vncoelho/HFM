@@ -101,8 +101,7 @@ public:
 		if (pf.getNewNonDominatedSolutionsStatus())
 		{
 			cout << "New Pareto size: is " << pf.size();
-			cout << " on [iter without improvement " << history << "]" << endl;
-
+			cout << " on [iter " << history.first.first << " of level " << history.first.second << "]"<<endl;
 			// =======================
 			//  Atualiza o historico
 			// =======================
