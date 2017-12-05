@@ -52,10 +52,10 @@ private:
 	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNS;
 
 	EmptyLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS> emptyLS;
-	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNSeq;
+	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*>* vNSeq;
 
 //	EFPESContinous* EsCOpt;
-	ES<RepEFP, OPTFRAME_DEFAULT_ADS>* es;
+	NGES<RepEFP, OPTFRAME_DEFAULT_ADS>* es;
 	NGESParams* ngesParams;
 
 	vector<LocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vLS;
@@ -111,7 +111,7 @@ public:
 		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiChangeSingleInput = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsChangeSingleInput);
 //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
 //		int maxRDM = 100;
-//		RandomDescentMethod<RepEFP>* rdm = new RandomDescentMethod<RepEFP>(*eval, *ns, maxRDM);
+//		RandomDescentMethod<RepEFP>* rdm = new RandomDescentMethod<RepEFP>(*eval, *nsChangeSingleInput, 100);
 //		//rdm->setMessageLevel(3);
 //		vLS.push_back(fiVAlpha);
 		vLS.push_back(fiModifyFuzzyRules);
@@ -137,11 +137,11 @@ public:
 //		EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, esMaxG, rg, initialDesv, mutationDesv);
 
 		//olr = new OptimalLinearRegression(*eval, *p);
-
-		vNSeq.push_back(nsModifyFuzzyRules);
-		vNSeq.push_back(nsChangeSingleInput);
-		vNSeq.push_back(nsRemoveSingleInput);
-		vNSeq.push_back(nsAddSingleInput);
+		vNSeq = new vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*>;
+		vNSeq->push_back(nsModifyFuzzyRules);
+		vNSeq->push_back(nsChangeSingleInput);
+		vNSeq->push_back(nsRemoveSingleInput);
+		vNSeq->push_back(nsAddSingleInput);
 //		vNSeq.push_back(nsVAlpha);
 //		vNSeq.push_back(nsAddMean01);
 //		vNSeq.push_back(nsAddMean1);
@@ -155,12 +155,18 @@ public:
 
 		//TODO check why ES goes more generations some time when we do not have improvements.
 
-		vector<int> vNSeqMax(vNSeq.size(), 1000);
+		vector<int> vNSeqMax(vNSeq->size(), 1000);
 		double mutationRate = 0.1;
 		int selectionType = 1;
+		vector<NS<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNSSeqForNGES;
+		vNSSeqForNGES.push_back(nsModifyFuzzyRules);
+		vNSSeqForNGES.push_back(nsChangeSingleInput);
+		vNSSeqForNGES.push_back(nsRemoveSingleInput);
+		vNSSeqForNGES.push_back(nsAddSingleInput);
+
 		string outputFile = "LogPopFOPlus";
 		ngesParams = new NGESParams(vNSeqMax, selectionType, mutationRate, mu, lambda, esGMaxWithoutImp, outputFile, 0);
-		es = new ES<RepEFP>(*eval, *c, vNSeq, emptyLS, rg, *ngesParams);
+		es = new NGES<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *c, vNSSeqForNGES, emptyLS, rg, *ngesParams);
 		es->setMessageLevel(3);
 
 		//MO -- HFM MULTI IS ABLE TO ONLY "EVALUATE" once
@@ -181,16 +187,16 @@ public:
 
 
 		//Trying to checkmodule
-		checkModule.add(*c);
-		checkModule.add(*eval);
-
-		checkModule.add(*nsModifyFuzzyRules);
-		checkModule.add(*nsRemoveSingleInput);
-		checkModule.add(*nsChangeSingleInput);
-		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
-
-		checkModule.run(1,2);
-		getchar();
+//		checkModule.add(*c);
+//		checkModule.add(*eval);
+//
+//		checkModule.add(*nsModifyFuzzyRules);
+//		checkModule.add(*nsRemoveSingleInput);
+//		checkModule.add(*nsChangeSingleInput);
+//		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
+//
+//		checkModule.run(1,2);
+//		getchar();
 	}
 
 	virtual ~ForecastClass()
@@ -205,9 +211,9 @@ public:
 			delete vLS[i];
 		vLS.clear();
 
-		for (int i = 0; i < (int) vNSeq.size(); i++)
-			delete vNSeq[i];
-		vNSeq.clear();
+		for (int i = 0; i < (int) vNSeq->size(); i++)
+			delete vNSeq->at(i);
+		delete vNSeq;
 
 		delete ilsPert; //todo verify
 		delete ils; //todo verify
@@ -270,10 +276,10 @@ public:
 //		GRInitialPareto<RepEFP,OPTFRAME_DEFAULT_ADS> grIP(*c, rg, 1, *mev);
 		BasicInitialPareto<RepEFP, OPTFRAME_DEFAULT_ADS> grIP(*c, *mev);
 		int maxTriesRI = 100;
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriMFR(*mev, *vNSeq[0], maxTriesRI);
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriCSI(*mev, *vNSeq[1], maxTriesRI);
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriRSI(*mev, *vNSeq[2], maxTriesRI);
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriASI(*mev, *vNSeq[3], maxTriesRI);
+		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriMFR(*mev, *vNSeq->at(0), maxTriesRI);
+		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriCSI(*mev, *vNSeq->at(1), maxTriesRI);
+		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriRSI(*mev, *vNSeq->at(2), maxTriesRI);
+		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriASI(*mev, *vNSeq->at(3), maxTriesRI);
 
 		vector<MOLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vMOLS;
 		vMOLS.push_back(&moriASI);
