@@ -9,6 +9,7 @@
 #include <numeric>
 #include "../../../OptFrame/RandGen.hpp"
 #include "../../../OptFrame/Util/RandGenMersenneTwister.hpp"
+#include "../Util/treatREDD.hpp"
 
 
 using namespace std;
@@ -97,7 +98,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 		// ============ END FORCES ======================
 
 		// ============= METHOD PARAMETERS=================
-		methodParameters methodParam;
+		HFMParams methodParam;
 		//seting up Continous ES params
 		methodParam.setESInitialDesv(10);
 		methodParam.setESMutationDesv(20);
@@ -296,7 +297,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 		// ============ END FORCES ======================
 
 		// ============= METHOD PARAMETERS=================
-		methodParameters methodParam;
+		HFMParams methodParam;
 		//seting up Continous ES params
 		methodParam.setESInitialDesv(10);
 		methodParam.setESMutationDesv(20);

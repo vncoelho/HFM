@@ -1,5 +1,5 @@
-#ifndef EFP_METHODPARAMETERS_HPP_
-#define EFP_METHODPARAMETERS_HPP_
+#ifndef HFM_METHODPARAMETERS_HPP_
+#define HFM_METHODPARAMETERS_HPP_
 
 #include <iostream>
 
@@ -11,7 +11,7 @@ using namespace scannerpp;
 namespace HFM
 {
 
-class methodParameters
+class HFMParams
 {
 private:
 	int esMaxG, esMU, esLambda, esInitialDesv, esMutationDesv;
@@ -21,7 +21,7 @@ private:
 	int evalAprox; //Aprox
 
 public:
-	methodParameters()
+	HFMParams()
 	{
 		esMaxG = -1;
 		esMU = -1;
@@ -154,5 +154,5 @@ public:
 
 }
 
-#endif /*EFP_METHODPARAMETERS_HPP_*/
+#endif /*HFM_METHODPARAMETERS_HPP_*/
 

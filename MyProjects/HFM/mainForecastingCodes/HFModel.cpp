@@ -95,7 +95,7 @@ int HFM_API(int argc, char **argv)
 		{
 			treatForecasts rF(explanatoryVariables);
 
-			methodParameters methodParam;
+			HFMParams methodParam;
 			cout << "Please type Evolution Strategy Pop Size (offpring = 6*mu):" << endl;
 			int mu;
 			cin >> mu;

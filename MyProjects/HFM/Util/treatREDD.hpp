@@ -1,15 +1,16 @@
-#ifndef TREATREEDATASET_HPP_
-#define TREATREEDATASET_HPP_
+#ifndef HFM_TREATREEDATASET_HPP_
+#define HFM_TREATREEDATASET_HPP_
 
 #include <vector>   // vector
-#include<cmath>     // abs
-#include<algorithm> // sort
+#include <cmath>     // abs
+#include <algorithm> // sort
 #include <iomanip>
 #include <fstream>
 
 namespace HFM
 {
 
+//Written by Alexandre
 class treatREEDDataset
 {
 public:
@@ -206,4 +207,4 @@ public:
 
 }
 
-#endif /* TREATREEDATASET_HPP_ */
+#endif /* HFM_TREATREEDATASET_HPP_ */

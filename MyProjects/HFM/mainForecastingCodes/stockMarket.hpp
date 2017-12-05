@@ -68,7 +68,7 @@ int stockMarketForecasting(int argc, char **argv)
 	// ============ END FORCES ======================
 
 	// ============= METHOD PARAMETERS=================
-	methodParameters methodParam;
+	HFMParams methodParam;
 	//seting up ES params
 	methodParam.setESMU(mu);
 	methodParam.setESLambda(lambda);

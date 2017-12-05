@@ -5,8 +5,8 @@
  *      Author: vitor
  */
 
-#ifndef OPTIMALLINEARREGRESSION_HPP_
-#define OPTIMALLINEARREGRESSION_HPP_
+#ifndef HFM_OPTIMALLINEARREGRESSION_HPP_
+#define HFM_OPTIMALLINEARREGRESSION_HPP_
 
 #include "../../OptFrame/LocalSearch.hpp"
 #include "./Evaluator.hpp"
@@ -179,4 +179,4 @@ public:
 
 }
 
-#endif /* OPTIMALLINEARREGRESSION_HPP_ */
+#endif /* HFM_OPTIMALLINEARREGRESSION_HPP_ */

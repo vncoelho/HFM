@@ -5,7 +5,6 @@
 #include "./HFM/Solution.h"
 #include "./HFM/Evaluation.h"
 #include "./HFM/ProblemReadParameters.hpp"
-#include "./HFM/methodParameters.hpp"
 #include "./HFM/ProblemInstance.hpp"
 #include "./HFM/Evaluator.hpp"
 #include "./HFM/NS/NSSeqNEIGH.hpp"
@@ -18,8 +17,8 @@
 #include "./HFM/ConstructiveRandom.hpp"
 #include "./HFM/ConstructiveRandomACF.hpp"
 #include "./HFM/HFMESContinous.hpp"
-#include "./HFM/treatForecasts.hpp"
 #include "./HFM/ForecastClass.hpp"
-#include "./HFM/treatREDD.hpp"
+
+
 
 #endif /*HFM_H_*/

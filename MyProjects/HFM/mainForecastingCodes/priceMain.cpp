@@ -103,7 +103,7 @@ int priceCompetitionBlind(int argc, char **argv)
 		// ============ END FORCES ======================
 
 		// ============= METHOD PARAMETERS=================
-		methodParameters methodParam;
+		HFMParams methodParam;
 		//seting up ES params
 		methodParam.setESMU(mu);
 		methodParam.setESLambda(lambda);
@@ -342,7 +342,7 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 		randomPrecision = 20;
 
 		// ============= METHOD PARAMETERS=================
-		methodParameters methodParam;
+		HFMParams methodParam;
 		//seting up ES params
 		methodParam.setESMU(mu);
 		methodParam.setESLambda(lambda);

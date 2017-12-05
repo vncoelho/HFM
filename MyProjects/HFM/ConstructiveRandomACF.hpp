@@ -1,26 +1,21 @@
 #ifndef EFP_CONTRUCTIVE_ACF_HPP_
 #define EFP_CONTRUCTIVE_ACF_HPP_
 
-#include "../../OptFrame/Constructive.hpp"
-//#include "../../OptFrame/Heuristics/GRASP/GRConstructive.hpp"
-
-#include "ProblemInstance.hpp"
-
-#include "Representation.h"
-#include "Solution.h"
-
-#include "Evaluator.hpp"
-
 #include <list>
-
 #include <algorithm>
 #include <stdlib.h>
 #include <set>
+//#include "../../OptFrame/Heuristics/GRASP/GRConstructive.hpp"
 
-#include "./autocorr.cpp"
-#include "./lregress.cpp"
+#include "ProblemInstance.hpp"
+#include "Representation.h"
+#include "Solution.h"
+#include "Evaluator.hpp"
+#include "../../OptFrame/Constructive.hpp"
 
-#include "./autocorr.h"
+//Tools for ACF
+#include "./Util/autocorr.cpp"
+#include "./Util/lregress.cpp"
 
 using namespace std;
 

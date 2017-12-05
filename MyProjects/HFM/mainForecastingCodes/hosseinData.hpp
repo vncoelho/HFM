@@ -59,7 +59,7 @@ int hosseinBlindForecasts(int argc, char **argv)
 		// ============ END FORCES ======================
 
 		// ============= METHOD PARAMETERS=================
-		methodParameters methodParam;
+		HFMParams methodParam;
 		//seting up Continous ES params
 		methodParam.setESInitialDesv(10);
 		methodParam.setESMutationDesv(20);

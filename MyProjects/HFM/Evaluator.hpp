@@ -14,8 +14,8 @@
 #include "Evaluation.h"
 
 #include "ProblemInstance.hpp"
-#include "treatForecasts.hpp"
 #include <algorithm>
+#include "TreatForecasts.hpp"
 
 #define EPSILON_EFP 0.0001
 extern int nThreads;

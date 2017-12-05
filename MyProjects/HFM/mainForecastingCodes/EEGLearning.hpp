@@ -304,7 +304,7 @@ pair<Solution<RepEFP>, Evaluation>* learnModel(treatForecasts& tFTraining, int a
 	// ============ END FORCES ======================
 
 	// ============= METHOD PARAMETERS=================
-	methodParameters methodParam;
+	HFMParams methodParam;
 	//seting up Continous ES params
 	methodParam.setESInitialDesv(10);
 	methodParam.setESMutationDesv(20);
@@ -400,7 +400,7 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 	// ============ END FORCES ======================
 
 	// ============= METHOD PARAMETERS=================
-	methodParameters methodParam;
+	HFMParams methodParam;
 	//seting up Continous ES params
 	methodParam.setESInitialDesv(10);
 	methodParam.setESMutationDesv(20);

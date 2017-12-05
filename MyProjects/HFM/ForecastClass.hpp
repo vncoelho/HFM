@@ -13,8 +13,7 @@
 #include "Evaluation.h"
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
-#include "treatForecasts.hpp"
-
+#include "HFMParams.hpp"
 #include "../../OptFrame/Heuristics/Empty.hpp"
 #include "../../OptFrame/NSSeq.hpp"
 #include "../../OptFrame/Heuristics/LocalSearches/VND.h"
@@ -34,6 +33,7 @@
 #include "../../OptFrame/Heuristics/ILS/MO/BasicMOILS.hpp"
 #include "../../OptFrame/Heuristics/ILS/MO/MOILSLevels.hpp"
 #include "../../OptFrame/Util/CheckCommand.hpp"
+#include "TreatForecasts.hpp"
 
 namespace HFM
 {
@@ -44,7 +44,7 @@ private:
 	vector<vector<double> >& tForecastings;
 	ProblemParameters& problemParam;
 	RandGen& rg;
-	methodParameters& methodParam;
+	HFMParams& methodParam;
 
 	ProblemInstance* p;
 	EFPEvaluator* eval;
@@ -76,7 +76,7 @@ private:
 
 public:
 
-	ForecastClass(vector<vector<double> >& _tForecastings, ProblemParameters& _problemParam, RandGen& _rg, methodParameters& _methodParam) :
+	ForecastClass(vector<vector<double> >& _tForecastings, ProblemParameters& _problemParam, RandGen& _rg, HFMParams& _methodParam) :
 			tForecastings(_tForecastings), problemParam(_problemParam), rg(_rg), methodParam(_methodParam)
 	{
 

@@ -77,7 +77,7 @@ int musicGen(int argc, char **argv)
 	// ============ END FORCES ======================
 
 	// ============= METHOD PARAMETERS=================
-	methodParameters methodParam;
+	HFMParams methodParam;
 	//seting up ES params
 	methodParam.setESMU(mu);
 	methodParam.setESLambda(lambda);
@@ -225,7 +225,7 @@ int musicGenMidiCSV(int argc, char **argv)
 	// ============ END FORCES ======================
 
 	// ============= METHOD PARAMETERS=================
-	methodParameters methodParam;
+	HFMParams methodParam;
 	//seting up ES params
 	methodParam.setESMU(mu);
 	methodParam.setESLambda(lambda);

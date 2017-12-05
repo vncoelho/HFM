@@ -5,8 +5,8 @@
  *      Author: vitor
  */
 
-#ifndef TREATFORECASTS_H_
-#define TREATFORECASTS_H_
+#ifndef HFM_TREATFORECASTS_H_
+#define HFM_TREATFORECASTS_H_
 
 namespace HFM
 {
@@ -553,5 +553,5 @@ public:
 }
 ;
 
-} /* namespace EFP */
-#endif /* TREATFORECASTS_H_ */
+} /* namespace HFM */
+#endif /* HFM_TREATFORECASTS_H_ */

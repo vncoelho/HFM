@@ -1,5 +1,5 @@
-#ifndef EFP_PROBLEMINSTANCE_HPP_
-#define EFP_PROBLEMINSTANCE_HPP_
+#ifndef HFM_PROBLEMINSTANCE_HPP_
+#define HFM_PROBLEMINSTANCE_HPP_
 
 #include <iostream>
 
@@ -157,5 +157,5 @@ public:
 
 }
 
-#endif /*EFP_PROBLEMINSTANCE_HPP_*/
+#endif /*HFM_PROBLEMINSTANCE_HPP_*/
 

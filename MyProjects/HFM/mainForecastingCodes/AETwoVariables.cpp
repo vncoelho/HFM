@@ -108,7 +108,7 @@ int AETwoVariables(int argc, char **argv)
 		}
 
 		// ============= METHOD PARAMETERS=================
-		methodParameters methodParam;
+		HFMParams methodParam;
 		//seting up ES params
 		methodParam.setESMU(mu);
 		methodParam.setESLambda(lambda);
