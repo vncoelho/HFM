@@ -29,5 +29,5 @@ HFM:
 	g++ $(GCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
 	
 clean:
-	#make clean -C ./MyProjects/
+	make clean -C ./MyProjects/
 	

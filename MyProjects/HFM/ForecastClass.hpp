@@ -181,16 +181,16 @@ public:
 
 
 		//Trying to checkmodule
-//		checkModule.add(*c);
-//		checkModule.add(*eval);
-//
-//		checkModule.add(*nsModifyFuzzyRules);
-//		checkModule.add(*nsRemoveSingleInput);
-//		checkModule.add(*nsChangeSingleInput);
-//		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
-//
-//		checkModule.run(1,2);
-//		getchar();
+		checkModule.add(*c);
+		checkModule.add(*eval);
+
+		checkModule.add(*nsModifyFuzzyRules);
+		checkModule.add(*nsRemoveSingleInput);
+		checkModule.add(*nsChangeSingleInput);
+		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
+
+		checkModule.run(1,2);
+		getchar();
 	}
 
 	virtual ~ForecastClass()
