@@ -123,12 +123,14 @@ public:
 			slope_ = 0;
 			intercept_ = 0;
 			cor_ = 0;
-			stddev_;
+			stddev_ = 0;
 			slopeError_ = 0;
 		}
+
 		~lineInfo()
 		{
 		}
+
 		/** copy constructor */
 		lineInfo(const lineInfo &rhs)
 		{
