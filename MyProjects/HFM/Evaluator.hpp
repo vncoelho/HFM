@@ -124,7 +124,7 @@ public:
 				double ruleLower = rep.singleFuzzyRS[nSP][LOWER];
 				double lowerWeight = rep.singleFuzzyRS[nSP][LOWER_WEIGHT];
 				double ruleEpsilon = rep.singleFuzzyRS[nSP][EPSILON];
-				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
+				ActivationFunction repFuzzyPertinenceFunc = ActivationFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
 
 				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, greaterAccepeted, lowerAccepted);
 			}
@@ -149,7 +149,7 @@ public:
 				double ruleLower = rep.averageFuzzyRS[nMP][LOWER];
 				double lowerWeight = rep.averageFuzzyRS[nMP][LOWER_WEIGHT];
 				double ruleEpsilon = rep.averageFuzzyRS[nMP][EPSILON];
-				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
+				ActivationFunction repFuzzyPertinenceFunc = ActivationFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
 
 				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, greaterAccepeted, lowerAccepted);
 			}
@@ -177,7 +177,7 @@ public:
 				double ruleLower = rep.derivativeFuzzyRS[nDP][LOWER];
 				double lowerWeight = rep.derivativeFuzzyRS[nDP][LOWER_WEIGHT];
 				double ruleEpsilon = rep.derivativeFuzzyRS[nDP][EPSILON];
-				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.derivativeFuzzyRS[nDP][PERTINENCEFUNC]);
+				ActivationFunction repFuzzyPertinenceFunc = ActivationFunction(rep.derivativeFuzzyRS[nDP][PERTINENCEFUNC]);
 
 				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, greaterAccepeted, lowerAccepted);
 			}
@@ -256,7 +256,7 @@ public:
 	}
 
 //defuzzification process -- Converter a node input into useful estimation values
-	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const FuzzyFunction fuzzyFunc, const double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
+	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const ActivationFunction fuzzyFunc, const double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
 	{
 
 		if (fuzzyFunc == Heavisde)

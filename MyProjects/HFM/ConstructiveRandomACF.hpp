@@ -188,7 +188,6 @@ public:
 			acfPoints.push_back(info.points());
 		}
 
-
 		vector<vector<pair<double, int> > > acfGreedy(numberExplanatoryVariables);
 
 		if (acfPoints[0].size() == 1)

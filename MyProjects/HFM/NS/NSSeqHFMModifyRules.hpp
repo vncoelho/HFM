@@ -194,33 +194,35 @@ class NSSeqHFMModifyRules: public NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>
 private:
 	ProblemInstance& pEFP;
 	RandGen& rg;
-	vector<double>* vUpdateValues;
+	vector<double> vUpdateValues;
 public:
 
+	//A vector of values to be used for changing rules and weights can be passed as parameter
 	NSSeqHFMModifyRules(ProblemInstance& _pEFP, RandGen& _rg, vector<double>* _vUpdateValues = NULL) :
-			pEFP(_pEFP), rg(_rg), vUpdateValues(_vUpdateValues)
+			pEFP(_pEFP), rg(_rg)
 	{
 		//TODO mean from the targetfile
 		double mean = pEFP.getMean(0);
 
-		if (!vUpdateValues)
-		{
-			vUpdateValues->push_back(0.01);
-			vUpdateValues->push_back(0.1);
-			vUpdateValues->push_back(1);
-			vUpdateValues->push_back(mean / 30);
-			vUpdateValues->push_back(mean / 15);
-			vUpdateValues->push_back(mean / 6);
-			vUpdateValues->push_back(mean / 2);
-			vUpdateValues->push_back(mean);
-			vUpdateValues->push_back(mean * 2);
-			vUpdateValues->push_back(mean * 5);
-			vUpdateValues->push_back(mean * 100);
-		}
-		else
+		if (_vUpdateValues)
 		{
 			cout << "Modify values given as input:" << *_vUpdateValues << endl;
 			assert(_vUpdateValues->size() > 0);
+			vUpdateValues = *_vUpdateValues;
+		}
+		else
+		{
+			vUpdateValues.push_back(0.01);
+			vUpdateValues.push_back(0.1);
+			vUpdateValues.push_back(1);
+			vUpdateValues.push_back(mean / 30);
+			vUpdateValues.push_back(mean / 15);
+			vUpdateValues.push_back(mean / 6);
+			vUpdateValues.push_back(mean / 2);
+			vUpdateValues.push_back(mean);
+			vUpdateValues.push_back(mean * 2);
+			vUpdateValues.push_back(mean * 5);
+			vUpdateValues.push_back(mean * 100);
 		}
 	}
 
@@ -272,8 +274,8 @@ public:
 		if (tries == maxTries)
 			return new MoveHFMModifyRule(-1, -1, -1, -1, -1); // return a random move
 
-		int applyRand = rg.rand(vUpdateValues->size());
-		double applyValue = vUpdateValues->at(applyRand);
+		int applyRand = rg.rand(vUpdateValues.size());
+		double applyValue = vUpdateValues.at(applyRand);
 		bool sign = rg.rand(2);
 
 		return new MoveHFMModifyRule(r, o, applyValue, sign, vectorType); // return a random move
@@ -281,7 +283,7 @@ public:
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorHFMModifyRules(rep, pEFP, *vUpdateValues); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorHFMModifyRules(rep, pEFP, vUpdateValues); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const
