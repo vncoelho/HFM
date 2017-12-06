@@ -208,13 +208,10 @@ public:
 
 		if (((begin + pa - K) < 0))
 		{
-			cout << "oi:" << K << endl;
-			getchar();
 			cout << "BUG Evaluator (function getKValue): (i + pa - K) = " << begin + pa - K << endl;
-			getchar();
 			cout << vForecastings.size() << endl;
 			cout << "vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
-			getchar();
+			assert( (begin + pa - K) < 0);
 		}
 
 		if ((K == 0))

@@ -19,6 +19,12 @@ const int NFUZZYFUNCTIONS = 2;
 
 using namespace std;
 
+enum inputTypes
+{
+	Single_Input,Average_Inputs,Derivative_Inputs,N_Inputs_Types
+};
+
+
 // Solution Representation
 
 enum FuzzyFunction

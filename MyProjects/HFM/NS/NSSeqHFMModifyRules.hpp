@@ -1,5 +1,5 @@
-#ifndef EFP_NSSEQNEIGHMODIFYRULES_HPP_
-#define EFP_NSSEQNEIGHMODIFYRULES_HPP_
+#ifndef HFM_NSSEQNEIGHMODIFYRULES_HPP_
+#define HFM_NSSEQNEIGHMODIFYRULES_HPP_
 
 // Framework includes
 #include "../../../OptFrame/NSSeq.hpp"
@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveNEIGHModifyRule: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveHFMModifyRule: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int r, o;
@@ -22,79 +22,69 @@ private:
 	int vectorType;
 public:
 
-
-	MoveNEIGHModifyRule(int _r, int _o, double _applyValue, bool _sign, int _vectorType) :
+	MoveHFMModifyRule(int _r, int _o, double _applyValue, bool _sign, int _vectorType) :
 			r(_r), o(_o), applyValue(_applyValue), sign(_sign), vectorType(_vectorType)
 	{
 
 	}
 
-	virtual ~MoveNEIGHModifyRule()
+	virtual ~MoveHFMModifyRule()
 	{
 	}
 
 	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		/*
-		 if(sign == false)
-		 return true;
-		 else {
-		 bool nonNegative = (rep[r][o] - applyValue2 >= 0);
-		 return nonNegative;
-		 }*/
-
 		return true;
-
 	}
 
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		if (r == -1)
-			return new MoveNEIGHModifyRule(-1, -1, -1, -1, -1);
+			return new MoveHFMModifyRule(-1, -1, -1, -1, -1);
 
 		if (r == PERTINENCEFUNC)
 		{
-			if (vectorType == 0)
+			if (vectorType == Single_Input)
 				rep.singleFuzzyRS[o][r] = !rep.singleFuzzyRS[o][r];
-			if (vectorType == 1)
+			if (vectorType == Average_Inputs)
 				rep.averageFuzzyRS[o][r] = !rep.averageFuzzyRS[o][r];
-			if (vectorType == 2)
+			if (vectorType == Derivative_Inputs)
 				rep.derivativeFuzzyRS[o][r] = !rep.derivativeFuzzyRS[o][r];
 
-			return new MoveNEIGHModifyRule(r, o, applyValue, !sign, vectorType);
+			return new MoveHFMModifyRule(r, o, applyValue, !sign, vectorType);
 		}
 
-		if (vectorType == 0)
+		if (vectorType == Single_Input)
 		{
 
-			if (sign == false)
+			if (!sign)
 				rep.singleFuzzyRS[o][r] += applyValue;
 			else
 				rep.singleFuzzyRS[o][r] -= applyValue;
 		}
 
-		if (vectorType == 1)
+		if (vectorType == Average_Inputs)
 		{
-			if (sign == false)
+			if (!sign)
 				rep.averageFuzzyRS[o][r] += applyValue;
 			else
 				rep.averageFuzzyRS[o][r] -= applyValue;
 		}
 
-		if (vectorType == 2)
+		if (vectorType == Derivative_Inputs)
 		{
-			if (sign == false)
+			if (!sign)
 				rep.derivativeFuzzyRS.at(o).at(r) += applyValue;
 			else
 				rep.derivativeFuzzyRS[o][r] -= applyValue;
 		}
 		// return reverse move
-		return new MoveNEIGHModifyRule(r, o, applyValue, !sign, vectorType);
+		return new MoveHFMModifyRule(r, o, applyValue, !sign, vectorType);
 	}
 
 	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
-		const MoveNEIGHModifyRule& m = (const MoveNEIGHModifyRule&) _m;
+		const MoveHFMModifyRule& m = (const MoveHFMModifyRule&) _m;
 		return ((m.r == r) && (m.o == o) && (m.sign == sign));
 	}
 
@@ -107,23 +97,24 @@ public:
 }
 ;
 
-class NSIteratorNEIGHModifyRules: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorHFMModifyRules: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	MoveNEIGHModifyRule* m;
-	vector<MoveNEIGHModifyRule*> moves;
+	MoveHFMModifyRule* m;
+	vector<MoveHFMModifyRule*> moves;
 	int index;
 	const RepEFP& rep;
 	ProblemInstance& pEFP;
+	vector<double>& vUpdateValues;
 public:
-	NSIteratorNEIGHModifyRules(const RepEFP& _rep, ProblemInstance& _pEFP) :
-			rep(_rep), pEFP(_pEFP)
+	NSIteratorHFMModifyRules(const RepEFP& _rep, ProblemInstance& _pEFP, vector<double>& _vUpdateValues) :
+			rep(_rep), pEFP(_pEFP), vUpdateValues(_vUpdateValues)
 	{
 		index = 0;
 		m = NULL;
 	}
 
-	virtual ~NSIteratorNEIGHModifyRules()
+	virtual ~NSIteratorHFMModifyRules()
 	{
 		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
@@ -132,29 +123,15 @@ public:
 
 	virtual void first()
 	{
-		vector<double> values;
-		double mean = pEFP.getMean(0); //TODO mean from the targetfile
-
-		values.push_back(0.01);
-		values.push_back(0.1);
-		values.push_back(1);
-		values.push_back(mean / 30);
-		values.push_back(mean / 15);
-		values.push_back(mean / 6);
-		values.push_back(mean / 2);
-		values.push_back(mean);
-		values.push_back(mean * 2);
-		values.push_back(mean * 5);
-		values.push_back(mean * 100);
-
+		int nShakes = vUpdateValues.size();
 		int options = rep.singleFuzzyRS.size(); //rep.size() options
 
 		for (int sign = 0; sign < 2; sign++)
 			for (int r = 0; r < NCOLUMNATRIBUTES; r++)
 				for (int o = 0; o < options; o++)
-					for (int v = 0; v < (int) values.size(); v++)
+					for (int v = 0; v < nShakes; v++)
 					{
-						moves.push_back(new MoveNEIGHModifyRule(r, o, values[v], sign, 0));
+						moves.push_back(new MoveHFMModifyRule(r, o, vUpdateValues[v], sign, 0));
 					}
 
 		options = rep.averageFuzzyRS.size(); //rep.size() options
@@ -162,9 +139,9 @@ public:
 		for (int sign = 0; sign < 2; sign++)
 			for (int r = 0; r < NCOLUMNATRIBUTES; r++)
 				for (int o = 0; o < options; o++)
-					for (int v = 0; v < (int) values.size(); v++)
+					for (int v = 0; v < nShakes; v++)
 					{
-						moves.push_back(new MoveNEIGHModifyRule(r, o, values[v], sign, 1));
+						moves.push_back(new MoveHFMModifyRule(r, o, vUpdateValues[v], sign, 1));
 					}
 
 		options = rep.derivativeFuzzyRS.size(); //rep.size() options
@@ -172,15 +149,13 @@ public:
 		for (int sign = 0; sign < 2; sign++)
 			for (int r = 0; r < NCOLUMNATRIBUTES; r++)
 				for (int o = 0; o < options; o++)
-					for (int v = 0; v < (int) values.size(); v++)
+					for (int v = 0; v < (int) nShakes; v++)
 					{
-						moves.push_back(new MoveNEIGHModifyRule(r, o, values[v], sign, 2));
+						moves.push_back(new MoveHFMModifyRule(r, o, vUpdateValues[v], sign, 2));
 					}
 
 		if (moves.size() > 0)
-		{
 			m = moves[index];
-		}
 		else
 			m = NULL;
 	}
@@ -189,11 +164,10 @@ public:
 	{
 		index++;
 		if (index < (int) moves.size())
-		{
 			m = moves[index];
-		}
 		else
 			m = NULL;
+
 	}
 
 	virtual bool isDone()
@@ -215,29 +189,49 @@ public:
 
 };
 
-class NSSeqNEIGHModifyRules: public NSSeq<RepEFP,OPTFRAME_DEFAULT_ADS>
+class NSSeqHFMModifyRules: public NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
 	RandGen& rg;
-
-
+	vector<double>* vUpdateValues;
 public:
 
-
-	NSSeqNEIGHModifyRules(ProblemInstance& _pEFP, RandGen& _rg) :
-			pEFP(_pEFP), rg(_rg)
+	NSSeqHFMModifyRules(ProblemInstance& _pEFP, RandGen& _rg, vector<double>* _vUpdateValues = NULL) :
+			pEFP(_pEFP), rg(_rg), vUpdateValues(_vUpdateValues)
 	{
+		//TODO mean from the targetfile
+		double mean = pEFP.getMean(0);
+
+		if (!vUpdateValues)
+		{
+			vUpdateValues->push_back(0.01);
+			vUpdateValues->push_back(0.1);
+			vUpdateValues->push_back(1);
+			vUpdateValues->push_back(mean / 30);
+			vUpdateValues->push_back(mean / 15);
+			vUpdateValues->push_back(mean / 6);
+			vUpdateValues->push_back(mean / 2);
+			vUpdateValues->push_back(mean);
+			vUpdateValues->push_back(mean * 2);
+			vUpdateValues->push_back(mean * 5);
+			vUpdateValues->push_back(mean * 100);
+		}
+		else
+		{
+			cout << "Modify values given as input:" << *_vUpdateValues << endl;
+			assert(_vUpdateValues->size() > 0);
+		}
 	}
 
-	virtual ~NSSeqNEIGHModifyRules()
+	virtual ~NSSeqHFMModifyRules()
 	{
 	}
 
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
-		int vectorType = rg.rand(3);
+		int vectorType = rg.rand(N_Inputs_Types);
 		int o = -1;
 		int r = -1;
 
@@ -245,79 +239,59 @@ public:
 		int tries = 1;
 		while ((r == -1) && (tries < maxTries))
 		{
-			vectorType = rg.rand(3);
+			vectorType = rg.rand(N_Inputs_Types);
 
-			if (vectorType == 0)
+			if (vectorType == Single_Input)
 			{
 				if (rep.singleFuzzyRS.size() > 0)
 				{
 					o = rg.rand(rep.singleFuzzyRS.size()); //rep.size() options
-					r = rg.rand(rep.singleFuzzyRS[0].size());
+					r = rg.rand(NCOLUMNATRIBUTES);
 				}
 			}
 
-			if (vectorType == 1)
+			if (vectorType == Average_Inputs)
 			{
 				if (rep.averageFuzzyRS.size() > 0)
 				{
 					o = rg.rand(rep.averageFuzzyRS.size()); //rep.size() options
-					r = rg.rand(rep.averageFuzzyRS[0].size());
+					r = rg.rand(NCOLUMNATRIBUTES);
 				}
 			}
 
-			if (vectorType == 2)
+			if (vectorType == Derivative_Inputs)
 			{
 				if (rep.derivativeFuzzyRS.size() > 0)
 				{
 					o = rg.rand(rep.derivativeFuzzyRS.size()); //rep.size() options
-					r = rg.rand(rep.derivativeFuzzyRS[0].size());
+					r = rg.rand(NCOLUMNATRIBUTES);
 				}
 			}
-
-			tries++;
 		}
 
 		if (tries == maxTries)
-		{
-			return new MoveNEIGHModifyRule(-1, -1, -1, -1, -1); // return a random move
-		}
+			return new MoveHFMModifyRule(-1, -1, -1, -1, -1); // return a random move
 
-
-		double mean = pEFP.getMean(0); //TODO mean from the targetfile
-
-		vector<double> changeValuesX;
-		changeValuesX.push_back(0.01);
-		changeValuesX.push_back(0.1);
-		changeValuesX.push_back(1);
-		changeValuesX.push_back(mean / 30);
-		changeValuesX.push_back(mean / 15);
-		changeValuesX.push_back(mean / 6);
-		changeValuesX.push_back(mean / 2);
-		changeValuesX.push_back(mean);
-		changeValuesX.push_back(mean * 2);
-		changeValuesX.push_back(mean * 5);
-		changeValuesX.push_back(mean * 100);
-
-		int applyRand = rg.rand(changeValuesX.size());
-		double applyValue = changeValuesX[applyRand];
+		int applyRand = rg.rand(vUpdateValues->size());
+		double applyValue = vUpdateValues->at(applyRand);
 		bool sign = rg.rand(2);
 
-		return new MoveNEIGHModifyRule(r, o, applyValue, sign, vectorType); // return a random move
+		return new MoveHFMModifyRule(r, o, applyValue, sign, vectorType); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorNEIGHModifyRules(rep, pEFP); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorHFMModifyRules(rep, pEFP, *vUpdateValues); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const
 	{
 		stringstream ss;
-		ss << "NSSeqNEIGHModifyRules with move: ";
+		ss << "NSSeqHFMModifyRules with move: ";
 		return ss.str();
 	}
 };
 
 }
-#endif /*EFP_NSSEQNEIGHMODIFYRULES_HPP_*/
+#endif /*HFM_NSSEQNEIGHMODIFYRULES_HPP_*/
 

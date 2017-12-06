@@ -1,5 +1,5 @@
-#ifndef EFP_NSSEQADDSINGLEINPUT_HPP_
-#define EFP_NSSEQADDSINGLEINPUT_HPP_
+#ifndef HFM_NSSEQADDSINGLEINPUT_HPP_
+#define HFM_NSSEQADDSINGLEINPUT_HPP_
 
 // Framework includes
 #include "../../../OptFrame/NSSeq.hpp"
@@ -224,5 +224,5 @@ public:
 };
 
 }
-#endif /*EFP_NSSEQADDSINGLEINPUT_HPP_*/
+#endif /*HFM_NSSEQADDSINGLEINPUT_HPP_*/
 

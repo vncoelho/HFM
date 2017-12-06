@@ -1,5 +1,5 @@
-#ifndef EFP_NSSEQREMOVESINGLEINPUT_HPP_
-#define EFP_NSSEQREMOVESINGLEINPUT_HPP_
+#ifndef HFM_NSSEQREMOVESINGLEINPUT_HPP_
+#define HFM_NSSEQREMOVESINGLEINPUT_HPP_
 
 // Framework includes
 #include "../../../OptFrame/NSSeq.hpp"
@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveNEIGHRemoveSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveHFMRemoveSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int rule;
@@ -24,13 +24,13 @@ private:
 public:
 
 
-	MoveNEIGHRemoveSingleInput(int _rule, bool _reverse, pair<int, int> _singleIndexOld, vector<double> _singleFuzzyRSOld) :
+	MoveHFMRemoveSingleInput(int _rule, bool _reverse, pair<int, int> _singleIndexOld, vector<double> _singleFuzzyRSOld) :
 			rule(_rule), reverse(_reverse), singleIndexOld(_singleIndexOld), singleFuzzyRSOld(_singleFuzzyRSOld)
 	{
 
 	}
 
-	virtual ~MoveNEIGHRemoveSingleInput()
+	virtual ~MoveHFMRemoveSingleInput()
 	{
 	}
 
@@ -53,7 +53,7 @@ public:
 
 				rep.singleIndex.erase(rep.singleIndex.begin() + rule);
 				rep.singleFuzzyRS.erase(rep.singleFuzzyRS.begin() + rule);
-				return new MoveNEIGHRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
+				return new MoveHFMRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
 			}
 
 		}
@@ -63,13 +63,13 @@ public:
 			rep.singleFuzzyRS.insert(rep.singleFuzzyRS.begin() + rule, singleFuzzyRSOld);
 		}
 
-		return new MoveNEIGHRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
+		return new MoveHFMRemoveSingleInput(rule, !reverse, tempSingleIndexOld, tempSingleFuzzyRSOld);
 
 	}
 
 	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
-		const MoveNEIGHRemoveSingleInput& m = (const MoveNEIGHRemoveSingleInput&) _m;
+		const MoveHFMRemoveSingleInput& m = (const MoveHFMRemoveSingleInput&) _m;
 		return ((m.rule == rule) && (m.reverse == reverse));
 	}
 
@@ -81,23 +81,23 @@ public:
 }
 ;
 
-class NSIteratorNEIGHRemoveSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorHFMRemoveSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	MoveNEIGHRemoveSingleInput* m;
-	vector<MoveNEIGHRemoveSingleInput*> moves;
+	MoveHFMRemoveSingleInput* m;
+	vector<MoveHFMRemoveSingleInput*> moves;
 	int index;
 	const RepEFP& rep;
 
 public:
-	NSIteratorNEIGHRemoveSingleInput(const RepEFP& _rep) :
+	NSIteratorHFMRemoveSingleInput(const RepEFP& _rep) :
 			rep(_rep)
 	{
 		index = 0;
 		m = NULL;
 	}
 
-	virtual ~NSIteratorNEIGHRemoveSingleInput()
+	virtual ~NSIteratorHFMRemoveSingleInput()
 	{
 		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
@@ -110,7 +110,7 @@ public:
 
 		for (int rule = 0; rule < (int) rep.singleIndex.size(); rule++)
 		{
-			moves.push_back(new MoveNEIGHRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld));
+			moves.push_back(new MoveHFMRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld));
 		}
 
 		if (moves.size() > 0)
@@ -151,7 +151,7 @@ public:
 
 };
 
-class NSSeqNEIGHRemoveSingleInput: public NSSeq<RepEFP>
+class NSSeqHFMRemoveSingleInput: public NSSeq<RepEFP>
 {
 private:
 	RandGen& rg;
@@ -159,12 +159,12 @@ private:
 public:
 
 
-	NSSeqNEIGHRemoveSingleInput(RandGen& _rg) :
+	NSSeqHFMRemoveSingleInput(RandGen& _rg) :
 			rg(_rg)
 	{
 	}
 
-	virtual ~NSSeqNEIGHRemoveSingleInput()
+	virtual ~NSSeqHFMRemoveSingleInput()
 	{
 	}
 
@@ -178,12 +178,12 @@ public:
 		pair<int, int> tempSingleIndexOld;
 		vector<double> tempSingleFuzzyRSOld;
 
-		return new MoveNEIGHRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld); // return a random move
+		return new MoveHFMRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorNEIGHRemoveSingleInput(rep); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorHFMRemoveSingleInput(rep); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const
@@ -195,5 +195,5 @@ public:
 };
 
 }
-#endif /*EFP_NSSEQREMOVESINGLEINPUT_HPP_*/
+#endif /*HFM_NSSEQREMOVESINGLEINPUT_HPP_*/
 

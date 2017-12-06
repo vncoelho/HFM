@@ -47,6 +47,7 @@ private:
 	int stepsAhead;
 	int function;
 	vector<int> vNotUsedForTests;
+	//If maxUpperLag is greater than 0 model uses predicted data: ( t - (-K) ) => (t + K) | K !=0
 	int maxLag, maxUpperLag;
 	string instancePath;
 	string validationPath;

@@ -1,5 +1,5 @@
-#ifndef EFP_NSSEQVALPHA_HPP_
-#define EFP_NSSEQVALPHA_HPP_
+#ifndef HFM_NSSEQVALPHA_HPP_
+#define HFM_NSSEQVALPHA_HPP_
 
 // Framework includes
 #include "../../../OptFrame/NSSeq.hpp"
@@ -146,6 +146,7 @@ public:
 
 };
 
+//This NS is used for adapting weights of an approximation of the estimations
 class NSSeqNEIGHVAlpha: public NSSeq<RepEFP>
 {
 private:
@@ -205,11 +206,11 @@ public:
 	virtual string toString() const
 	{
 		stringstream ss;
-		ss << "NSSeqChangeFuzzyAproxVAlpha with move: ";
+		ss << "NSSeqHFMChangeFuzzyAproxVAlpha with move: ";
 		return ss.str();
 	}
 };
 
 }
-#endif /*EFP_NSSEQVALPHA_HPP_*/
+#endif /*HFM_NSSEQVALPHA_HPP_*/
 

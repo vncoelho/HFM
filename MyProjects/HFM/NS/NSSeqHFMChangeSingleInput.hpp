@@ -1,5 +1,5 @@
-#ifndef EFP_NSSEQCHANGESINGLEINPUT_HPP_
-#define EFP_NSSEQCHANGESINGLEINPUT_HPP_
+#ifndef HFM_NSSEQCHANGESINGLEINPUT_HPP_
+#define HFM_NSSEQCHANGESINGLEINPUT_HPP_
 
 // Framework includes
 #include "../../../OptFrame/NSSeq.hpp"
@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveNEIGHChangeSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveHFMChangeSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int rule;
@@ -25,13 +25,13 @@ private:
 public:
 
 
-	MoveNEIGHChangeSingleInput(int _rule, bool _sign, int _maxLag, int _maxUpperLag, int _X) :
+	MoveHFMChangeSingleInput(int _rule, bool _sign, int _maxLag, int _maxUpperLag, int _X) :
 			rule(_rule), sign(_sign), maxLag(_maxLag), maxUpperLag(_maxUpperLag), X(_X)
 	{
 
 	}
 
-	virtual ~MoveNEIGHChangeSingleInput()
+	virtual ~MoveHFMChangeSingleInput()
 	{
 	}
 
@@ -49,13 +49,13 @@ public:
 			notNull2 = ((rep.singleIndex[rule].second + X) != 0);
 		}
 
-		return minimumLag && maxLagCheck && (rule >= 0) && (rule < (int) rep.singleIndex.size()) && notNull1 && notNull2;
+		return minimumLag && maxLagCheck && notNull1 && notNull2;
 	}
 
 	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 
-		if (sign == false)
+		if (!sign)
 			rep.singleIndex[rule].second += X;
 		else
 			rep.singleIndex[rule].second -= X;
@@ -63,12 +63,12 @@ public:
 //		if (rep.singleIndex[rule].second > rep.earliestInput)
 //			rep.earliestInput = rep.singleIndex[rule].second;
 
-		return new MoveNEIGHChangeSingleInput(rule, !sign, maxLag, maxUpperLag, X);
+		return new MoveHFMChangeSingleInput(rule, !sign, maxLag, maxUpperLag, X);
 	}
 
 	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
-		const MoveNEIGHChangeSingleInput& m = (const MoveNEIGHChangeSingleInput&) _m;
+		const MoveHFMChangeSingleInput& m = (const MoveHFMChangeSingleInput&) _m;
 		return ((m.rule == rule) && (m.sign == sign) && (m.maxLag == maxLag) && (m.maxUpperLag == maxUpperLag) && (m.X == X));
 	}
 
@@ -80,24 +80,24 @@ public:
 }
 ;
 
-class NSIteratorNEIGHChangeSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorHFMChangeSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	MoveNEIGHChangeSingleInput* m;
-	vector<MoveNEIGHChangeSingleInput*> moves;
+	MoveHFMChangeSingleInput* m;
+	vector<MoveHFMChangeSingleInput*> moves;
 	int index;
 	const RepEFP& rep;
 	int maxLag, maxUpperLag;
 
 public:
-	NSIteratorNEIGHChangeSingleInput(const RepEFP& _rep, int _maxLag, int _maxUpperLag) :
+	NSIteratorHFMChangeSingleInput(const RepEFP& _rep, int _maxLag, int _maxUpperLag) :
 			rep(_rep), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
 	{
 		index = 0;
 		m = NULL;
 	}
 
-	virtual ~NSIteratorNEIGHChangeSingleInput()
+	virtual ~NSIteratorHFMChangeSingleInput()
 	{
 		for (int i = index + 1; i < (int) moves.size(); i++)
 			delete moves[i];
@@ -108,14 +108,13 @@ public:
 		int X = 1;
 		for (int rule = 0; rule < (int) rep.singleIndex.size(); rule++)
 		{
-			moves.push_back(new MoveNEIGHChangeSingleInput(rule, false, maxLag, maxUpperLag, X));
-			moves.push_back(new MoveNEIGHChangeSingleInput(rule, true, maxLag, maxUpperLag, X));
+			bool sign = false;
+			moves.push_back(new MoveHFMChangeSingleInput(rule, sign, maxLag, maxUpperLag, X));
+			moves.push_back(new MoveHFMChangeSingleInput(rule, !sign, maxLag, maxUpperLag, X));
 		}
 
 		if (moves.size() > 0)
-		{
 			m = moves[index];
-		}
 		else
 			m = NULL;
 	}
@@ -124,9 +123,7 @@ public:
 	{
 		index++;
 		if (index < (int) moves.size())
-		{
 			m = moves[index];
-		}
 		else
 			m = NULL;
 	}
@@ -141,7 +138,7 @@ public:
 		if (isDone())
 		{
 			cout << "There isnt any current element!" << endl;
-			cout << "NSIteratorNEIGHChangeSingleInput. Aborting." << endl;
+			cout << "NSIteratorHFMChangeSingleInput. Aborting." << endl;
 			exit(1);
 		}
 
@@ -150,7 +147,7 @@ public:
 
 };
 
-class NSSeqNEIGHChangeSingleInput: public NSSeq<RepEFP>
+class NSSeqHFMChangeSingleInput: public NSSeq<RepEFP>
 {
 private:
 	ProblemInstance& pEFP;
@@ -159,12 +156,12 @@ private:
 
 public:
 
-	NSSeqNEIGHChangeSingleInput(ProblemInstance& _pEFP, RandGen& _rg, int _maxLag, int _maxUpperLag) :
+	NSSeqHFMChangeSingleInput(ProblemInstance& _pEFP, RandGen& _rg, int _maxLag, int _maxUpperLag) :
 			pEFP(_pEFP), rg(_rg), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
 	{
 	}
 
-	virtual ~NSSeqNEIGHChangeSingleInput()
+	virtual ~NSSeqHFMChangeSingleInput()
 	{
 	}
 
@@ -178,22 +175,22 @@ public:
 
 		int sign = rg.rand(2);
 
-		return new MoveNEIGHChangeSingleInput(rule, sign, maxLag, maxUpperLag, X); // return a random move
+		return new MoveHFMChangeSingleInput(rule, sign, maxLag, maxUpperLag, X); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorNEIGHChangeSingleInput(rep, maxLag, maxUpperLag); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorHFMChangeSingleInput(rep, maxLag, maxUpperLag); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const
 	{
 		stringstream ss;
-		ss << "NSSeqNEIGHChangeSingleInput";
+		ss << "NSSeqHFMChangeSingleInput";
 		return ss.str();
 	}
 };
 
 }
-#endif /*EFP_NSSEQCHANGESINGLEINPUT_HPP_*/
+#endif /*HFM_NSSEQCHANGESINGLEINPUT_HPP_*/
 

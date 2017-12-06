@@ -62,7 +62,7 @@ int stockMarketForecasting(int argc, char **argv)
 	int mu = 10;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
-	int contructiveNumberOfRules = 1000;
+	int contructiveNumberOfRules = 100;
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
@@ -108,7 +108,7 @@ int stockMarketForecasting(int argc, char **argv)
 	problemParam.setMaxLag(iterationMaxLag);
 	int maxLag = problemParam.getMaxLag();
 
-	//If maxUpperLag is greater than 0 model uses predicted data
+	//If maxUpperLag is greater than 0 model uses predicted data: ( t - (-K) ) => (t + K) | K !=0
 	problemParam.setMaxUpperLag(0);
 	//int maxUpperLag = problemParam.getMaxUpperLag();
 	//=================================================

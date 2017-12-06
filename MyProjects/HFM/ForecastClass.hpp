@@ -14,6 +14,7 @@
 #include "ProblemInstance.hpp"
 #include "HFMESContinous.hpp"
 #include "HFMParams.hpp"
+
 #include "../../OptFrame/Heuristics/Empty.hpp"
 #include "../../OptFrame/NSSeq.hpp"
 #include "../../OptFrame/Heuristics/LocalSearches/VND.h"
@@ -83,9 +84,9 @@ public:
 		p = new ProblemInstance(tForecastings, problemParam);
 		eval = new HFMEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), methodParam.getEvalAprox());
 
-		NSSeqNEIGHModifyRules* nsModifyFuzzyRules = new NSSeqNEIGHModifyRules(*p, rg);
-		NSSeqNEIGHChangeSingleInput* nsChangeSingleInput = new NSSeqNEIGHChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
-		NSSeqNEIGHRemoveSingleInput* nsRemoveSingleInput = new NSSeqNEIGHRemoveSingleInput(rg);
+		NSSeqHFMModifyRules* nsModifyFuzzyRules = new NSSeqHFMModifyRules(*p, rg);
+		NSSeqHFMChangeSingleInput* nsChangeSingleInput = new NSSeqHFMChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
+		NSSeqHFMRemoveSingleInput* nsRemoveSingleInput = new NSSeqHFMRemoveSingleInput(rg);
 		NSSeqNEIGHAddSingleInput* nsAddSingleInput = new NSSeqNEIGHAddSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
 //		NSSeqNEIGHVAlpha* nsVAlpha = new NSSeqNEIGHVAlpha(*p, rg, 5);
 
@@ -190,16 +191,16 @@ public:
 //		basicMOILSPert->add_ns(*nsChangeSingleInput);
 
 //Trying to checkmodule
-//		checkModule.add(*c);
-//		checkModule.add(*eval);
-//
-//		checkModule.add(*nsModifyFuzzyRules);
-//		checkModule.add(*nsRemoveSingleInput);
-//		checkModule.add(*nsChangeSingleInput);
-//		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
-//
-//		checkModule.run(5,1);
-//		getchar();
+		checkModule.add(*c);
+		checkModule.add(*eval);
+
+		checkModule.add(*nsModifyFuzzyRules);
+		checkModule.add(*nsRemoveSingleInput);
+		checkModule.add(*nsChangeSingleInput);
+		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
+
+		checkModule.run(5,2);
+		getchar();
 	}
 
 	virtual ~ForecastClass()

@@ -13,6 +13,9 @@ CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include
 
 RESTSDK_FGLAS = #-lboost_system -lcrypto -lssl -lcpprest
 
+#Used with music forecasting/composition experiments 
+LLIBSMP3 = -lsndfile 
+
 #OpenMP Multi-Core Multi-Thread flags
 OPENMP_FLAGS = -fopenmp -lpthread
 
@@ -20,7 +23,6 @@ OPENMP_FLAGS = -fopenmp -lpthread
 LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
-LLIBSMP3 = -lsndfile 
 GCC_FLAGS = -g -Ofast -Wall --std=c++11  
 
 SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
