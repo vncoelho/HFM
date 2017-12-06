@@ -287,8 +287,9 @@ public:
 				greaterWeight = rg.randG(greaterMeanSTD.first, greaterMeanSTD.second);
 				lowerWeight = rg.randG(lowerMeanSTD.first, lowerMeanSTD.second);
 
-				// greaterWeight = rg.randG(meanWeight, stdDesvWeight);
-				// lowerWeight = rg.randG(meanWeight, stdDesvWeight);
+				//Forcing weights for only changing according to STD TODO
+//				greaterWeight = rg.randG(greaterMeanSTD.second, greaterMeanSTD.second);
+//				lowerWeight = rg.randG(lowerMeanSTD.second, lowerMeanSTD.second);
 
 				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
 

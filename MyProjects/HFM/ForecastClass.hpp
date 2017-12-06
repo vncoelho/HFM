@@ -109,8 +109,8 @@ public:
 
 		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiModifyFuzzyRules = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules);
 		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiChangeSingleInput = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsChangeSingleInput);
-		RandomDescentMethod<RepEFP>* rdmRemove = new RandomDescentMethod<RepEFP>(*eval, *nsRemoveSingleInput, 100); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
-		RandomDescentMethod<RepEFP>* rdmAdd = new RandomDescentMethod<RepEFP>(*eval, *nsAddSingleInput, 100); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+		RandomDescentMethod<RepEFP>* rdmRemove = new RandomDescentMethod<RepEFP>(*eval, *nsRemoveSingleInput, 500); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+		RandomDescentMethod<RepEFP>* rdmAdd = new RandomDescentMethod<RepEFP>(*eval, *nsAddSingleInput, 500); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
 //		int maxRDM = 100;
 //
 //		//rdm->setMessageLevel(3);
