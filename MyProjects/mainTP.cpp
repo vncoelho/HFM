@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
 	SolutionTP* sol = c.generateSolution(0);
 	cout << "solucao gerada com sucesso!" << endl;
 	TPEvaluator eval(p);
-	Evaluation e = eval.evaluate(*sol);
-	cout << e.evaluation();
+//	Evaluation e = eval.evaluate(sol->getR());
+//	cout << e.evaluation();
 
 	delete sol;
 
@@ -60,7 +60,9 @@ int main(int argc, char **argv) {
 
 
 	cout << " \n RUNNING OPTIMIZATION ALGORITHMS..." << endl;
-	pair<SolutionTP, Evaluation>* graspSearchSol = g.search(60);
+	SOSC stopCriteria;
+	stopCriteria.timelimit=60;
+	pair<SolutionTP, EvaluationTP>* graspSearchSol = g.search(stopCriteria);
 
 	cout << "PROGRAMM ended successfully" << endl;
 

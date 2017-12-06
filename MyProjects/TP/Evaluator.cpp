@@ -76,7 +76,7 @@ double TPEvaluator::getNodeValue(const Node* root, int s)
 	return nodeValue;
 }
 
-EvaluationTP TPEvaluator::evaluate(const RepTP& rep, const MY_ADS* ads)
+EvaluationTP TPEvaluator::evaluate(const RepTP& rep, const MY_ADS*)
 {
 // 'rep' is the representation of the solution
 

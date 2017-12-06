@@ -63,10 +63,11 @@ struct Node
 	Node(Node&& node)
 	{
 		father = node.father;
-		nodeChar = node.nodeChar;
+		nodeChar = std::move(node.nodeChar);
+		children = std::move(node.children);
 		// steal from the dying friend... (dirty move!)
-		for (unsigned i = 0; i < node.children.size(); i++)
-			children.push_back(node.children[i]);
+//		for (unsigned i = 0; i < node.children.size(); i++)
+//			children.push_back(node.children[i]);
 		// very important to empty the vector WITHOUT deleting the elements...
 		node.children.clear();
 	}

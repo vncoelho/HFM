@@ -28,3 +28,7 @@ Outros
 *(copy*
 ./*.sh
 Scripts
+*.o
+app*
+
+

@@ -3,7 +3,8 @@
 
 #include "../../OptFrame/RandGen.hpp"
 
-#include "../../OptFrame/Constructive.hpp"
+//#include "../../OptFrame/Constructive.hpp"
+#include "../../OptFrame/Heuristics/GRASP/GRConstructive.hpp"
 #include "ProblemInstance.h"
 
 #include "Representation.h"
@@ -11,7 +12,7 @@
 
 #include "Evaluator.h"
 
-//#include "../../OptFrame/Heuristics/GRASP/GRConstructive.hpp"
+
 
 #include <list>
 
@@ -25,7 +26,7 @@ using namespace optframe;
 namespace TP
 {
 
-class TPConstructiveRandom: public Constructive<RepTP, MY_ADS>
+class TPConstructiveRandom: public GRConstructive<RepTP, MY_ADS>
 {
 private:
 	ProblemInstance& pTP;
@@ -41,7 +42,8 @@ public:
 
 	virtual ~TPConstructiveRandom();
 
-    Solution<RepTP, MY_ADS>* generateSolution(double timelimit) = 0;
+    Solution<RepTP, MY_ADS>* generateGRSolution(float notUsed, double timelimit);
+
 
 	void fillNode(Node& previousNode, int nOperators, int nVariables, int nodeMaxChildren, int treeMaxDepth);
 };

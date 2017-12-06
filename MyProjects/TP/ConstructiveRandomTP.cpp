@@ -72,10 +72,10 @@ void TPConstructiveRandom::fillNode(Node& node, int nOperators, int nVariables, 
 			newNode->nodeChar.nT = opPerceptron;
 			newNode->nodeChar.operatorOrExpVariable = rVariable;
 			newNode->nodeChar.K = 0;
-			ActivationFunction randAF = rg.rand(NActivationFunctions);
+			int randAF = rg.rand(NActivationFunctions);
 			vector<double> rulesWeightsParams(3, 0); // rule, weight and episilon equal to 0
 			Perceptron* p = new Perceptron;
-			p->aF = randAF;
+			p->aF = ActivationFunction(randAF);
 			p->rulesWeightsParams = rulesWeightsParams;
 			newNode->nodeChar.p = p;
 		}
@@ -87,7 +87,7 @@ void TPConstructiveRandom::fillNode(Node& node, int nOperators, int nVariables, 
 	return;
 }
 
-Solution<RepTP, MY_ADS>* TPConstructiveRandom::generateSolution(double timelimit)
+Solution<RepTP, MY_ADS>* TPConstructiveRandom::generateGRSolution(float notUsed, double timelimit)
 {
 
 //	cout << "welcome to construtive" << endl;

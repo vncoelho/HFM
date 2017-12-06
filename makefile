@@ -1,4 +1,4 @@
-all: HFM
+all: TP 
 	@echo "BUILT SUCCESSFULLY!"
 
 
@@ -30,6 +30,10 @@ SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 HFM:
 	g++ $(GCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
 	
+TP:
+	make -f makeTP.mk
+	
 clean:
-	#make clean -C ./MyProjects/
+	rm -f ./MyProjects/app_*
+	rm -f ./MyProjects/*.o
 	

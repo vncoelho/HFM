@@ -29,7 +29,8 @@ public:
 	
 	virtual ~TPEvaluator();
 
-	EvaluationTP evaluate(const RepTP& rep, const MY_ADS* ads);
+	EvaluationTP evaluate(const RepTP& rep, const MY_ADS*);
+
 	
 	double getNodeValue(const Node* root, int s);
 
