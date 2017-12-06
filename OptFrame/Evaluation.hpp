@@ -56,7 +56,7 @@ namespace optframe
 typedef EVALUATION_TYPE evtype;
 
 #ifndef EVALUATION_ZERO
-#define EVALUATION_ZERO 0.000001
+#define EVALUATION_ZERO 0.0001
 #endif
 
 #ifndef EVALUATION_ABS
