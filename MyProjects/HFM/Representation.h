@@ -32,20 +32,7 @@ enum ActivationFunction
 	Heavisde, Trapezoid
 };
 
-//struct HFMNode
-//{
-//	InputTypes nodeType;
-//	ActivationFunction nodeAF;
-//
-//	//Each node should return all necessary inputs that will be used by then for the deffuzification process
-//	vector<pair<int, int> > getRequiredBackshiftOperators() = 0;
-//
-//	//getNodeValue should return the deffuzification result given a set of input
-//	//assert if inputs.size() == getRequiredBackshiftOperators().size - Values should be respectively given
-//	double getNodeValue(const vector<double> inputs) = 0;
-//
-//
-//};
+
 
 
 
