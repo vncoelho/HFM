@@ -21,6 +21,7 @@ int stockMarketForecasting(int argc, char **argv)
 {
 	nThreads = 1;
 	cout << "Welcome to stock market forecasting!" << endl;
+	cout << "Let's optimize with " << nThreads << " nThreads\n" << endl;
 
 	RandGenMersenneTwister rg;
 	//long  1412730737
@@ -47,9 +48,9 @@ int stockMarketForecasting(int argc, char **argv)
 	cout << "nomeOutput=" << nomeOutput << endl;
 
 	//Numero de passos a frente - Horizonte de previsao
-	int fh = 10;
+	int fh = 1;
 	//O valor mais antigo que pode ser utilizado como entrada do modelo de previsao [100]
-	int argvMaxLagRate = 25;
+	double argvMaxLagRate = 0.5;
 
 	vector<string> explanatoryVariables;
 
@@ -58,10 +59,10 @@ int stockMarketForecasting(int argc, char **argv)
 	treatForecasts rF(explanatoryVariables);
 
 	//Parametros do metodo
-	int mu = 200;
+	int mu = 10;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
-	int contructiveNumberOfRules = 100;
+	int contructiveNumberOfRules = 1000;
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
@@ -112,6 +113,8 @@ int stockMarketForecasting(int argc, char **argv)
 	//int maxUpperLag = problemParam.getMaxUpperLag();
 	//=================================================
 
+//	problemParam.setRounding(true);
+
 	vector<double> foIndicators;
 	int beginTrainingSet = 0;
 	cout << std::setprecision(9);
@@ -133,22 +136,25 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto < RepEFP > *pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 30;
-	int timeGPLS = 30;
+	int timeES = 600;
+	int timeGPLS = 120;
 	for (int b = 0; b < 2; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+//		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->runGILS(0, timeES);
+		cout << "Bye bye..see u soon." << endl;
+		exit(1);
+
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
-		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS,pf);
+		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
 		delete forecastObject;
 		delete sol;
 
-		//		cout<<"Bye bye..see u soon."<<endl;
 //		getchar();
 	}
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);

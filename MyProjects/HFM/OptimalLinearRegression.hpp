@@ -23,11 +23,11 @@ namespace HFM
 class OptimalLinearRegression: public LocalSearch<RepEFP>
 {
 private:
-	EFPEvaluator& eval;
+	HFMEvaluator& eval;
 	ProblemInstance& pEFP;
 
 public:
-	OptimalLinearRegression(EFPEvaluator& _eval, ProblemInstance& _pEFP) :
+	OptimalLinearRegression(HFMEvaluator& _eval, ProblemInstance& _pEFP) :
 			eval(_eval), pEFP(_pEFP)
 	{
 

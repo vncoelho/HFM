@@ -22,7 +22,7 @@ using namespace std;
 namespace HFM
 {
 
-class ConstructiveACF: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>
+class ConstructiveACF: public Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
@@ -183,10 +183,11 @@ public:
 				acfData[i] = data[nEXV].at(i);
 
 			acorrInfo info;
-			autocorr acf(-1, problemParam.getMaxLag() + 1); //the ACF generator counts lag 0);
+			autocorr acf(-10, problemParam.getMaxLag() + 1); //the ACF generator counts lag 0);
 			acf.ACF(acfData, nTotalPoints, info);
 			acfPoints.push_back(info.points());
 		}
+
 
 		vector<vector<pair<double, int> > > acfGreedy(numberExplanatoryVariables);
 
@@ -270,7 +271,6 @@ public:
 
 			for (int p = 0; p < pSP; p++)
 			{
-
 				int index = rg.rand(nACFUsefullPoints);
 				int K = lagsRLC[nEXV][index].second;
 				singleIndex.push_back(make_pair(nEXV, K));
@@ -439,7 +439,7 @@ public:
 		 */
 		//cout << "End of ACF sol generation!" << endl;
 		//getchar();
-		return new Solution<RepEFP,OPTFRAME_DEFAULT_ADS>(newRep);
+		return new Solution<RepEFP, OPTFRAME_DEFAULT_ADS>(newRep);
 	}
 
 };

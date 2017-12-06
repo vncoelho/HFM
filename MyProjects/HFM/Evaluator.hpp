@@ -1,5 +1,5 @@
-#ifndef EFP_EVALUATOR_HPP_
-#define EFP_EVALUATOR_HPP_
+#ifndef HFM_EVALUATOR_HPP_
+#define HFM_EVALUATOR_HPP_
 
 //#include <cmath>
 #include <stdlib.h>
@@ -17,7 +17,6 @@
 #include <algorithm>
 #include "TreatForecasts.hpp"
 
-#define EPSILON_EFP 0.0001
 extern int nThreads;
 
 using namespace std;
@@ -27,46 +26,10 @@ namespace HFM
 
 enum PerformanceIndicator
 {
-	MAPE_INDEX, MAE_INDEX, MSE_INDEX, RMSE_INDEX, MAPE_INV_INDEX, SMAPE_INDEX, MMAPE_INDEX, WMAPE_INDEX, PINBALL_INDEX, PINBALL_ERROR_INDEX, EVALUTORS_NMETRICS_ENUM_COUNT,ALL_EVALUATIONS
+	MAPE_INDEX, MAE_INDEX, MSE_INDEX, RMSE_INDEX, MAPE_INV_INDEX, SMAPE_INDEX, MMAPE_INDEX, WMAPE_INDEX, PINBALL_INDEX, PINBALL_ERROR_INDEX, EVALUTORS_NMETRICS_ENUM_COUNT, ALL_EVALUATIONS
 };
 
-//TODO -- Change to ENUM
-//const int MAPE_INDEX = 0;
-//const int PINBALL_INDEX = 1;
-//const int MSE_INDEX = 2;
-//const int RMSE_INDEX = 3;
-//const int PINBALL_ERROR_INDEX = 4;
-//const int SMAPE_INDEX = 5;
-//const int WMAPE_INDEX = 6;
-//const int MMAPE_INDEX = 7;
-//const int MAPE_INV_INDEX = 8;
-
-//const int MAE_INDEX = 10;
-
-//const int NMETRICS = 10;
-
-//const int ALL_EVALUATIONS = -1;
-
-float sigmoid(float x)
-{
-	float exp_value;
-	float return_value;
-
-	/*** Exponential calculation ***/
-	exp_value = exp((double) -x);
-
-	/*** Final sigmoid value ***/
-	return_value = 1 / (1 + exp_value);
-
-	return return_value;
-}
-
-//static bool compara(double d1, double d2)
-//{
-//	return d1 < d2;
-//}
-
-class EFPEvaluator: public Evaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class HFMEvaluator: public Evaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	ProblemInstance& pEFP;
@@ -87,7 +50,7 @@ private:
 	int targetFile;
 public:
 
-	EFPEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _optMetric, int _aprox) : // If necessary, add more parameters
+	HFMEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _optMetric, int _aprox) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), optMetric(_optMetric), aprox(_aprox)
 	{
 		nForecastings = pEFP.getForecatingsSizeFile(0); //all files have the same size
@@ -100,9 +63,143 @@ public:
 		counter = 0;
 	}
 
-	virtual ~EFPEvaluator()
+	virtual ~HFMEvaluator()
 	{
 
+	}
+
+	EvaluationEFP evaluate(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	{
+		//Fo vector with different metrics calculations
+		vector<double>* foIndicator = evaluateAll(rep, optMetric);
+
+		double fo = foIndicator->at(optMetric);		// Evaluation Function Value
+		delete foIndicator;
+		return EvaluationEFP(fo);
+	}
+
+	vector<double>* evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
+	{
+		if (vForecastings == NULL)
+			vForecastings = &pEFP.getForecastingsVector();
+
+		pair<vector<double>*, vector<double>*>* targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
+		vector<double>* foIndicator = getAccuracy(*targetAndForecasts->first, *targetAndForecasts->second, accIndicator);
+
+		delete targetAndForecasts->first;
+		delete targetAndForecasts->second;
+		delete targetAndForecasts;
+
+		return foIndicator;
+	}
+
+	vector<double>* returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
+	{
+		int sizeSP = rep.singleIndex.size();
+		int sizeAP = rep.averageIndex.size();
+		int sizeDP = rep.derivativeIndex.size();
+
+		int maxLag = problemParam.getMaxLag();
+
+		vector<double>* predicteds = new vector<double>(fh);
+
+		//for (int pa = 0; ((pa < stepsAhead) && (pa + begin < nForTargetFile)); pa++) //auxiliar loop for steps ahead
+		for (int pa = 0; pa < fh; pa++)	 // passos a frente
+		{
+			//vector<double> fuzzyWeights;
+			//forecasting estimation
+			double estimation = 0;
+			double greaterAccepeted = 0;
+			double lowerAccepted = 0;
+
+			for (int nSP = 0; nSP < sizeSP; nSP++)
+			{
+				int file = rep.singleIndex[nSP].first;
+				int K = rep.singleIndex[nSP].second;
+
+				double singleValue = getKValue(K, file, begin, pa, vForecastings, *predicteds);
+
+				double ruleGreater = rep.singleFuzzyRS[nSP][GREATER];
+				double greaterWeight = rep.singleFuzzyRS[nSP][GREATER_WEIGHT];
+				double ruleLower = rep.singleFuzzyRS[nSP][LOWER];
+				double lowerWeight = rep.singleFuzzyRS[nSP][LOWER_WEIGHT];
+				double ruleEpsilon = rep.singleFuzzyRS[nSP][EPSILON];
+				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
+
+				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, greaterAccepeted, lowerAccepted);
+			}
+
+			for (int nMP = 0; nMP < sizeAP; nMP++)
+			{
+				vector<pair<int, int> > meansK = rep.averageIndex[nMP];
+				int nAveragePoints = meansK.size();
+
+				double mean = 0;
+				for (int mK = 0; mK < nAveragePoints; mK++)
+				{
+					int file = meansK[mK].first;
+					int K = meansK[mK].second;
+
+					mean += getKValue(K, file, begin, pa, vForecastings, *predicteds);
+				}
+				mean = mean / nAveragePoints;
+
+				double ruleGreater = rep.averageFuzzyRS[nMP][GREATER];
+				double greaterWeight = rep.averageFuzzyRS[nMP][GREATER_WEIGHT];
+				double ruleLower = rep.averageFuzzyRS[nMP][LOWER];
+				double lowerWeight = rep.averageFuzzyRS[nMP][LOWER_WEIGHT];
+				double ruleEpsilon = rep.averageFuzzyRS[nMP][EPSILON];
+				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
+
+				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, greaterAccepeted, lowerAccepted);
+			}
+
+			for (int nDP = 0; nDP < sizeDP; nDP++)
+			{
+				vector<pair<int, int> > derivateK = rep.derivativeIndex[nDP];
+
+				double d = 0;
+				for (int dK = 0; dK < (int) derivateK.size(); dK++)
+				{
+					int file = derivateK[dK].first;
+					int K = derivateK[dK].second;
+
+					double value = getKValue(K, file, begin, pa, vForecastings, *predicteds);
+
+					if (dK == 0)
+						d += value;
+					else
+						d -= value;
+				}
+
+				double ruleGreater = rep.derivativeFuzzyRS[nDP][GREATER];
+				double greaterWeight = rep.derivativeFuzzyRS[nDP][GREATER_WEIGHT];
+				double ruleLower = rep.derivativeFuzzyRS[nDP][LOWER];
+				double lowerWeight = rep.derivativeFuzzyRS[nDP][LOWER_WEIGHT];
+				double ruleEpsilon = rep.derivativeFuzzyRS[nDP][EPSILON];
+				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.derivativeFuzzyRS[nDP][PERTINENCEFUNC]);
+
+				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, greaterAccepeted, lowerAccepted);
+			}
+
+			//Applying rules weights
+			double accepted = greaterAccepeted + lowerAccepted;
+			if (accepted > 0)
+				estimation /= accepted;
+
+			//Approximations using time series backshift operators
+			if (aprox != 0)
+				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, *predicteds, maxLag);
+
+			//================================================
+			//Apply special operators, rounding, binary, on estimated value
+			modifyEstimation(estimation);
+			//================================================
+			predicteds->at(pa) = estimation;
+
+		} //Forecasting horizon loop -- Steps Ahead
+
+		return predicteds;
 	}
 
 	double getKValue(const int K, const int file, const int begin, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
@@ -111,11 +208,11 @@ public:
 
 		if (((begin + pa - K) < 0))
 		{
-			cout<<"oi:"<<K<<endl;
+			cout << "oi:" << K << endl;
 			getchar();
 			cout << "BUG Evaluator (function getKValue): (i + pa - K) = " << begin + pa - K << endl;
 			getchar();
-			cout<<vForecastings.size()<<endl;
+			cout << vForecastings.size() << endl;
 			cout << "vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
 			getchar();
 		}
@@ -169,13 +266,13 @@ public:
 		{
 			if (value > ruleGreater)
 			{
-				estimation += greaterWeight;
+				estimation += greaterWeight + value;
 				greaterAccepeted += 1;
 			}
 
 			if (value < ruleLower)
 			{
-				estimation += lowerWeight;
+				estimation += lowerWeight + value;
 				lowerAccepted += 1;
 			}
 
@@ -198,12 +295,17 @@ public:
 				mu = value * K1 + K2;
 			}
 
-			estimation += greaterWeight * mu;
+			estimation += greaterWeight * mu + value;
 			greaterAccepeted += mu;
 		}
 
 		if (fuzzyFunc == Trapezoid)
 		{
+			//TODO Implement Sigmoid
+			/*** Exponential calculation ***/
+//			exp_value = exp((double) -x);
+			/*** Final sigmoid value ***/
+//			return_value = 1 / (1 + exp_value);
 			double b = ruleLower;
 			double mu = 0;
 			if (value >= (b + epsilon))
@@ -217,7 +319,7 @@ public:
 				mu = value * K1 + K2;
 			}
 
-			estimation += lowerWeight * mu;
+			estimation += lowerWeight * mu + value;
 			lowerAccepted += mu;
 		}
 
@@ -407,207 +509,8 @@ public:
 		}
 	}
 
-	EvaluationEFP evaluate(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
-	{
-		//Fo vector with different metrics calculations
-		vector<double>* foIndicator = evaluateAll(rep, optMetric);
-
-		double fo = foIndicator->at(optMetric);		// Evaluation Function Value
-		delete foIndicator;
-		return EvaluationEFP(fo);
-	}
-
-	vector<double>* evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
-	{
-		if (vForecastings == NULL)
-			vForecastings = &pEFP.getForecastingsVector();
-
-		pair<vector<double>*, vector<double>*>* targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());
-		vector<double>* foIndicator = getAccuracy(*targetAndForecasts->first, *targetAndForecasts->second, accIndicator);
-
-		delete targetAndForecasts->first;
-		delete targetAndForecasts->second;
-		delete targetAndForecasts;
-
-		return foIndicator;
-	}
-
-	vector<double>* returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
-	{
-		int sizeSP = rep.singleIndex.size();
-		int sizeAP = rep.averageIndex.size();
-		int sizeDP = rep.derivativeIndex.size();
-
-		int maxLag = problemParam.getMaxLag();
-
-		vector<double>* predicteds = new vector<double>(fh);
-
-		//for (int pa = 0; ((pa < stepsAhead) && (pa + begin < nForTargetFile)); pa++) //auxiliar loop for steps ahead
-		for (int pa = 0; pa < fh; pa++)	 // passos a frente
-		{
-			//vector<double> fuzzyWeights;
-			//forecasting estimation
-			double estimation = 0;
-			double greaterAccepeted = 0;
-			double lowerAccepted = 0;
-
-			for (int nSP = 0; nSP < sizeSP; nSP++)
-			{
-				int file = rep.singleIndex[nSP].first;
-				int K = rep.singleIndex[nSP].second;
-
-				double singleValue = getKValue(K, file, begin, pa, vForecastings, *predicteds);
-
-				double ruleGreater = rep.singleFuzzyRS[nSP][GREATER];
-				double greaterWeight = rep.singleFuzzyRS[nSP][GREATER_WEIGHT];
-				double ruleLower = rep.singleFuzzyRS[nSP][LOWER];
-				double lowerWeight = rep.singleFuzzyRS[nSP][LOWER_WEIGHT];
-				double ruleEpsilon = rep.singleFuzzyRS[nSP][EPSILON];
-				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
-
-				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, greaterAccepeted, lowerAccepted);
-			}
-
-			for (int nMP = 0; nMP < sizeAP; nMP++)
-			{
-				vector<pair<int, int> > meansK = rep.averageIndex[nMP];
-				int nAveragePoints = meansK.size();
-
-				double mean = 0;
-				for (int mK = 0; mK < nAveragePoints; mK++)
-				{
-					int file = meansK[mK].first;
-					int K = meansK[mK].second;
-
-					mean += getKValue(K, file, begin, pa, vForecastings, *predicteds);
-				}
-				mean = mean / nAveragePoints;
-
-				double ruleGreater = rep.averageFuzzyRS[nMP][GREATER];
-				double greaterWeight = rep.averageFuzzyRS[nMP][GREATER_WEIGHT];
-				double ruleLower = rep.averageFuzzyRS[nMP][LOWER];
-				double lowerWeight = rep.averageFuzzyRS[nMP][LOWER_WEIGHT];
-				double ruleEpsilon = rep.averageFuzzyRS[nMP][EPSILON];
-				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
-
-				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, greaterAccepeted, lowerAccepted);
-			}
-
-			for (int nDP = 0; nDP < sizeDP; nDP++)
-			{
-				vector<pair<int, int> > derivateK = rep.derivativeIndex[nDP];
-
-				double d = 0;
-				for (int dK = 0; dK < (int) derivateK.size(); dK++)
-				{
-					int file = derivateK[dK].first;
-					int K = derivateK[dK].second;
-
-					double value = getKValue(K, file, begin, pa, vForecastings, *predicteds);
-
-					if (dK == 0)
-						d += value;
-					else
-						d -= value;
-				}
-
-				double ruleGreater = rep.derivativeFuzzyRS[nDP][GREATER];
-				double greaterWeight = rep.derivativeFuzzyRS[nDP][GREATER_WEIGHT];
-				double ruleLower = rep.derivativeFuzzyRS[nDP][LOWER];
-				double lowerWeight = rep.derivativeFuzzyRS[nDP][LOWER_WEIGHT];
-				double ruleEpsilon = rep.derivativeFuzzyRS[nDP][EPSILON];
-				FuzzyFunction repFuzzyPertinenceFunc = FuzzyFunction(rep.derivativeFuzzyRS[nDP][PERTINENCEFUNC]);
-
-				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, greaterAccepeted, lowerAccepted);
-			}
-
-			//Applying rules weights
-			double accepted = greaterAccepeted + lowerAccepted;
-			if (accepted > 0)
-				estimation /= accepted;
-
-			//Approximations using time series backshift operators
-			if (aprox != 0)
-				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, *predicteds, maxLag);
-
-			//================================================
-			//Apply special operators, rounding, binary, on estimated value
-			modifyEstimation(estimation);
-			//================================================
-
-			predicteds->at(pa) = estimation;
-
-		} //Forecasting horizon loop -- Steps Ahead
-
-		return predicteds;
-	}
-
-//return a pair -- first vector contain the real values while the second has the forecasted ones - StepsSize=slidingWindowStepSize
-	pair<vector<double>*, vector<double>*>* generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int stepSize)
-	{
-		vector<double>* allForecasts = new vector<double>;
-		vector<double>* allTargets = new vector<double>;
-
-		int nForTargetFile = vForecastings[targetFile].size();
-		int maxLag = problemParam.getMaxLag();
-		int nSamples = nForTargetFile - maxLag;
-
-		int beginParallel;
-
-		if (nThreads > 1)
-		{
-			//===================================================================
-			//		PARALELL CODE FOR MULTI CPU
-			vector<vector<double> > allForecastsVectors(ceil(double(nSamples) / stepSize));
-			vector<vector<double> > allForecastsTarget(ceil(double(nSamples) / stepSize));
-
-#pragma omp parallel for num_threads(nThreads)
-			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
-			{
-				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
-
-				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
-				int index = (beginParallel - maxLag) / stepSize;
-
-				allForecastsVectors[index].insert(allForecastsVectors[index].end(), forecasts->begin(), forecasts->begin() + fhSize);
-				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
-				delete forecasts;
-			}
-
-			for (int aV = 0; aV < (int) allForecastsVectors.size(); aV++)
-				for (int k = 0; k < (int) allForecastsVectors[aV].size(); k++)
-				{
-					allForecasts->push_back(allForecastsVectors[aV][k]);
-					allTargets->push_back(allForecastsTarget[aV][k]);
-				}
-			//		PARALELL CODE FOR MULTI CPU
-			//===================================================================
-		}
-		else
-		{
-
-			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += stepSize) // main loop that varries all the time series
-			{
-				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
-				int fhSize = std::min(stepSize, nForTargetFile - beginParallel);
-
-				for (int i = 0; i < fhSize; i++)
-				{
-					allForecasts->push_back(forecasts->at(i));
-					allTargets->push_back(vForecastings[targetFile][beginParallel + i]);
-				}
-
-//				allForecasts->insert(allForecasts->end(), forecasts->begin(), forecasts->begin() + fhSize);
-//				allTargets->insert(allTargets->end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
-				delete forecasts;
-			}
-		}
-
-		return new pair<vector<double>*, vector<double>*>(make_pair(allTargets, allForecasts));
-	}
-
-//return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
-//if equals to -1 it calls all indicators calculus
+	//return a vector with size equal to the number of indicators -- However, only accIndicator index is calculated
+	//if equals to -1 it calls all indicators calculus
 	vector<double>* getAccuracy(const vector<double>& targetValues, const vector<double>& estimatedValues, const int accIndicator)
 	{
 
@@ -753,7 +656,7 @@ public:
 		//cout << foIndicator[MAPE_INDEX] << endl;
 		//MSE AND RSME FINAL CALC
 		//PINBALL FINAL CALC
-//		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
+		//		vector<pair<double, double> > vPinballFunctions(20, make_pair(0, 0));
 		/*
 		 double minPinball = 1000000;
 		 double pinbalError;
@@ -775,6 +678,71 @@ public:
 		//cout << "steps Ahead:";
 		//cout << foIndicatorStepsAhead << endl;
 		return foIndicator;
+	}
+
+//return a pair -- first vector contain the real values while the second has the forecasted ones - StepsSize=slidingWindowStepSize
+	//Sliding Window Multi Round Forecasts with stepSize
+	pair<vector<double>*, vector<double>*>* generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int slidingWindowStep)
+	{
+		vector<double>* allForecasts = new vector<double>;
+		vector<double>* allTargets = new vector<double>;
+
+		int nForTargetFile = vForecastings[targetFile].size();
+		int maxLag = problemParam.getMaxLag();
+		int nSamples = nForTargetFile - maxLag;
+
+		int beginParallel;
+
+		if (nThreads > 1)
+		{
+			//===================================================================
+			//		PARALELL CODE FOR MULTI CPU
+			vector<vector<double> > allForecastsVectors(ceil(double(nSamples) / slidingWindowStep));
+			vector<vector<double> > allForecastsTarget(ceil(double(nSamples) / slidingWindowStep));
+
+#pragma omp parallel for num_threads(nThreads)
+			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += slidingWindowStep) // main loop that varries all the time series
+			{
+				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
+
+				int fhOrTsSize = std::min(slidingWindowStep, nForTargetFile - beginParallel);
+				int index = (beginParallel - maxLag) / slidingWindowStep;
+
+				allForecastsVectors[index].insert(allForecastsVectors[index].end(), forecasts->begin(), forecasts->begin() + fhOrTsSize);
+				allForecastsTarget[index].insert(allForecastsTarget[index].end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhOrTsSize);
+				delete forecasts;
+			}
+
+			for (int aV = 0; aV < (int) allForecastsVectors.size(); aV++)
+				for (int k = 0; k < (int) allForecastsVectors[aV].size(); k++)
+				{
+					allForecasts->push_back(allForecastsVectors[aV][k]);
+					allTargets->push_back(allForecastsTarget[aV][k]);
+				}
+			//		PARALELL CODE FOR MULTI CPU
+			//===================================================================
+		}
+		else
+		{
+
+			for (beginParallel = maxLag; beginParallel < nForTargetFile; beginParallel += slidingWindowStep) // main loop that varries all the time series
+			{
+				vector<double>* forecasts = returnForecasts(rep, vForecastings, beginParallel, problemParam.getStepsAhead());
+				int fhOrTsSize = std::min(slidingWindowStep, nForTargetFile - beginParallel);
+
+				for (int i = 0; i < fhOrTsSize; i++)
+				{
+					allForecasts->push_back(forecasts->at(i));
+					allTargets->push_back(vForecastings[targetFile][beginParallel + i]);
+				}
+
+//				allForecasts->insert(allForecasts->end(), forecasts->begin(), forecasts->begin() + fhSize);
+//				allTargets->insert(allTargets->end(), vForecastings[targetFile].begin() + beginParallel, vForecastings[targetFile].begin() + beginParallel + fhSize);
+				delete forecasts;
+			}
+		}
+
+		return new pair<vector<double>*, vector<double>*>(make_pair(allTargets, allForecasts));
 	}
 
 	virtual bool isMinimization() const
@@ -1119,5 +1087,5 @@ public:
 
 }
 
-#endif /*EFP_EVALUATOR_HPP_*/
+#endif /*HFM_EVALUATOR_HPP_*/
 

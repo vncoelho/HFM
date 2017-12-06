@@ -14,7 +14,7 @@ CCINCFLAG = -I$(CPLEXDIR)/include -I$(CONCERTDIR)/include
 RESTSDK_FGLAS = #-lboost_system -lcrypto -lssl -lcpprest
 
 #OpenMP Multi-Core Multi-Thread flags
-OPENMP_FLAGS = #-fopenmp -lpthread
+OPENMP_FLAGS = -fopenmp -lpthread
 
 #Raspberry WiringPi Flags (Package GPIO, Copyright (c) 2012-2017 Gordon Henderson, is required)
 LDFLAGS	= -L/usr/local/lib

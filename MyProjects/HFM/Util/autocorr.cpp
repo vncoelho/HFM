@@ -93,6 +93,8 @@ void autocorr::ACF(const double *v, const size_t N, acorrInfo &info)
 		}
 		double numerator = sum / static_cast<double>(n);
 		cor = numerator / denom;
+		if(denom == 0) //TODO - Gambs for including files with same points
+			cor=0;
 	}
 
 	// calculate the log/log slope of the autocorrelation

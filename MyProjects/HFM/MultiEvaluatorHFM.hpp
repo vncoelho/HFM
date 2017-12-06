@@ -32,10 +32,10 @@ namespace HFM
 
 class HFMMultiEvaluator: public MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
-	EFPEvaluator& evalEFP;
+	HFMEvaluator& evalEFP;
 public:
 
-	HFMMultiEvaluator(EFPEvaluator& _evalEFP) :
+	HFMMultiEvaluator(HFMEvaluator& _evalEFP) :
 			evalEFP(_evalEFP)
 	{
 	}
@@ -65,7 +65,7 @@ public:
 		return nev;
 	}
 
-	virtual void reevaluateMEV(MultiEvaluation mev, const RepEFP& r, const OPTFRAME_DEFAULT_ADS* ads)
+	virtual void reevaluateMEV(MultiEvaluation& mev, const RepEFP& r, const OPTFRAME_DEFAULT_ADS* ads)
 	{
 		mev = evaluate(r,ads);
 	}

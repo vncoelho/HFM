@@ -47,7 +47,7 @@ private:
 	HFMParams& methodParam;
 
 	ProblemInstance* p;
-	EFPEvaluator* eval;
+	HFMEvaluator* eval;
 	Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>* c;
 	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNS;
 
@@ -81,7 +81,7 @@ public:
 	{
 
 		p = new ProblemInstance(tForecastings, problemParam);
-		eval = new EFPEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), methodParam.getEvalAprox());
+		eval = new HFMEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), methodParam.getEvalAprox());
 
 		NSSeqNEIGHModifyRules* nsModifyFuzzyRules = new NSSeqNEIGHModifyRules(*p, rg);
 		NSSeqNEIGHChangeSingleInput* nsChangeSingleInput = new NSSeqNEIGHChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
@@ -109,18 +109,22 @@ public:
 
 		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiModifyFuzzyRules = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules);
 		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiChangeSingleInput = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsChangeSingleInput);
-//		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+		RandomDescentMethod<RepEFP>* rdmRemove = new RandomDescentMethod<RepEFP>(*eval, *nsRemoveSingleInput, 100); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+		RandomDescentMethod<RepEFP>* rdmAdd = new RandomDescentMethod<RepEFP>(*eval, *nsAddSingleInput, 100); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
 //		int maxRDM = 100;
-//		RandomDescentMethod<RepEFP>* rdm = new RandomDescentMethod<RepEFP>(*eval, *nsChangeSingleInput, 100);
+//
 //		//rdm->setMessageLevel(3);
 //		vLS.push_back(fiVAlpha);
-		vLS.push_back(fiModifyFuzzyRules);
-		vLS.push_back(fiChangeSingleInput);
+		vLS.push_back(rdmRemove);
+		vLS.push_back(rdmAdd);
+//		vLS.push_back(fiModifyFuzzyRules);
+//		vLS.push_back(fiChangeSingleInput);
 		vnd = new VariableNeighborhoodDescent<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, vLS);
+//		vnd->setVerbose();
 
 //		ilsPert = new ILSLPerturbationLPlus2<RepEFP,OPTFRAME_DEFAULT_ADS>(*eval, 50, *nsModifyFuzzyRules, rg); //TODO check why 50 was removed
 		ilsPert = new ILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules, rg);
-		ilsPert->add_ns(*nsChangeSingleInput);
+//		ilsPert->add_ns(*nsChangeSingleInput);
 //		nsVAlpha
 		ils = new IteratedLocalSearchLevels<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *c, *vnd, *ilsPert, 100, 10);
 
@@ -136,7 +140,7 @@ public:
 //Old continous Evolution Strategy - Deprecated
 //		EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, esMaxG, rg, initialDesv, mutationDesv);
 
-		//olr = new OptimalLinearRegression(*eval, *p);
+//olr = new OptimalLinearRegression(*eval, *p);
 		vNSeq = new vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*>;
 		vNSeq->push_back(nsModifyFuzzyRules);
 		vNSeq->push_back(nsChangeSingleInput);
@@ -153,7 +157,7 @@ public:
 //		vNSeq.push_back(nsAddMeanM5);
 //		vNSeq.push_back(nsAddMeanBigM);
 
-		//TODO check why ES goes more generations some time when we do not have improvements.
+//TODO check why ES goes more generations some time when we do not have improvements.
 
 		vector<int> vNSeqMax(vNSeq->size(), 1000);
 		double mutationRate = 0.1;
@@ -182,11 +186,10 @@ public:
 		moILSPert = new MOILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, *nsModifyFuzzyRules, rg);
 //		moILSPert->add_ns(*nsChangeSingleInput);
 
-		basicMOILSPert= new BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, 2,10,*nsModifyFuzzyRules, rg);
+		basicMOILSPert = new BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, 2, 10, *nsModifyFuzzyRules, rg);
 //		basicMOILSPert->add_ns(*nsChangeSingleInput);
 
-
-		//Trying to checkmodule
+//Trying to checkmodule
 //		checkModule.add(*c);
 //		checkModule.add(*eval);
 //
@@ -195,7 +198,7 @@ public:
 //		checkModule.add(*nsChangeSingleInput);
 //		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
 //
-//		checkModule.run(1,2);
+//		checkModule.run(5,1);
 //		getchar();
 	}
 
@@ -253,7 +256,6 @@ public:
 	{
 		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pf = new Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>();
 
-
 //		if (vS != NULL)
 //		{
 //			if (pf == NULL)
@@ -282,21 +284,18 @@ public:
 		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriASI(*mev, *vNSeq->at(3), maxTriesRI);
 
 		vector<MOLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vMOLS;
-		vMOLS.push_back(&moriASI);
-		vMOLS.push_back(&moriRSI);
 		vMOLS.push_back(&moriMFR);
+		vMOLS.push_back(&moriRSI);
+		vMOLS.push_back(&moriASI);
 		vMOLS.push_back(&moriCSI);
 
 		GeneralParetoLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS> generalPLS(*mev, grIP, initial_population_size, vMOLS);
 
-
-		BasicMOILS<RepEFP, OPTFRAME_DEFAULT_ADS> basicMOILS(*mev, grIP, initial_population_size, &moriASI,rg, *basicMOILSPert,100);
+		BasicMOILS<RepEFP, OPTFRAME_DEFAULT_ADS> basicMOILS(*mev, grIP, initial_population_size, &moriASI, rg, *basicMOILSPert, 100);
 		int moIlslevelMax = 10;
 		int moIlsIterMax = 100;
-		MOILSLevels<RepEFP, OPTFRAME_DEFAULT_ADS> moILSLevels(*mev, grIP, initial_population_size, &moriASI,rg, *moILSPert,moIlsIterMax,moIlslevelMax);
+		MOILSLevels<RepEFP, OPTFRAME_DEFAULT_ADS> moILSLevels(*mev, grIP, initial_population_size, &moriASI, rg, *moILSPert, moIlsIterMax, moIlslevelMax);
 //		moILSLevels.setMessageLevel(3);
-
-
 
 		MOSC moStopCriteriaGPLS;
 		moStopCriteriaGPLS.timelimit = timeGPLS;
@@ -330,15 +329,6 @@ public:
 		return pf;
 	}
 
-	//Mathematical model for finding optimal weights between models, ensemble forecasting TODO
-//	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
-//	{
-//
-//		pair<Solution<RepEFP>&, Evaluation&>* finalSol = NULL;
-//		//olr->exec(finalSol->first, 100, 100);
-//		return finalSol;
-//	}
-
 	pair<Solution<RepEFP>, Evaluation>* runGRASP(int timeGRASP, int nSol)
 	{
 		SOSC* stopCriteria = new SOSC(timeGRASP);
@@ -359,7 +349,7 @@ public:
 		pair<Solution<RepEFP>, Evaluation>* finalSol;
 
 		double targetValue = 3.879748973;
-		targetValue = 0.123;
+		targetValue = 0;
 
 		SOSC* stopCriteria = new SOSC(timeES, targetValue);
 		finalSol = es->search(*stopCriteria);
@@ -381,7 +371,7 @@ public:
 
 	pair<Solution<RepEFP>, Evaluation>* runGILS(int timeGRASP, int timeILS)
 	{
-		SOSC stopCriteria;
+
 //		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, 100000);
 //		g.setMessageLevel(3);
 		pair<Solution<RepEFP>, Evaluation>* finalSol;
@@ -391,6 +381,7 @@ public:
 //		const Solution<RepEFP> solGRASP = finalSol.first;
 //		const Evaluation evaluationGrasp = finalSol.second;
 
+		SOSC stopCriteria;
 		stopCriteria.timelimit = timeILS;
 		stopCriteria.target_f = 0;
 		ils->setMessageLevel(3);
@@ -400,6 +391,15 @@ public:
 
 		return finalSol;
 	}
+
+	//Mathematical model for finding optimal weights between models, ensemble forecasting TODO
+//	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
+//	{
+//
+//		pair<Solution<RepEFP>&, Evaluation&>* finalSol = NULL;
+//		//olr->exec(finalSol->first, 100, 100);
+//		return finalSol;
+//	}
 
 	//return blind forecasts for the required steps ahead of problemParam class
 	//this function feed a trainedModel with the last samples from the vector of TimeSeries
@@ -440,13 +440,13 @@ public:
 	//Return forecasts with pre-defined sliding window strategy with FH
 	vector<double>* returnForecasts(pair<SolutionEFP, Evaluation>* sol, vector<vector<double> > vForecastingsValidation)
 	{
-		pair<vector<double>*, vector<double>* >* targetAndForecasts  = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
+		pair<vector<double>*, vector<double>*>* targetAndForecasts = eval->generateSWMultiRoundForecasts(sol->first.getR(), vForecastingsValidation, problemParam.getStepsAhead());
 		return targetAndForecasts->second;
 	}
 
 	/*Target and forecasts
 	 Return forecasts with pre-defined sliding window strategy with FH*/
-	pair<vector<double>*, vector<double>* >* returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
+	pair<vector<double>*, vector<double>*>* returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
 	{
 		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());
 	}
