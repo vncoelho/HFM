@@ -8,7 +8,7 @@ using namespace std;
 
 enum Operation
 {
-	opLag, opOperator, opPerceptron, opNOperations
+	opLag, opOperator, opPerceptron, opConstant, opNOperations
 };
 
 enum ActivationFunction
@@ -28,6 +28,7 @@ struct NodeChar
 	Operation nT;
 	int operatorOrExpVariable; //operator or explanatoryVariable, column of the input file
 	int K; //Lag, Backshift operator, etc..
+	double* PI = nullptr; // PI we go!
 	Perceptron* p = nullptr;
 };
 
