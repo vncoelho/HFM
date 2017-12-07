@@ -251,7 +251,7 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 	for (int m = 0; m < nIQ; m++)
 	{
 		double minMaxError;
-		if (minOrMax == true)
+		if (minOrMax)
 		{
 			minMaxError = bigM;
 		}
@@ -264,7 +264,7 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 
 		for (int v = 0; v <  (int) results.getNumCols(); v++)
 		{
-			if (minOrMax == true)
+			if (minOrMax)
 			{
 				if (results(m, v) < minMaxError)
 				{

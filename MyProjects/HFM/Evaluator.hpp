@@ -482,20 +482,20 @@ public:
 	void modifyEstimation(double& estimation)
 	{
 		//Block all negative predicted values
-		if (problemParam.getRoundingNegative() == true)
+		if (problemParam.getRoundingNegative())
 		{
 			if (estimation < 0)
 				estimation = 0;
 		}
 
 		//Do not allow real values, round all values to integer
-		if (problemParam.getRoundingToInteger() == true)
+		if (problemParam.getRoundingToInteger())
 		{
 			estimation = round(estimation);
 		}
 
 		//Rounding target to binary output
-		if (problemParam.getBinary() == true)
+		if (problemParam.getBinary())
 		{
 			estimation = round(estimation);
 			if (estimation < 0)
