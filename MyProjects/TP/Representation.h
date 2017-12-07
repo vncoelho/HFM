@@ -28,8 +28,8 @@ struct NodeChar
 	Operation nT;
 	int operatorOrExpVariable; //operator or explanatoryVariable, column of the input file
 	int K; //Lag, Backshift operator, etc..
-	double* PI = nullptr; // PI we go!
-	Perceptron* p = nullptr;
+	double PI;
+	Perceptron p;
 };
 
 struct Node
@@ -143,7 +143,7 @@ struct Node
 		if (root->nodeChar.nT == opLag)
 			cout << root->nodeChar.K << "/t";
 		if (root->nodeChar.nT == opPerceptron)
-			cout << root->nodeChar.p->aF<< "/t" << root->nodeChar.p->rulesWeightsParams <<"\t";
+			cout << root->nodeChar.p.aF<< "/t" << root->nodeChar.p.rulesWeightsParams <<"\t";
 		cout << "|c|=" << root->children.size() << "): { ";
 
 		//for (Node* n : root->children){

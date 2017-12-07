@@ -1,4 +1,4 @@
-all: HFM 
+all: clean TP 
 	@echo "BUILT SUCCESSFULLY!"
 
 

@@ -29,7 +29,27 @@ using namespace std;
 using namespace optframe;
 using namespace TP;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
+	cout << sizeof(NodeChar) << endl;
+	cout << sizeof(bool) << endl;
+	cout << sizeof(bool*) << endl;
+//	cout << sizeof(int) << endl;
+//	cout << sizeof(int*) << endl;
+//	cout << sizeof(unsigned) << endl;
+//	cout << sizeof(unsigned*) << endl;
+//	cout << sizeof(double) << endl;
+//	cout << sizeof(double*) << endl;
+//	cout << sizeof(float) << endl;
+//	cout << sizeof(float*) << endl;
+//	cout << sizeof(long double) << endl;
+//	cout << sizeof(long double*) << endl;
+//	cout << sizeof(char) << endl;
+//	cout << sizeof(char*) << endl;
+//	cout << sizeof(string) << endl;
+//	cout << sizeof(string*) << endl;
+	getchar();
+
 	RandGen rg;
 	long seed = time(nullptr);
 	seed = 10;
@@ -57,11 +77,9 @@ int main(int argc, char **argv) {
 
 	g.setMessageLevel(3);
 
-
-
 	cout << " \n RUNNING OPTIMIZATION ALGORITHMS..." << endl;
 	SOSC stopCriteria;
-	stopCriteria.timelimit=60;
+	stopCriteria.timelimit = 60;
 	pair<SolutionTP, EvaluationTP>* graspSearchSol = g.search(stopCriteria);
 
 	cout << "PROGRAMM ended successfully" << endl;
