@@ -962,7 +962,7 @@ public:
 								// calculate cost for move 2
 								MoveCost* cost_m2 = ev.moveCostComplete(move2, s);
 
-								// apply move 1 (consider reverse is not NULL)
+								// apply move 1 (consider reverse is not nullptr)
 								Move<R, ADS>& rev_m1 = *move1.applySolution(s);
 
 								// calculate new cost for move 2
@@ -1075,12 +1075,12 @@ public:
 		for (unsigned i = 0; i < lComponents.size(); i++)
 		{
 			Scanner scan(lComponents.at(i));
-			type = NULL;
+			type = nullptr;
 			factory.assign(type, scan.nextInt(), scan.next()); // reversed!
 
 			if (!type)
 			{
-				cout << "checkcommand  warning: NULL component " << lComponents[i] << "!" << endl;
+				cout << "checkcommand  warning: nullptr component " << lComponents[i] << "!" << endl;
 			}
 			else
 				vComp.push_back(type);
