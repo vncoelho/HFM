@@ -169,18 +169,6 @@ public:
 		return b == "true";
 	}
 
-	struct TimeCheckNS
-	{
-		vector<pair<int, double> > timeNSApply;
-		vector<pair<int, double> > timeNSCostApply;
-		vector<pair<int, double> > timeNSCostApplyDelta;
-		vector<pair<int, double> > timeNSCostApplyRealDelta;
-		vector<pair<int, double> > timeNSCost;
-		vector<pair<int, double> > timeNSEstimatedCost;
-		vector<pair<int, double> > errorNSEstimatedCost;
-		bool overestimate, underestimate;
-	};
-
 	struct TimeCheckWithSamples
 	{
 		vector<vector<double> > timeNSApply;
@@ -199,15 +187,7 @@ public:
 		bool overestimate, underestimate;
 	};
 
-	struct TimeCheckSol
-	{
-		pair<int, double> timeCloneSolution;
-		vector<pair<int, double> > timeInitializeADS;
-		vector<pair<int, double> > fullTimeEval;
-		vector<pair<int, double> > timeReeval;
-	};
-
-	bool testMoveGeneral(int iter, NS<R, ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckSol& timeSol, TimeCheckNS& timeNS, TimeCheckWithSamples& timeSamples)
+	bool testMoveGeneral(int iter, NS<R, ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckWithSamples& timeSamples)
 	{
 		for (unsigned ev = 0; ev < lEvaluator.size(); ev++)
 		{
@@ -233,8 +213,6 @@ public:
 
 			Timer t_clone;
 			Solution<R, ADS>& sOriginal = s.clone(); // remove if not verbose
-			timeSol.timeCloneSolution.second += t_clone.inMilliSecs();
-			timeSol.timeCloneSolution.first++;
 			timeSamples.timeCloneSolution.push_back(t_clone.inMilliSecs());
 
 			Timer tMovApply;
@@ -245,14 +223,10 @@ public:
 				return false;
 			}
 
-			timeNS.timeNSApply[id_ns].second += tMovApply.inMilliSecs();
-			timeNS.timeNSApply[id_ns].first++;
 			timeSamples.timeNSApply[id_ns].push_back(tMovApply.inMilliSecs());
 
 			Timer t_clone2;
 			Solution<R, ADS>& sNeighbor = s.clone(); // remove if not verbose
-			timeSol.timeCloneSolution.second += t_clone2.inMilliSecs();
-			timeSol.timeCloneSolution.first++;
 			timeSamples.timeCloneSolution.push_back(t_clone2.inMilliSecs());
 			// ===================== tests with ADSManager ======================
 
@@ -265,8 +239,6 @@ public:
 				ADS ads(sNeighbor.getADS()); // copy
 				Timer ts_ds;
 				adsMan->initializeADS(sNeighbor.getR(), sNeighbor.getADS());
-				timeSol.timeInitializeADS[0].second += ts_ds.inMilliSecs();
-				timeSol.timeInitializeADS[0].first++;
 				timeSamples.timeInitializeADS[0].push_back(ts_ds.inMilliSecs());
 
 				if (!adsMan->compareADS(ads, sNeighbor.getADS()))
@@ -286,16 +258,12 @@ public:
 
 			Timer te;
 			Evaluation e_rev = lEvaluator.at(ev)->evaluateSolution(s);
-			timeSol.fullTimeEval[ev].second += te.inMilliSecs();
-			timeSol.fullTimeEval[ev].first++;
 			timeSamples.fullTimeEval[ev].push_back(te.inMilliSecs());
 
 			Timer tMovRevApply;
 			Move<R, ADS>* ini = NULL;
 			if (rev)
 				ini = rev->applySolution(s);
-			timeNS.timeNSApply[id_ns].second += tMovRevApply.inMilliSecs();
-			timeNS.timeNSApply[id_ns].first++;
 			timeSamples.timeNSApply[id_ns].push_back(tMovRevApply.inMilliSecs());
 			// ===================== tests with ADSManager ======================
 
@@ -307,8 +275,6 @@ public:
 				ADS ads(s.getADS()); // copy
 				Timer ts_ds2;
 				adsMan->initializeADS(s.getR(), s.getADS());
-				timeSol.timeInitializeADS[0].second += ts_ds2.inMilliSecs();
-				timeSol.timeInitializeADS[0].first++;
 				timeSamples.timeInitializeADS[0].push_back(ts_ds2.inMilliSecs());
 
 				if (!adsMan->compareADS(ads, s.getADS()))
@@ -334,8 +300,6 @@ public:
 
 			Timer te2;
 			Evaluation e_ini = lEvaluator.at(ev)->evaluateSolution(s);
-			timeSol.fullTimeEval[ev].second += te2.inMilliSecs();
-			timeSol.fullTimeEval[ev].first++;
 			timeSamples.fullTimeEval[ev].push_back(te2.inMilliSecs());
 
 			if (ini && (*ini != move))
@@ -382,8 +346,6 @@ public:
 			evtype simpleCost = mcSimpleCost->cost();
 			delete mcSimpleCost;
 			message(lEvaluator.at(ev), iter, "simpleCost calculated!");
-			timeNS.timeNSCostApply[id_ns].second += tMoveCostApply.inMilliSecs();
-			timeNS.timeNSCostApply[id_ns].first++;
 			timeSamples.timeNSCostApply[id_ns].push_back(tMoveCostApply.inMilliSecs());
 
 			if (EVALUATION_ABS(revCost - simpleCost) >= EVALUATION_ZERO)
@@ -408,8 +370,6 @@ public:
 			Move<R, ADS>& ini1 = *rev1.applySolution(s);
 			e = std::move(evBeginFasterCost);
 			evtype e_ini1 = e.evaluation();
-			timeNS.timeNSCostApplyDelta[id_ns].second += tMoveCostApplyDelta.inMilliSecs();
-			timeNS.timeNSCostApplyDelta[id_ns].first++;
 			timeSamples.timeNSCostApplyDelta[id_ns].push_back(tMoveCostApplyDelta.inMilliSecs());
 
 			delete &rev1;
@@ -441,8 +401,6 @@ public:
 			evtype realFasterCost = mcRealFasterCost->cost();
 			delete mcRealFasterCost;
 			message(lEvaluator.at(ev), iter, "realFasterCost calculated!");
-			timeNS.timeNSCostApplyRealDelta[id_ns].second += tMoveCostApplyRealDelta.inMilliSecs();
-			timeNS.timeNSCostApplyRealDelta[id_ns].first++;
 			timeSamples.timeNSCostApplyRealDelta[id_ns].push_back(tMoveCostApplyRealDelta.inMilliSecs());
 
 			message(lEvaluator.at(ev), iter, "realfasterCost calculated!");
@@ -467,21 +425,15 @@ public:
 			message(lEvaluator.at(ev), iter, "cost() calculated!");
 
 			if (cost && !cost->isEstimated())
-			{
-				timeNS.timeNSCost[id_ns].second += tMoveCost.inMilliSecs();
-				timeNS.timeNSCost[id_ns].first++;
 				timeSamples.timeNSCost[id_ns].push_back(tMoveCost.inMilliSecs());
-			}
 
 			if (cost && cost->isEstimated())
 			{
-				timeNS.timeNSEstimatedCost[id_ns].second += tMoveCost.inMilliSecs();
-				timeNS.timeNSEstimatedCost[id_ns].first++;
 				timeSamples.timeNSEstimatedCost[id_ns].push_back(tMoveCost.inMilliSecs());
 				if (cost->cost() > revCost)
-					timeNS.overestimate = true;
+					timeSamples.overestimate = true;
 				if (cost->cost() < revCost)
-					timeNS.underestimate = true;
+					timeSamples.underestimate = true;
 			}
 
 			if (cost && !cost->isEstimated())
@@ -590,10 +542,6 @@ public:
 		for (unsigned ev = 0; ev < lEvaluator.size(); ev++)
 			evaluators.push_back(lEvaluator[ev]);
 
-		TimeCheckSol timeSol;
-		// time to clone a solution
-		timeSol.timeCloneSolution = pair<int, double>(0, 0.0);
-
 		adsMan = NULL;
 		if (lADSManagerComp.size() > 0)
 		{
@@ -602,20 +550,6 @@ public:
 			if (lADSManagerComp.size() > 1)
 				cout << " checkcommand warning: more than 1 ADSManager (" << lADSManagerComp.size() << ")" << endl;
 		}
-
-		timeSol.timeInitializeADS = vector<pair<int, double> >(1, make_pair(0, 0.0));
-		timeSol.fullTimeEval = vector<pair<int, double> >(evaluators.size(), make_pair(0, 0.0));
-		timeSol.timeReeval = vector<pair<int, double> >(evaluators.size(), make_pair(0, 0.0));
-
-		TimeCheckNS timeNS;
-		timeNS.timeNSApply = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.timeNSCostApply = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.timeNSCostApplyDelta = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.timeNSCostApplyRealDelta = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.timeNSCost = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.timeNSEstimatedCost = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.errorNSEstimatedCost = vector<pair<int, double> >(lNS.size(), make_pair(0, 0.0));
-		timeNS.overestimate = timeNS.underestimate = false;
 
 		TimeCheckWithSamples timeSamples;
 		timeSamples.timeNSApply = vector<vector<double> >(lNS.size());
@@ -637,8 +571,6 @@ public:
 		vector<Solution<R, ADS>*> solutions;
 		vector<vector<Evaluation*> > evaluations(evaluators.size());
 
-		vector<pair<int, double> > timeConstructive(lConstructive.size(), make_pair(0, 0.0));
-
 		if (lConstructive.size() > 0)
 			cout << "checkcommand  will test " << lConstructive.size() << " constructive components (iterMax=" << iterMax << ")" << endl;
 		for (unsigned c = 0; c < lConstructive.size(); c++)
@@ -654,16 +586,12 @@ public:
 
 				Timer ts;
 				Solution<R, ADS> s = *constructive->generateSolution(10000000);
-				timeConstructive[c].second += ts.inMilliSecs();
-				timeConstructive[c].first++;
 				timeSamples.timeConstructive[c].push_back(ts.inMilliSecs());
 
 				if (adsMan)
 				{
 					Timer ts2;
 					adsMan->initializeADS(s.getR(), s.getADS());
-					timeSol.timeInitializeADS[0].second += ts2.inMilliSecs();
-					timeSol.timeInitializeADS[0].first++;
 					timeSamples.timeInitializeADS[0].push_back(ts2.inMilliSecs());
 				}
 
@@ -674,8 +602,6 @@ public:
 					message(lEvaluator.at(ev), iter, "evaluating solution.");
 					Timer te;
 					Evaluation e = evaluators.at(ev)->evaluateSolution(s);
-					timeSol.fullTimeEval[ev].second += te.inMilliSecs();
-					timeSol.fullTimeEval[ev].first++;
 					timeSamples.fullTimeEval[ev].push_back(te.inMilliSecs());
 
 					evaluations.at(ev).push_back(new Evaluation(e));
@@ -718,8 +644,6 @@ public:
 				message(lEvaluator.at(ev), p, "evaluating input solution.");
 				Timer te;
 				Evaluation e = evaluators.at(ev)->evaluateSolution(*lSolution[p]);
-				timeSol.fullTimeEval[ev].second += te.inMilliSecs();
-				timeSol.fullTimeEval[ev].first++;
 				timeSamples.fullTimeEval[ev].push_back(te.inMilliSecs());
 
 				evaluations.at(ev).push_back(new Evaluation(e));
@@ -754,7 +678,7 @@ public:
 
 				// 	bool testMoveGeneral(int iter, NS<R,ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckSol& timeSol, TimeNS& timeNS)
 
-				if (!testMoveGeneral(-1, NULL, -1, s, id_s, move, evaluations, timeSol, timeNS, timeSamples))
+				if (!testMoveGeneral(-1, NULL, -1, s, id_s, move, evaluations, timeSamples))
 					return false;
 
 				/////delete& move; // TODO NEVER DESTROY THIS OptFrame:Move!
@@ -816,7 +740,7 @@ public:
 					// bool testMoveNS(int iter, NS<R,ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, pair<int, double>& timeCloneSolution, vector<pair<int, double> >& timeInitializeADS, vector<pair<int, double> >& fullTimeEval, vector<pair<int, double> >& timeReeval, TimeNS& timeNS)
 					// bool testMoveGeneral(int iter, NS<R,ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckSol& timeSol, TimeNS& timeNS)
 
-					if (!testMoveGeneral(iter, ns, id_ns, s, id_s, move, evaluations, timeSol, timeNS, timeSamples))
+					if (!testMoveGeneral(iter, ns, id_ns, s, id_s, move, evaluations, timeSamples))
 					{
 						delete &move;
 						return false;
@@ -840,6 +764,8 @@ public:
 
 		vector<int> vCountMoves(lNSSeq.size());
 		vector<int> vCountValidMoves(lNSSeq.size());
+		vector<vector<int> > vCountMovesSamples(lNSSeq.size());
+		vector<vector<int> > vCountValidMovesSamples(lNSSeq.size());
 
 		for (unsigned id_nsseq = 0; id_nsseq < lNSSeq.size(); id_nsseq++)
 		{
@@ -865,6 +791,9 @@ public:
 
 				// TODO: consider that iterator can be null!
 				NSIterator<R, ADS>& it = *nsseq->getIteratorSolution(s);
+
+				int countMovesNSSeq = 0;
+				int countValidMovesNSSeq = 0;
 
 				for (it.first(); !it.isDone(); it.next())
 				{
@@ -894,7 +823,7 @@ public:
 					//	bool testMoveNSSeq(int iter, NSSeq<R,ADS>* nsseq, int nqs, int id_nsseq, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, pair<int, double>& timeCloneSolution, vector<pair<int, double> >& timeInitializeADS, vector<pair<int, double> >& fullTimeEval, vector<pair<int, double> >& timeReeval, TimeNS& timeNS)
 					// 	bool testMoveGeneral(int iter, NS<R,ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckSol& timeSol, TimeNS& timeNS)
 
-					if (!testMoveGeneral(nqs, nsseq, id_nsseq, s, id_s, move, evaluations, timeSol, timeNS, timeSamples))
+					if (!testMoveGeneral(nqs, nsseq, id_nsseq, s, id_s, move, evaluations, timeSamples))
 					{
 						delete &move;
 						return false;
@@ -903,11 +832,14 @@ public:
 					delete &move;
 				}
 
+				vCountMovesSamples[id_nsseq].push_back(countMovesNSSeq);
+				vCountValidMovesSamples[id_nsseq].push_back(countValidMovesNSSeq);
 				delete &it;
 			}
 
 			vCountMoves[id_nsseq] += countMoves;
 			vCountValidMoves[id_nsseq] += countValidMoves;
+
 
 			cout << "checkcommand: " << lNSSeq.at(id_nsseq)->id() << " finished." << endl;
 			if (verbose)
@@ -926,6 +858,12 @@ public:
 
 		vector<int> vCountIndependentEnum(lNSEnum.size());
 		vector<int> vCountMovePairsEnum(lNSEnum.size());
+
+		vector<vector<int>> vCountMovesEnumSamples(lNSEnum.size());
+		vector<vector<int>> vCountValidMovesEnumSamples(lNSEnum.size());
+
+		vector<vector<int>> vCountIndependentEnumSamples(lNSEnum.size());
+		vector<vector<int>> vCountMovePairsEnumSamples(lNSEnum.size());
 
 		for (unsigned id_nsenum = 0; id_nsenum < lNSEnum.size(); id_nsenum++)
 		{
@@ -951,6 +889,8 @@ public:
 
 				// TODO: consider that iterator can be null!
 				NSIterator<R, ADS>& it = *nsenum->getIteratorSolution(s);
+				int countMovesNSEnum = 0;
+				int countValidMovesNSEnum = 0;
 
 				for (it.first(); !it.isDone(); it.next())
 				{
@@ -961,6 +901,7 @@ public:
 					// TODO: verify if it's not null!
 					Move<R, ADS>& move = *it.current();
 					countMoves++;
+					countMovesNSEnum++;
 
 					if (!move.canBeAppliedToSolution(s))
 					{
@@ -974,13 +915,13 @@ public:
 					}
 
 					countValidMoves++;
-
+					countValidMovesNSEnum++;
 					// EXEC MOVES HERE
 
 					//	bool testMoveNSSeq(int iter, NSSeq<R,ADS>* nsseq, int nqs, int id_nsseq, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, pair<int, double>& timeCloneSolution, vector<pair<int, double> >& timeInitializeADS, vector<pair<int, double> >& fullTimeEval, vector<pair<int, double> >& timeReeval, TimeNS& timeNS)
 					// 	bool testMoveGeneral(int iter, NS<R,ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckSol& timeSol, TimeNS& timeNS)
 
-					if (!testMoveGeneral(nqs, nsenum, id_nsenum, s, id_s, move, evaluations, timeSol, timeNS, timeSamples))
+					if (!testMoveGeneral(nqs, nsenum, id_nsenum, s, id_s, move, evaluations, timeSamples))
 					{
 						delete &move;
 						return false;
@@ -989,11 +930,15 @@ public:
 					delete &move;
 				}
 
+				vCountMovesEnumSamples[id_nsenum].push_back(countMovesNSEnum);
+				vCountValidMovesEnumSamples[id_nsenum].push_back(countValidMovesNSEnum);
+
 				delete &it;
 			}
 
 			vCountMovesEnum[id_nsenum] += countMoves;
 			vCountValidMovesEnum[id_nsenum] += countValidMoves;
+
 
 			if (checkIndependent)
 			{
@@ -1002,7 +947,8 @@ public:
 
 				// adopting Evaluator 0...
 				Evaluator<R, ADS>& ev = *evaluators.at(0);
-
+				int countMovePairsEnum = 0;
+				int countMoveIndependentEnum = 0;
 				// check for independence between moves m1 and m2
 				for (int m1 = 0; m1 < int(nsenum->size()) - 1; m1++)
 				{
@@ -1014,6 +960,7 @@ public:
 						bool conflict = false;
 						// compute another move pair
 						vCountMovePairsEnum[id_nsenum]++;
+						countMovePairsEnum++;
 
 						if (!conflict)
 						{
@@ -1066,6 +1013,7 @@ public:
 							{
 								// if here, m1 'could' be independent from m2
 								vCountIndependentEnum[id_nsenum]++;
+								countMoveIndependentEnum++;
 								count_ind_m1++;
 								if (verbose)
 								{
@@ -1081,6 +1029,9 @@ public:
 					cout << "checkcommand: found " << count_ind_m1 << " independent move pairs." << endl;
 				}
 
+				//Aigor - Check if this counter is right - Any example was tested here
+				vCountMovePairsEnumSamples[id_nsenum].push_back(countMovePairsEnum);
+				vCountIndependentEnumSamples[id_nsenum].push_back(countMoveIndependentEnum);
 			}
 
 			cout << "checkcommand: " << lNSEnum.at(id_nsenum)->id() << " finished." << endl;
@@ -1099,49 +1050,14 @@ public:
 		cout << "           SUMMARY             " << endl;
 		cout << "===============================" << endl << endl;
 
-		printSingleSummary("Solution", timeSol.timeCloneSolution, "Time to clone a solution");
 		printSingleSummarySamples("Solution", timeSamples.timeCloneSolution, "Time to clone a solution");
 
-		printSummary(convertVector(lConstructive), timeConstructive, "Constructive", "testing construction of initial solution");
 		printSummarySamples(convertVector(lConstructive), timeSamples.timeConstructive, "Constructive", "testing construction of initial solution");
 
 		if (adsMan)
-		{
-			printSummary(convertVector(lADSManagerComp), timeSol.timeInitializeADS, "ADSManager::initializeADS()", "testing lazy initializeADS in solutions");
 			printSummarySamples(convertVector(lADSManagerComp), timeSamples.timeInitializeADS, "ADSManager::initializeADS()", "testing lazy initializeADS in solutions");
-		}
 		else
-		{
 			cout << endl << "No ADSManager was tested." << endl << endl;
-		}
-
-		printSummary(convertVector(lEvaluator), timeSol.fullTimeEval, "Evaluators", "testing full evaluate(s) of a solution");
-
-		printSummary(convertVector(lNS), timeNS.timeNSApply, "NS", "testing time of move apply(s)");
-
-		printSummary(convertVector(lNS), timeNS.timeNSCostApply, "NS", "testing time of cost based on move apply(s)");
-
-		printSummary(convertVector(lNS), timeNS.timeNSCostApplyDelta, "NS", "testing time of cost based on move apply(e, s)");
-
-		printSummary(convertVector(lNS), timeNS.timeNSCostApplyRealDelta, "NS", "testing time of real cost based on move apply(e, s) - forcing allowCosts to False");
-
-		printSummary(convertVector(lNS), timeNS.timeNSCost, "NS", "testing time of move cost()");
-
-		printSummary(convertVector(lNS), timeNS.timeNSEstimatedCost, "NS", "testing time of move estimatedCost()");
-
-		printSummary(convertVector(lNS), timeNS.errorNSEstimatedCost, "NS", "testing error (%) of move estimatedCost()");
-
-		printSummarySimple(convertVector(lNSSeq), vCountMoves, nSolNSSeq, "NSSeq", "counting moves of NSSeq iterator");
-
-		printSummarySimple(convertVector(lNSSeq), vCountValidMoves, nSolNSSeq, "NSSeq", "counting valid moves of NSSeq iterator");
-
-		printSummarySimple(convertVector(lNSEnum), vCountMovesEnum, nSolNSSeq, "NSEnum", "counting moves of NSEnum iterator");
-
-		printSummarySimple(convertVector(lNSEnum), vCountValidMovesEnum, nSolNSSeq, "NSEnum", "counting valid moves of NSEnum iterator");
-
-		printSummarySimple(convertVector(lNSEnum), vCountMovePairsEnum, 1, "NSEnum", "counting general move pairs for NSEnum");
-
-		printSummarySimple(convertVector(lNSEnum), vCountIndependentEnum, 1, "NSEnum", "counting independent move pairs for NSEnum");
 
 		printSummarySamples(convertVector(lEvaluator), timeSamples.fullTimeEval, "Evaluators", "testing full evaluate(s) of a solution");
 
@@ -1158,6 +1074,30 @@ public:
 		printSummarySamples(convertVector(lNS), timeSamples.timeNSEstimatedCost, "NS", "testing time of move estimatedCost()");
 
 		printSummarySamples(convertVector(lNS), timeSamples.errorNSEstimatedCost, "NS", "testing error (%) of move estimatedCost()");
+
+		printSummarySimple(convertVector(lNSSeq), vCountMoves, nSolNSSeq, "NSSeq", "counting moves of NSSeq iterator");
+
+		printSummarySimple(convertVector(lNSSeq), vCountValidMoves, nSolNSSeq, "NSSeq", "counting valid moves of NSSeq iterator");
+
+		printSummarySimple(convertVector(lNSEnum), vCountMovesEnum, nSolNSSeq, "NSEnum", "counting moves of NSEnum iterator");
+
+		printSummarySimple(convertVector(lNSEnum), vCountValidMovesEnum, nSolNSSeq, "NSEnum", "counting valid moves of NSEnum iterator");
+
+		printSummarySimple(convertVector(lNSEnum), vCountMovePairsEnum, 1, "NSEnum", "counting general move pairs for NSEnum");
+
+		printSummarySimple(convertVector(lNSEnum), vCountIndependentEnum, 1, "NSEnum", "counting independent move pairs for NSEnum");
+
+		printSummarySimpleSamples(convertVector(lNSSeq), vCountMovesSamples, "NSSeq", "counting moves of NSSeq iterator");
+
+		printSummarySimpleSamples(convertVector(lNSSeq), vCountValidMovesSamples, "NSSeq", "counting valid moves of NSSeq iterator");
+
+		printSummarySimpleSamples(convertVector(lNSEnum), vCountMovesEnumSamples, "NSEnum", "counting moves of NSEnum iterator");
+
+		printSummarySimpleSamples(convertVector(lNSEnum), vCountValidMovesEnumSamples, "NSEnum", "counting valid moves of NSEnum iterator");
+
+		printSummarySimpleSamples(convertVector(lNSEnum), vCountMovePairsEnumSamples, "NSEnum", "counting general move pairs for NSEnum");
+
+		printSummarySimpleSamples(convertVector(lNSEnum), vCountIndependentEnumSamples, "NSEnum", "counting independent move pairs for NSEnum");
 
 		cout << "checkcommand: tests finished successfully!" << endl;
 		return true;
@@ -1194,51 +1134,6 @@ public:
 		return vcomp;
 	}
 
-	void printSingleSummary(string component, const pair<int, double>& value, string title)
-	{
-		printf("---------------------------------\n");
-		cout << component << "\t" << title << endl;
-		printf("---------------------------------\n");
-		printf("title\t#tests\tavg(ms)\tsum(ms)\n");
-		double avg = 0;
-		int validValues = 0;
-		if (value.first > 0)
-		{
-			printf("%s\t%d\t%.4f\t%.4f\n", component.c_str(), value.first, (value.second / value.first), value.second);
-			avg += (value.second / value.first);
-			validValues++;
-		}
-		else
-			printf("%s\t%d\tUNTESTED OR UNIMPLEMENTED\n", component.c_str(), 0);
-		printf("---------------------------------\n");
-		printf("all\t-\t%.4f\t-\n", (avg / validValues));
-		cout << endl;
-	}
-
-	void printSummary(const vector<Component*>& vcomp, const vector<pair<int, double> >& values, string type, string title)
-	{
-		printf("---------------------------------\n");
-		cout << "|" << type << "|=" << values.size() << "\t" << title << endl;
-		printf("---------------------------------\n");
-		printf("#id\ttitle\t#tests\tavg(ms)\tsum(ms)\n");
-		double avg = 0;
-		int validValues = 0;
-		for (unsigned id = 0; id < values.size(); id++)
-		{
-			if (values[id].first > 0)
-			{
-				printf("#%d\t%s\t%d\t%.4f\t%.4f\n", ((int) id), vcomp[id]->toString().c_str(), values[id].first, (values[id].second / values[id].first), values[id].second);
-				avg += (values[id].second / values[id].first);
-				validValues++;
-			}
-			else
-				printf("#%d\t%s\t%d\tUNTESTED OR UNIMPLEMENTED\n", ((int) id), vcomp[id]->toString().c_str(), 0);
-		}
-		printf("---------------------------------\n");
-		printf("all\t*\t-\t%.4f\t-\n", (avg / validValues));
-		cout << endl;
-	}
-
 	void printSummarySimple(const vector<Component*>& vcomp, const vector<int>& values, int numTests, string type, string title)
 	{
 		printf("---------------------------------\n");
@@ -1253,6 +1148,37 @@ public:
 			{
 				printf("#%d\t%s\t%d\t%d\n", ((int) id), vcomp[id]->toString().c_str(), values[id], (values[id] / numTests));
 				avg += (values[id] / numTests);
+				validValues++;
+			}
+			else
+				printf("#%d\t%s\t%d\tUNTESTED OR UNIMPLEMENTED\n", ((int) id), vcomp[id]->toString().c_str(), 0);
+		}
+		printf("---------------------------------\n");
+		printf("all\t*\t-\t%.4f\t-\n", (avg / validValues));
+		cout << endl;
+	}
+
+	void printSummarySimpleSamples(const vector<Component*>& vcomp, const vector<vector<int>>& vMoveSamples, string type, string title)
+	{
+		unsigned nComponents = vMoveSamples.size();
+		printf("---------------------------------\n");
+		cout << "|" << type << "|=" << nComponents << "\t" << title << endl;
+		printf("---------------------------------\n");
+		printf("#id\ttitle\t#tests\ttotal\tavg\tstd \n");
+		double avg = 0;
+		int validValues = 0;
+		for (unsigned id = 0; id < nComponents; id++)
+		{
+			int nSamples = vMoveSamples[id].size();
+			if (nSamples > 0)
+			{
+				vector<double> vMoveSamplesIDDouble(vMoveSamples[id].begin(), vMoveSamples[id].end());
+				KahanAccumulation init =
+				{ 0 };
+				KahanAccumulation kahanSum = accumulate(vMoveSamplesIDDouble.begin(), vMoveSamplesIDDouble.end(), init, KahanSum);
+				pair<double, double> avgStd = calculateAvgStd(vMoveSamplesIDDouble);
+				printf("#%d\t%s\t%d\t%.4f\t%.4f\t%.4f\n", ((int) id), vcomp[id]->toString().c_str(), nSamples, kahanSum.sum, avgStd.first, avgStd.second);
+				avg += avgStd.first;
 				validValues++;
 			}
 			else
@@ -1329,7 +1255,11 @@ public:
 			stdev += (d - avg) * (d - avg);
 		});
 
-		stdev = sqrt(stdev / (nSamples - 1));
+		if ((nSamples - 1) == 0)
+			stdev = 0;
+		else
+			stdev = sqrt(stdev / (nSamples - 1));
+
 		return make_pair(avg, stdev);
 	}
 
