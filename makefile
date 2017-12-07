@@ -1,4 +1,4 @@
-all: TP 
+all: HFM 
 	@echo "BUILT SUCCESSFULLY!"
 
 

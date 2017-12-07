@@ -29,7 +29,7 @@ enum InputTypes
 
 enum ActivationFunction
 {
-	Heavisde, Trapezoid
+	Heaviside, Trapezoid
 };
 
 
@@ -94,8 +94,8 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 		s << "\t Epsilon:" << rep.singleFuzzyRS[i][EPSILON];
 		s << "\t FuzzyFunction:" << rep.singleFuzzyRS[i][PERTINENCEFUNC] << endl;
 
-		if (rep.singleFuzzyRS[i][PERTINENCEFUNC] == Heavisde)
-			nFuzzyFunction[Heavisde]++;
+		if (rep.singleFuzzyRS[i][PERTINENCEFUNC] == Heaviside)
+			nFuzzyFunction[Heaviside]++;
 		if (rep.singleFuzzyRS[i][PERTINENCEFUNC] == Trapezoid)
 			nFuzzyFunction[Trapezoid]++;
 		counter++;
@@ -115,8 +115,8 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 		s << "\t Epsilon:" << rep.averageFuzzyRS[i][EPSILON];
 		s << "\t FuzzyFunction:" << rep.averageFuzzyRS[i][PERTINENCEFUNC] << endl;
 
-		if (rep.averageFuzzyRS[i][PERTINENCEFUNC] == Heavisde)
-			nFuzzyFunction[Heavisde]++;
+		if (rep.averageFuzzyRS[i][PERTINENCEFUNC] == Heaviside)
+			nFuzzyFunction[Heaviside]++;
 		if (rep.averageFuzzyRS[i][PERTINENCEFUNC] == Trapezoid)
 			nFuzzyFunction[Trapezoid]++;
 		counter++;
@@ -136,8 +136,8 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 		s << "\t Epsilon:" << rep.derivativeFuzzyRS[i][EPSILON];
 		s << "\t FuzzyFunction:" << rep.derivativeFuzzyRS[i][PERTINENCEFUNC] << endl;
 
-		if (rep.derivativeFuzzyRS[i][PERTINENCEFUNC] == Heavisde)
-			nFuzzyFunction[Heavisde]++;
+		if (rep.derivativeFuzzyRS[i][PERTINENCEFUNC] == Heaviside)
+			nFuzzyFunction[Heaviside]++;
 		if (rep.derivativeFuzzyRS[i][PERTINENCEFUNC] == Trapezoid)
 			nFuzzyFunction[Trapezoid]++;
 		counter++;
@@ -145,10 +145,10 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 
 	//s << "earliestInput: " << rep.earliestInput << endl;
 	s << "counter: " << counter << endl;
-	s << "Heaviside functions on rules: " << nFuzzyFunction[Heavisde] / counter * 100 << endl;
+	s << "Heaviside functions on rules: " << nFuzzyFunction[Heaviside] / counter * 100 << endl;
 	s << "Trapezoid functions on rules: " << nFuzzyFunction[Trapezoid] / counter * 100 << endl;
 
-	if ((nFuzzyFunction[Heavisde] + nFuzzyFunction[Trapezoid]) != counter)
+	if ((nFuzzyFunction[Heaviside] + nFuzzyFunction[Trapezoid]) != counter)
 	{
 		s << "BUGOU!" << endl;
 	}

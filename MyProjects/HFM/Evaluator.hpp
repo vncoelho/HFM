@@ -259,17 +259,17 @@ public:
 	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const ActivationFunction fuzzyFunc, const double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
 	{
 
-		if (fuzzyFunc == Heavisde)
+		if (fuzzyFunc == Heaviside)
 		{
 			if (value > ruleGreater)
 			{
-				estimation += greaterWeight + value;
+				estimation += (greaterWeight + value);
 				greaterAccepeted += 1;
 			}
 
 			if (value < ruleLower)
 			{
-				estimation += lowerWeight + value;
+				estimation += (lowerWeight + value);
 				lowerAccepted += 1;
 			}
 
@@ -292,7 +292,7 @@ public:
 				mu = value * K1 + K2;
 			}
 
-			estimation += greaterWeight * mu + value;
+			estimation += (greaterWeight * mu) + value;
 			greaterAccepeted += mu;
 		}
 
@@ -316,7 +316,7 @@ public:
 				mu = value * K1 + K2;
 			}
 
-			estimation += lowerWeight * mu + value;
+			estimation += (lowerWeight * mu) + value;
 			lowerAccepted += mu;
 		}
 

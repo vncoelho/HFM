@@ -44,7 +44,7 @@ int stockMarketForecasting(int argc, char **argv)
 //	const char* caminhoOutput = argv[1];
 //	string nomeOutput = caminhoOutput;
 
-	string nomeOutput = "./HFM/Instance/dadosBovespa/emprestimoAigor";
+	string nomeOutput = "./HFM/Instance/dadosBovespa/bovespa";
 
 	//===================================
 	cout << "Parametros:" << endl;
