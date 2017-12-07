@@ -20,7 +20,7 @@ int GAPSO_SKU(int argc, char **argv)
 	cout << "Welcome to GAPSO-SKU calibration" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 111212101990;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

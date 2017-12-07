@@ -40,7 +40,7 @@ void TPConstructiveRandom::fillNode(Node& node, int nOperators, int nVariables, 
 	if (node.nodeChar.nT == opOperator)
 	{
 		nRandomChildren = 2 * (rg.rand(nodeMaxChildren) + 1);
-		node.children = vector<Node*>(nRandomChildren, NULL);
+		node.children = vector<Node*>(nRandomChildren, nullptr);
 	}
 
 	for (int i = 0; i < nRandomChildren; i++)
@@ -98,7 +98,7 @@ Solution<RepTP, MY_ADS>* TPConstructiveRandom::generateGRSolution(float notUsed,
 //	getchar();
 
 	int firstOperator = rg.rand(nOperators);
-	Node* firstNode = new Node; // or new Node(NULL)
+	Node* firstNode = new Node; // or new Node(nullptr)
 	firstNode->nodeChar.nT = opOperator;
 	firstNode->nodeChar.operatorOrExpVariable = firstOperator;
 	firstNode->nodeChar.K = -1;

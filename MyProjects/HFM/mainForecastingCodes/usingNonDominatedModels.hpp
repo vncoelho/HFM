@@ -25,7 +25,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 	cout << "Welcome to MO forecasting, let's generate a couple of non-dominated HFM models!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

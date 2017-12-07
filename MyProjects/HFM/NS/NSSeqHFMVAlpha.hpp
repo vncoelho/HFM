@@ -75,7 +75,7 @@ public:
 			rep(_rep), pEFP(_pEFP)
 	{
 		index = 0;
-		m = NULL;
+		m = nullptr;
 	}
 
 	virtual ~NSIteratorNEIGHVAlpha()
@@ -113,7 +113,7 @@ public:
 			m = moves[index];
 		}
 		else
-			m = NULL;
+			m = nullptr;
 	}
 
 	virtual void next()
@@ -124,12 +124,12 @@ public:
 			m = moves[index];
 		}
 		else
-			m = NULL;
+			m = nullptr;
 	}
 
 	virtual bool isDone()
 	{
-		return m == NULL;
+		return m == nullptr;
 	}
 
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()

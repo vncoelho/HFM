@@ -28,7 +28,7 @@ struct NodeChar
 	Operation nT;
 	int operatorOrExpVariable; //operator or explanatoryVariable, column of the input file
 	int K; //Lag, Backshift operator, etc..
-	Perceptron* p = NULL;
+	Perceptron* p = nullptr;
 };
 
 struct Node
@@ -41,7 +41,7 @@ struct Node
 	Node()
 	{
 		// Luke, I'm ..... Nooooooooo!
-		father = NULL;
+		father = nullptr;
 	}
 
 	// father constructor
@@ -75,14 +75,14 @@ struct Node
 	// destructor (recursive destructor call cleans whole tree)
 	~Node()
 	{
-		father = NULL;
+		father = nullptr;
 		// destroy dependent children
 		for (unsigned i = 0; i < children.size(); i++)
 		{
 			// delete children
 			delete children[i];
-			// safety NULL assign
-			children[i] = NULL;
+			// safety nullptr assign
+			children[i] = nullptr;
 		}
 		// empty vector of garbage references
 		children.clear();
@@ -120,7 +120,7 @@ struct Node
 			children.push_back(node.children[i]);
 		// clear without delete!
 		node.children.clear();
-		node.father = NULL;
+		node.father = nullptr;
 		return *this;
 	}
 

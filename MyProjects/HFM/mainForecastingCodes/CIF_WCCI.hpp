@@ -20,7 +20,7 @@ int CIFWCCICalibration(int argc, char **argv)
 	cout << "Welcome to WCCI calibration for the competition!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	//seed = 9;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
@@ -254,7 +254,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 	cout << "Welcome to WCCI forecasting competition! With this code we generated the forecasts." << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	//seed = 9;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

@@ -111,7 +111,7 @@ public:
 			rep(_rep), pEFP(_pEFP), vUpdateValues(_vUpdateValues)
 	{
 		index = 0;
-		m = NULL;
+		m = nullptr;
 	}
 
 	virtual ~NSIteratorHFMModifyRules()
@@ -157,7 +157,7 @@ public:
 		if (moves.size() > 0)
 			m = moves[index];
 		else
-			m = NULL;
+			m = nullptr;
 	}
 
 	virtual void next()
@@ -166,13 +166,13 @@ public:
 		if (index < (int) moves.size())
 			m = moves[index];
 		else
-			m = NULL;
+			m = nullptr;
 
 	}
 
 	virtual bool isDone()
 	{
-		return m == NULL;
+		return m == nullptr;
 	}
 
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
@@ -198,7 +198,7 @@ private:
 public:
 
 	//A vector of values to be used for changing rules and weights can be passed as parameter
-	NSSeqHFMModifyRules(ProblemInstance& _pEFP, RandGen& _rg, vector<double>* _vUpdateValues = NULL) :
+	NSSeqHFMModifyRules(ProblemInstance& _pEFP, RandGen& _rg, vector<double>* _vUpdateValues = nullptr) :
 			pEFP(_pEFP), rg(_rg)
 	{
 		//TODO mean from the targetfile

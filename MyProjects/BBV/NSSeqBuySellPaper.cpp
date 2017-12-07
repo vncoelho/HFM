@@ -19,7 +19,7 @@ Move< RepBBV , MY_ADS  >* MoveBuySellPaper::apply(RepBBV& rep, MY_ADS&)
 
 MoveCost* MoveBuySellPaper::cost(const Evaluation&, const RepBBV& rep, const MY_ADS& ads)
 {
-   return NULL;
+   return nullptr;
    // Implement if a more efficient evaluation of the move is available
    //double move_cost = ...;
    //double move_cost_infeasible = ...;

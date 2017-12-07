@@ -28,7 +28,7 @@ int stockMarketForecasting(int argc, char **argv)
 
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

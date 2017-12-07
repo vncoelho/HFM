@@ -22,7 +22,7 @@ int HFM_API(int argc, char **argv)
 	cout << "Interface is on the way to go... :)" << endl;
 	cout << "=============================================================" << endl;
 	RandGenMersenneTwister rg;
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);

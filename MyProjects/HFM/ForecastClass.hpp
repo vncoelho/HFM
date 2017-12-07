@@ -253,13 +253,13 @@ public:
 		paretoMan.addSolutionWithMEV(pf, candidateS, candidateMev);
 	}
 
-	Pareto<RepEFP>* runMultiObjSearch(double timeGPLS, Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* _pf = NULL)
+	Pareto<RepEFP>* runMultiObjSearch(double timeGPLS, Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* _pf = nullptr)
 	{
 		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pf = new Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>();
 
-//		if (vS != NULL)
+//		if (vS != nullptr)
 //		{
-//			if (pf == NULL)
+//			if (pf == nullptr)
 //			{
 //				pf = new Pareto<RepEFP>();
 //
@@ -300,7 +300,7 @@ public:
 
 		MOSC moStopCriteriaGPLS;
 		moStopCriteriaGPLS.timelimit = timeGPLS;
-		if (_pf == NULL)
+		if (_pf == nullptr)
 		{
 			delete pf;
 			pf = generalPLS.searchWithOptionalPareto(moStopCriteriaGPLS);
@@ -397,7 +397,7 @@ public:
 //	pair<Solution<RepEFP>&, Evaluation&>* runOLR()
 //	{
 //
-//		pair<Solution<RepEFP>&, Evaluation&>* finalSol = NULL;
+//		pair<Solution<RepEFP>&, Evaluation&>* finalSol = nullptr;
 //		//olr->exec(finalSol->first, 100, 100);
 //		return finalSol;
 //	}

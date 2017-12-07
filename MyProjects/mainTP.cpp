@@ -31,7 +31,7 @@ using namespace TP;
 
 int main(int argc, char **argv) {
 	RandGen rg;
-	long seed = time(NULL);
+	long seed = time(nullptr);
 	seed = 10;
 	cout << "Seed = " << seed << endl;
 	rg.setSeed(seed);

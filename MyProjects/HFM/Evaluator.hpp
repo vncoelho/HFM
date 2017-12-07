@@ -78,9 +78,9 @@ public:
 		return EvaluationEFP(fo);
 	}
 
-	vector<double>* evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = NULL)
+	vector<double>* evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = nullptr)
 	{
-		if (vForecastings == NULL)
+		if (vForecastings == nullptr)
 			vForecastings = &pEFP.getForecastingsVector();
 
 		pair<vector<double>*, vector<double>*>* targetAndForecasts = generateSWMultiRoundForecasts(rep, *vForecastings, problemParam.getStepsAhead());

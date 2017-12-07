@@ -19,7 +19,7 @@ int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 	cout << "Welcome to Mokoko's place" << endl;
 	RandGenMersenneTwister rg;
 
-	long seed = time(NULL);
+	long seed = time(nullptr);
 	seed = 1; // Fix the seed
 	cout << "Seed = " << seed << endl;
 	srand(seed);

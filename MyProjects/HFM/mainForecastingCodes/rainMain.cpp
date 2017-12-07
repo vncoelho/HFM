@@ -19,7 +19,7 @@ int rainMain(int argc, char **argv)
 	cout << "Welcome to rain forecast place" << endl;
 	RandGenMersenneTwister rg;
 	//long
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

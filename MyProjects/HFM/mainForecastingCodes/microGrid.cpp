@@ -19,7 +19,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 	cout << "Welcome to Micro Grid Liu Applied Energy Dataset Calibration Mode..." << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 9;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

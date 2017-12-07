@@ -94,7 +94,7 @@ public:
 			rep(_rep), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
 	{
 		index = 0;
-		m = NULL;
+		m = nullptr;
 	}
 
 	virtual ~NSIteratorHFMChangeSingleInput()
@@ -116,7 +116,7 @@ public:
 		if (moves.size() > 0)
 			m = moves[index];
 		else
-			m = NULL;
+			m = nullptr;
 	}
 
 	virtual void next()
@@ -125,12 +125,12 @@ public:
 		if (index < (int) moves.size())
 			m = moves[index];
 		else
-			m = NULL;
+			m = nullptr;
 	}
 
 	virtual bool isDone()
 	{
-		return m == NULL;
+		return m == nullptr;
 	}
 
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()

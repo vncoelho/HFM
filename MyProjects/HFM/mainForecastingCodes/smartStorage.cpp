@@ -23,7 +23,7 @@ int smartStorage(int argc, char **argv)
 	cout << "Welcome to SmartStorage prob. forecast generation wind, solar, price" << endl;
 	RandGenMersenneTwister rg;
 	//long
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	//seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

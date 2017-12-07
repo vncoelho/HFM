@@ -23,7 +23,7 @@ int musicGen(int argc, char **argv)
 	cout << "Welcome to automatic music learning and forecasting and generation" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
@@ -180,7 +180,7 @@ int musicGenMidiCSV(int argc, char **argv)
 	cout << "Welcome to automatic music MIDI learning and forecasting and generation" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

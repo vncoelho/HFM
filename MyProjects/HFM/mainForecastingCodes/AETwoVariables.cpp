@@ -18,7 +18,7 @@ int AETwoVariables(int argc, char **argv)
 	cout << "Welcome to AE batch with two variables!" << endl;
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	//seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);

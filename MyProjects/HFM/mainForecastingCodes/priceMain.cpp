@@ -17,7 +17,7 @@ int priceCompetitionBlind(int argc, char **argv)
 {
 	cout << "Welcome to Price Competition Mode Blind Result Generation..." << endl;
 	RandGenMersenneTwister rg;
-	long seed = time(NULL);
+	long seed = time(nullptr);
 	seed = 2;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
@@ -221,7 +221,7 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 	cout << "Welcome to Price Competition Calibration Mode..." << endl;
 	RandGenMersenneTwister rg;
 	//long seed = 1;
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);

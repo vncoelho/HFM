@@ -25,7 +25,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	//force seed
 	//seed = 9;
 	cout << "Seed = " << seed << endl;
@@ -238,7 +238,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 
 	RandGenMersenneTwister rg;
 	//long  1412730737
-	long seed = time(NULL); //CalibrationMode
+	long seed = time(nullptr); //CalibrationMode
 	//force seed
 	seed = 9;
 	cout << "Seed = " << seed << endl;
