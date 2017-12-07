@@ -76,7 +76,7 @@ public:
 			verbose(_verbose)
 	{
 		convertNS = true;
-		adsMan = NULL;
+		adsMan = nullptr;
 		checkIndependent = true;
 	}
 
@@ -262,7 +262,7 @@ public:
 			timeSamples.fullTimeEval[ev].push_back(te.inMilliSecs());
 
 			Timer tMovRevApply;
-			Move<R, ADS>* ini = NULL;
+			Move<R, ADS>* ini = nullptr;
 			if (rev)
 				ini = rev->applySolution(s);
 			timeSamples.timeNSApply[id_ns].push_back(tMovRevApply.inMilliSecs());
@@ -418,7 +418,7 @@ public:
 			// ==============
 
 			Timer tMoveCost;
-			MoveCost* cost = NULL;
+			MoveCost* cost = nullptr;
 
 			if (lEvaluator[ev]->getAllowCosts())
 				cost = move.cost(e, s.getR(), s.getADSptr(), false);
@@ -483,7 +483,7 @@ public:
 					}
 					else
 					{
-						MoveCost* cost2 = NULL;
+						MoveCost* cost2 = nullptr;
 						if (lEvaluator[ev]->getAllowCosts())
 						{
 							cost2 = move2.cost(e, s.getR(), s.getADSptr(), false);
@@ -543,7 +543,7 @@ public:
 		for (unsigned ev = 0; ev < lEvaluator.size(); ev++)
 			evaluators.push_back(lEvaluator[ev]);
 
-		adsMan = NULL;
+		adsMan = nullptr;
 		if (lADSManagerComp.size() > 0)
 		{
 			adsMan = lADSManagerComp[0];
@@ -679,7 +679,7 @@ public:
 
 				// 	bool testMoveGeneral(int iter, NS<R,ADS>* ns, int id_ns, Solution<R, ADS>& s, int id_s, Move<R, ADS>& move, vector<vector<Evaluation*> >& evaluations, TimeCheckSol& timeSol, TimeNS& timeNS)
 
-				if (!testMoveGeneral(-1, NULL, -1, s, id_s, move, evaluations, timeSamples))
+				if (!testMoveGeneral(-1, nullptr, -1, s, id_s, move, evaluations, timeSamples))
 					return false;
 
 				/////delete& move; // TODO NEVER DESTROY THIS OptFrame:Move!
