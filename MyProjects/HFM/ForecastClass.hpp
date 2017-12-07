@@ -199,8 +199,8 @@ public:
 		checkModule.add(*nsChangeSingleInput);
 		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
 
-//		checkModule.run(5,2);
-//		getchar();
+		checkModule.run(5,2);
+		getchar();
 	}
 
 	virtual ~ForecastClass()

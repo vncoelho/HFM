@@ -66,7 +66,7 @@ int stockMarketForecasting(int argc, char **argv)
 	int mu = 10;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
-	int contructiveNumberOfColumns = 500;
+	int contructiveNumberOfColumns = 100;
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
@@ -144,17 +144,18 @@ int stockMarketForecasting(int argc, char **argv)
 	Pareto < RepEFP > *pf = new Pareto<RepEFP>();
 
 	ForecastClass* forecastObject;
-	int timeES = 600;
+	int timeES = 300;
 	int timeGPLS = 120;
-	for (int b = 0; b < 2; b++)
+	int nBatches = 1;
+	for (int b = 0; b < nBatches; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 //		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->runGILS(0, timeES);
-		cout << "Bye bye..see u soon." << endl;
-		exit(1);
+//		cout << "Bye bye..see u soon." << endl;
+//		exit(1);
 
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
 		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
