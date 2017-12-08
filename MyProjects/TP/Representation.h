@@ -6,30 +6,30 @@
 
 using namespace std;
 
-enum Operation
+enum NodeType
 {
-	opLag, opOperator, opPerceptron, opConstant, opNOperations
+	opConstant, opLag, opOperator, opPerceptron, opNOperations
 };
 
-enum ActivationFunction
+enum AFType
 {
 	Heavisde_Low, Heavisde_High, Trapezoid_Low, Trapezoid_High, NActivationFunctions
 };
 
-struct Perceptron
+struct ActivationFunction
 {
-	ActivationFunction aF; //activation function
+	AFType type; //activation function
 	vector<double> rulesWeightsParams; //rule, weight, episilon, etc..
 };
 
 //Node characteristics
 struct NodeChar
 {
-	Operation nT;
-	int operatorOrExpVariable; //operator or explanatoryVariable, column of the input file
-	int K; //Lag, Backshift operator, etc..
+	NodeType nT;
+	pair<int,int> K; // explanatoryVariable/file/column and respective Lag, Backshift operator, etc...
+	int mathOperation; //mathOperation
 	double PI;
-	Perceptron p;
+	ActivationFunction p;
 };
 
 struct Node
@@ -139,11 +139,11 @@ struct Node
 	{
 
 		cout << "(op:" << root->nodeChar.nT << "/";
-		cout << root->nodeChar.operatorOrExpVariable << "/";
+		cout << root->nodeChar.mathOperation << "/";
 		if (root->nodeChar.nT == opLag)
 			cout << root->nodeChar.K << "/t";
 		if (root->nodeChar.nT == opPerceptron)
-			cout << root->nodeChar.p.aF<< "/t" << root->nodeChar.p.rulesWeightsParams <<"\t";
+			cout << root->nodeChar.p.type<< "/t" << root->nodeChar.p.rulesWeightsParams <<"\t";
 		cout << "|c|=" << root->children.size() << "): { ";
 
 		//for (Node* n : root->children){

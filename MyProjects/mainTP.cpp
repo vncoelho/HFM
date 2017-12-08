@@ -34,6 +34,10 @@ int main(int argc, char **argv)
 	cout << sizeof(NodeChar) << endl;
 	cout << sizeof(bool) << endl;
 	cout << sizeof(bool*) << endl;
+	cout << sizeof(bool*) << endl;
+	cout << sizeof(pair<int,int>) << endl;
+	cout << sizeof(pair<double,double>) << endl;
+
 //	cout << sizeof(int) << endl;
 //	cout << sizeof(int*) << endl;
 //	cout << sizeof(unsigned) << endl;
