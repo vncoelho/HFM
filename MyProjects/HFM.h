@@ -4,8 +4,8 @@
 #include "HFM/Representation.h"
 #include "HFM/Solution.h"
 #include "HFM/Evaluation.h"
-#include "HFM/ProblemReadParameters.hpp"
 #include "HFM/ProblemInstance.hpp"
+#include "HFM/ProblemParameters.hpp"
 #include "HFM/Evaluator.hpp"
 //#include "./HFM/NS/NSSeqVAlpha.hpp"
 //#include "./HFM/NS/NSSeqHFMAddX.hpp"
@@ -17,6 +17,7 @@
 #include "HFM/ConstructiveRandomACF.hpp"
 #include "HFM/HFMESContinous.hpp"
 #include "HFM/ForecastClass.hpp"
+
 
 
 #endif /*HFM_H_*/

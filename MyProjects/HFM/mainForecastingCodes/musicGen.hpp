@@ -111,8 +111,8 @@ int musicGen(int argc, char **argv)
 
 	problemParam.setStepsAhead(fh);
 	problemParam.setMaxLag(maxLag);
-	problemParam.setRounding(true);
-	problemParam.setRoundingNegative(false);
+	problemParam.setRounding(true,0);
+	problemParam.setRoundingNegative(false,0);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);
@@ -260,8 +260,8 @@ int musicGenMidiCSV(int argc, char **argv)
 
 	problemParam.setStepsAhead(fh);
 	problemParam.setMaxLag(maxLag);
-	problemParam.setRounding(true);
-	problemParam.setRoundingNegative(true);
+	problemParam.setRounding(true,0);
+	problemParam.setRoundingNegative(true,0);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);

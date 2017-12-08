@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "../../OptFrame/Scanner++/Scanner.h"
+#include "../../OptFrame/Util/KahanSummation.hpp"
 
 using namespace std;
 using namespace scannerpp;
@@ -11,68 +12,31 @@ using namespace scannerpp;
 namespace HFM
 {
 
-class ProblemInstance
+class HFMProblemInstance
 {
 private:
-	// Your private vars
+	vector<vector<double> > forecastings;
+
 	vector<double> means;
 	vector<double> vMax;
 	vector<double> stdDesvs;
-	//int precision;
-	//int options;
-	//int function;
-	int stepsHead;
-	vector<vector<double> > forecastings;
-	ProblemParameters problemParam;
 
 public:
-	ProblemInstance(vector<vector<double> > _forecastings, ProblemParameters& _problemParam) :
-		forecastings(_forecastings),problemParam(_problemParam)
+	HFMProblemInstance(const vector<vector<double> >& _forecastings) :
+			forecastings(_forecastings)
 	{
-		//precision = problemParam.getPrecision();
-		//options = problemParam.getOptions();
-		//function = problemParam.getFunction();
-		stepsHead = problemParam.getStepsAhead();
-
-		// Put here your code
-		// You can read the input data from the 'scanner' object
-
 		//number of different explanatory variables
 		int nExVar = forecastings.size();
+		means.resize(nExVar, 0);
+		stdDesvs.resize(nExVar, 0);
+		vMax.resize(nExVar, 0);
 
-		vector<int> tsNumberOfSamples(nExVar);
-		means.resize(nExVar,0);
-		stdDesvs.resize(nExVar,0);
-		vMax.resize(nExVar,0);
-		//vector with the number of forecasting in each file
-
-		for (int exVar = 0; exVar < nExVar; exVar++)
-			tsNumberOfSamples[exVar] = forecastings[exVar].size();
-
-
-		//getchar();
-		//Average Calc
 		for (int exVar = 0; exVar < nExVar; exVar++)
 		{
-			for (int i = 0; i < tsNumberOfSamples[exVar]; i++)
-			{
-				means[exVar] += getForecastings(exVar, i);
-				if(getForecastings(exVar, i)>vMax[exVar])
-					vMax[exVar] = getForecastings(exVar, i);
-			}
-
-			means[exVar] = means[exVar] / tsNumberOfSamples[exVar];
-
-			//cout << "Media = " << mean << endl;
-
-			for (int i = 0; i < tsNumberOfSamples[exVar]; i++)
-			{
-				double desv = getForecastings(exVar, i) - means[exVar];
-				stdDesvs[exVar] += desv * desv;
-			}
-
-			stdDesvs[exVar] = stdDesvs[exVar] / tsNumberOfSamples[exVar];
-			stdDesvs[exVar] = sqrt(stdDesvs[exVar]);
+			pair<double, double> avgStd = calculateAvgStd(forecastings[exVar]);
+			means[exVar] = avgStd.first;
+			stdDesvs[exVar] = avgStd.second;
+			vMax[exVar] = *max_element(forecastings[exVar].begin(), forecastings[exVar].end());
 		}
 
 		//cout <<"File means:"<< means << endl;
@@ -102,7 +66,6 @@ public:
 
 		//================================================
 	}
-
 
 	double getMean(int file)
 	{
@@ -149,7 +112,7 @@ public:
 		return forecastings[file][i];
 	}
 
-	virtual ~ProblemInstance()
+	virtual ~HFMProblemInstance()
 	{
 	}
 

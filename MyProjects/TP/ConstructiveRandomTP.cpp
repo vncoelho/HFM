@@ -52,18 +52,18 @@ void TPConstructiveRandom::fillNode(Node& node, int nOperators, int nVariables, 
 
 		if (nodeOperation == opLag)
 		{
-			int nROperator = rg.rand(nOperators);
+			int expVariable = rg.rand(nOperators);
+			int op = rg.rand(nVariables);
 			newNode->nodeChar.nT = opOperator;
-			newNode->nodeChar.operatorOrExpVariable = nROperator;
+			newNode->nodeChar.K.first = expVariable;
 			newNode->nodeChar.K = -1;
 //
 		}
 		if (nodeOperation == opOperator)
 		{
-			int rVariable = rg.rand(nVariables);
+			int op = rg.rand(nVariables);
 			newNode->nodeChar.nT = opOperator;
-			newNode->nodeChar.operatorOrExpVariable = rVariable;
-			newNode->nodeChar.K = 0;
+			newNode->nodeChar.mathOperation = op;
 		}
 
 		if (nodeOperation == opPerceptron)
@@ -71,7 +71,6 @@ void TPConstructiveRandom::fillNode(Node& node, int nOperators, int nVariables, 
 			int rVariable = rg.rand(nVariables);
 			newNode->nodeChar.nT = opPerceptron;
 			newNode->nodeChar.operatorOrExpVariable = rVariable;
-			newNode->nodeChar.K = 0;
 			int randAF = rg.rand(NActivationFunctions);
 			vector<double> rulesWeightsParams(3, 0); // rule, weight and episilon equal to 0
 			Perceptron* p = new Perceptron;

@@ -22,8 +22,8 @@ private:
 
 public:
 
-	MoveNEIGHAddSingleInput(int _file, int _K, vector<double> _rulesAndWeights,bool _reverse) :
-			file(_file), K(_K), rulesAndWeights(_rulesAndWeights),reverse(_reverse)
+	MoveNEIGHAddSingleInput(int _file, int _K, vector<double> _rulesAndWeights, bool _reverse) :
+			file(_file), K(_K), rulesAndWeights(_rulesAndWeights), reverse(_reverse)
 	{
 
 	}
@@ -51,7 +51,7 @@ public:
 			fuzzyRules[GREATER_WEIGHT] = rulesAndWeights[GREATER_WEIGHT];
 			fuzzyRules[LOWER] = rulesAndWeights[LOWER];
 			fuzzyRules[LOWER_WEIGHT] = rulesAndWeights[LOWER_WEIGHT];
-			fuzzyRules[EPSILON] =  rulesAndWeights[EPSILON];
+			fuzzyRules[EPSILON] = rulesAndWeights[EPSILON];
 			fuzzyRules[PERTINENCEFUNC] = rulesAndWeights[PERTINENCEFUNC];
 
 			rep.singleFuzzyRS.push_back(fuzzyRules);
@@ -73,7 +73,7 @@ public:
 	void print() const
 	{
 		cout << "MoveNEIGHAddSingleInput( vector:  explatonary variable " << file << " <=>  k " << K;
-		cout<<"rules and weights "<<rulesAndWeights<< " )";
+		cout << "rules and weights " << rulesAndWeights << " )";
 		cout << endl;
 	}
 }
@@ -83,19 +83,17 @@ class NSIteratorNEIGHAddSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_
 {
 private:
 	const RepEFP& rep;
-	int maxLag, maxUpperLag;
-	ProblemInstance& pEFP;
+	vector<int> vMaxLag, vMaxUpperLag;
+	HFMProblemInstance& pEFP;
 	RandGen& rg;
 
 	MoveNEIGHAddSingleInput* m;
 	vector<MoveNEIGHAddSingleInput*> moves;
 	int index;
 
-
-
 public:
-	NSIteratorNEIGHAddSingleInput(const RepEFP& _rep, int _maxLag, int _maxUpperLag, ProblemInstance& _pEFP, RandGen& _rg) :
-			rep(_rep), maxLag(_maxLag), maxUpperLag(_maxUpperLag), pEFP(_pEFP), rg(_rg)
+	NSIteratorNEIGHAddSingleInput(const RepEFP& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag, HFMProblemInstance& _pEFP, RandGen& _rg) :
+			rep(_rep), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag), pEFP(_pEFP), rg(_rg)
 	{
 		index = 0;
 		m = nullptr;
@@ -109,10 +107,13 @@ public:
 
 	virtual void first()
 	{
+		cout<<toString()<<" iterator is not working properly. Iterator should be improved"<<endl;
+		exit(1);
+		int nEXV = 0; //TODO
+		int maxLag = vMaxLag[nEXV];
 
 		for (int lag = 1; lag <= maxLag; lag++)
 		{
-			int nEXV = 0;
 			int mean = pEFP.getMean(nEXV);
 			int stdDesv = pEFP.getStdDesv(nEXV);
 			double meanWeight = pEFP.getMean(0); //File 0 is the target file
@@ -125,9 +126,10 @@ public:
 			double fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
 			double epsilon = 1; //forcing to 1, trapezoid functions - TODO
 
-			vector<double> rulesAndWeights = {greater,greaterWeight,lower,lowerWeight, epsilon, fuzzyFunction};
+			vector<double> rulesAndWeights =
+			{ greater, greaterWeight, lower, lowerWeight, epsilon, fuzzyFunction };
 
-			moves.push_back(new MoveNEIGHAddSingleInput(0, lag,rulesAndWeights, false));
+			moves.push_back(new MoveNEIGHAddSingleInput(0, lag, rulesAndWeights, false));
 		}
 
 		if (moves.size() > 0)
@@ -171,15 +173,15 @@ public:
 class NSSeqNEIGHAddSingleInput: public NSSeq<RepEFP>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	RandGen& rg;
 
-	int maxLag, maxUpperLag;
+	vector<int> vMaxLag, vMaxUpperLag;
 
 public:
 
-	NSSeqNEIGHAddSingleInput(ProblemInstance& _pEFP, RandGen& _rg, int _maxLag, int _maxUpperLag) :
-			pEFP(_pEFP), rg(_rg), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
+	NSSeqNEIGHAddSingleInput(HFMProblemInstance& _pEFP, RandGen& _rg, vector<int> _vMaxLag, vector<int> _vMaxUpperLag) :
+			pEFP(_pEFP), rg(_rg), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag)
 	{
 	}
 
@@ -190,10 +192,11 @@ public:
 	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		//TODO - Check the possibility of add negative K values
-		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
-		int file = rg.rand(pEFP.getNumberExplanatoryVariables());
+		int nEXV = rg.rand(pEFP.getNumberExplanatoryVariables());
+		int maxLag = vMaxLag[nEXV];
 
-		int nEXV = file;
+		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
+
 		int mean = pEFP.getMean(nEXV);
 		int stdDesv = pEFP.getStdDesv(nEXV);
 		double meanWeight = pEFP.getMean(0); //File 0 is the target file
@@ -206,13 +209,14 @@ public:
 		double fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
 		double epsilon = 1; //forcing to 1, trapezoid functions - TODO
 
-		vector<double> rulesAndWeights = {greater,greaterWeight,lower,lowerWeight, epsilon, fuzzyFunction};
-		return new MoveNEIGHAddSingleInput(file, K, rulesAndWeights, false); // return a random move
+		vector<double> rulesAndWeights =
+		{ greater, greaterWeight, lower, lowerWeight, epsilon, fuzzyFunction };
+		return new MoveNEIGHAddSingleInput(nEXV, K, rulesAndWeights, false); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorNEIGHAddSingleInput(rep, maxLag, maxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorNEIGHAddSingleInput(rep, vMaxLag, vMaxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const

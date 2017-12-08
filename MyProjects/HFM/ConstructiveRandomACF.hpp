@@ -25,7 +25,7 @@ namespace HFM
 class ConstructiveACF: public Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	ProblemParameters problemParam;
 	RandGen& rg;
 
@@ -39,7 +39,7 @@ private:
 
 public:
 
-	ConstructiveACF(ProblemInstance& _pEFP, ProblemParameters& _problemParam, RandGen& _rg, int _precision, vector<double> _alphaACF) : // If necessary, add more parameters
+	ConstructiveACF(HFMProblemInstance& _pEFP, ProblemParameters& _problemParam, RandGen& _rg, int _precision, vector<double> _alphaACF) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), rg(_rg), precision(_precision), alphaACF(_alphaACF)
 	{
 
@@ -61,6 +61,8 @@ public:
 
 		cout << "Inside constructive ACF -- Forcing average and derivative values" << endl;
 		precisionSP = precision;
+		precisionMP = precision; // 1 because it feeds a random generator -- rg.rand(precisionMP);
+		precisionDP = precision;
 		precisionMP = 1; // 1 because it feeds a random generator -- rg.rand(precisionMP);
 		precisionDP = 1;
 	}
@@ -183,7 +185,7 @@ public:
 				acfData[i] = data[nEXV].at(i);
 
 			acorrInfo info;
-			autocorr acf(-10, problemParam.getMaxLag() + 1); //the ACF generator counts lag 0);
+			autocorr acf(-10, problemParam.getMaxLag(nEXV) + 1); //the ACF generator counts lag 0);
 			acf.ACF(acfData, nTotalPoints, info);
 			acfPoints.push_back(info.points());
 		}
@@ -246,8 +248,8 @@ public:
 		vector<vector<pair<double, int> > > lagsRLC = returnRLCUsingACF();
 
 		//Get trivial inputs when learning samples - Time series does not exist
-		if (problemParam.getForceSampleLearningWithEndogenous())
-			lagsRLC = returnTrivialRLCForSamplesLearning();
+//		if (problemParam.getForceSampleLearningWithEndogenous(0))
+//			lagsRLC = returnTrivialRLCForSamplesLearning();
 
 		int earliestInput = 0;
 		vector<pair<int, int> > singleIndex;
@@ -259,6 +261,8 @@ public:
 
 		for (int nEXV = 0; nEXV < numberExplanatoryVariables; nEXV++)
 		{
+
+
 			int nACFUsefullPoints = lagsRLC[nEXV].size();
 			double mean = pEFP.getMean(nEXV);
 			double stdDesv = pEFP.getStdDesv(nEXV);

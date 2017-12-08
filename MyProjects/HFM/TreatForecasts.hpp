@@ -11,10 +11,7 @@
 namespace HFM
 {
 
-static bool comparaTreatQuantiles(double d1, double d2)
-{
-	return d1 < d2;
-}
+
 
 class treatForecasts
 {
@@ -490,6 +487,10 @@ public:
 
 	vector<double> generateQuantis(vector<double> forecasts, int firstQuantil, int lastQuantil)
 	{
+		auto comparaTreatQuantiles = [&](double d1, double d2)-> bool
+		{
+			return d1 < d2;
+		};
 
 		sort(forecasts.begin(), forecasts.end(), comparaTreatQuantiles); // ordena com QuickSort
 		//cout<<forecasts<<endl;

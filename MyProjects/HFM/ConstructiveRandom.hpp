@@ -25,7 +25,7 @@ namespace HFM
 class ConstructiveRandom: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	ProblemParameters problemParam;
 	RandGen& rg;
 
@@ -35,12 +35,9 @@ private:
 	int precision;
 	// Your private vars
 
-
-	int maxLag, maxUpperLag;
-
 public:
 
-	ConstructiveRandom(ProblemInstance& _pEFP, ProblemParameters& _problemParam, RandGen& _rg, int _precision) : // If necessary, add more parameters
+	ConstructiveRandom(HFMProblemInstance& _pEFP, ProblemParameters& _problemParam, RandGen& _rg, int _precision) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), rg(_rg), precision(_precision)
 	{
 
@@ -50,8 +47,6 @@ public:
 			getchar();
 		}
 
-		maxLag = problemParam.getMaxLag();
-		maxUpperLag = problemParam.getMaxUpperLag();
 		precisionSP = precision;
 		precisionMP = precision;
 		precisionDP = precision;
@@ -91,6 +86,9 @@ public:
 			int stdDesv = pEFP.getStdDesv(nEXV);
 			double meanWeight = pEFP.getMean(0); //File 0 is the target file
 			double stdDesvWeight = pEFP.getStdDesv(0);
+
+			int maxLag = problemParam.getMaxLag(nEXV);
+			int maxUpperLag = problemParam.getMaxUpperLag(nEXV);
 
 			int pSP = rg.rand(precisionSP);
 			for (int p = 0; p < pSP; p++)
@@ -249,7 +247,7 @@ public:
 		int nAdjust = rg.rand(1) + 1;
 		for (int nA = 0; nA <= nAdjust; nA++)
 		{
-			int K = rg.rand(maxLag);
+			int K = rg.rand(problemParam.getMaxLag(problemParam.getTargetFile()));
 
 			vIndex.push_back(K);
 //			double std = rg.rand(300) / 1000; //TODO check the use of this variable

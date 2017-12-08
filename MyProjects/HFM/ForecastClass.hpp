@@ -47,7 +47,7 @@ private:
 	RandGen& rg;
 	HFMParams& methodParam;
 
-	ProblemInstance* p;
+	HFMProblemInstance* p;
 	HFMEvaluator* eval;
 	Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>* c;
 	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNS;
@@ -81,13 +81,13 @@ public:
 			tForecastings(_tForecastings), problemParam(_problemParam), rg(_rg), methodParam(_methodParam)
 	{
 
-		p = new ProblemInstance(tForecastings, problemParam);
+		p = new HFMProblemInstance(tForecastings);
 		eval = new HFMEvaluator(*p, problemParam, methodParam.getEvalFOMinimizer(), methodParam.getEvalAprox());
 
 		NSSeqHFMModifyRules* nsModifyFuzzyRules = new NSSeqHFMModifyRules(*p, rg);
-		NSSeqHFMChangeSingleInput* nsChangeSingleInput = new NSSeqHFMChangeSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
+		NSSeqHFMChangeSingleInput* nsChangeSingleInput = new NSSeqHFMChangeSingleInput(*p, rg, problemParam.getVMaxLag(), problemParam.getVMaxUpperLag());
 		NSSeqHFMRemoveSingleInput* nsRemoveSingleInput = new NSSeqHFMRemoveSingleInput(rg);
-		NSSeqNEIGHAddSingleInput* nsAddSingleInput = new NSSeqNEIGHAddSingleInput(*p, rg, problemParam.getMaxLag(), problemParam.getMaxUpperLag());
+		NSSeqNEIGHAddSingleInput* nsAddSingleInput = new NSSeqNEIGHAddSingleInput(*p, rg, problemParam.getVMaxLag(), problemParam.getVMaxUpperLag());
 //		NSSeqNEIGHVAlpha* nsVAlpha = new NSSeqNEIGHVAlpha(*p, rg, 5);
 
 //		NSSeqNEIGHAddX* nsAddMean01 = new NSSeqNEIGHAddX(*p, rg, 0.1);
@@ -199,8 +199,8 @@ public:
 		checkModule.add(*nsChangeSingleInput);
 		checkModule.add(*nsAddSingleInput); //This move has dynamic components - Thus SimpleCost does not work properly
 
-		checkModule.run(5,2);
-		getchar();
+//		checkModule.run(5,2);
+//		getchar();
 	}
 
 	virtual ~ForecastClass()

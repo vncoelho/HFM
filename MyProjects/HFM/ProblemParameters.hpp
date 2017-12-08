@@ -1,5 +1,5 @@
-#ifndef EFP_PROBLEMREADPARAMETERS_HPP_
-#define EFP_PROBLEMREADPARAMETERS_HPP_
+#ifndef HFM_PROBLEMPARAMETERS_HPP_
+#define HFM_PROBLEMPARAMETERS_HPP_
 
 #include <iostream>
 
@@ -13,15 +13,17 @@ namespace HFM
 
 struct ForecastingOptions
 {
-	bool roundNegative;
-	bool round;
-	bool binary;
-	bool forceSampleLearningWithEndogenous;
+	vector<bool> roundNegative;
+	vector<bool> round;
+	vector<bool> binary;
+	vector<bool> forceSampleLearningWithEndogenous;
 
-	ForecastingOptions(bool _roundNegative = false, bool _round = false, bool _binary = false, bool _forceSampleLearningWithEndogenous = false) :
-			roundNegative(_roundNegative), round(_round), binary(_binary), forceSampleLearningWithEndogenous(_forceSampleLearningWithEndogenous)
+	ForecastingOptions()
 	{
-
+		roundNegative.resize(1,false);
+		round.resize(1,false);
+		binary.resize(1,false);
+		forceSampleLearningWithEndogenous.resize(1,false);
 	}
 
 	friend ostream & operator<<(ostream & os, const ForecastingOptions& fOptions)
@@ -48,12 +50,12 @@ private:
 	int function;
 	vector<int> vNotUsedForTests;
 	//If maxUpperLag is greater than 0 model uses predicted data: ( t - (-K) ) => (t + K) | K !=0
-	int maxLag, maxUpperLag;
+	vector<int> vMaxLag, vMaxUpperLag;
 	string instancePath;
 	string validationPath;
 	int nFiles;
 	ForecastingOptions fOptions;
-
+	int targetFile;
 	vector<pair<int, int> > oForesSP; //Options to Forecasting with single points
 	vector<pair<int, vector<int> > > oForesMP; //Options to Forecasting with mean points
 	vector<pair<int, vector<int> > > oForesDP; //Options to Forecasting with derivate points
@@ -62,20 +64,157 @@ public:
 	ProblemParameters(string parametersFile)
 	{
 		readFile(parametersFile);
-
+		targetFile = 0;
+		vMaxLag.resize(1,0);
+		vMaxUpperLag.resize(1,0);
 	}
 
 	ProblemParameters()
 	{
-
+		targetFile = 0;
+		vMaxLag.resize(1,0);
+		vMaxUpperLag.resize(1,0);
 	}
 
 	//the target file is always the first time series
 	int getTargetFile()
 	{
-		return 0;
+		return targetFile;
 	}
 
+	virtual ~ProblemParameters()
+	{
+	}
+
+	int getStepsAhead()
+	{
+		return stepsAhead;
+	}
+
+	vector<int> getVMaxLag()
+	{
+		return vMaxLag;
+	}
+
+	vector<int> getVMaxUpperLag()
+	{
+		return vMaxUpperLag;
+	}
+
+	int getMaxLag(int _expVariable = -1)
+	{
+		if(_expVariable == -1)
+			_expVariable = getTargetFile();
+		assert((int)vMaxLag.size()>=_expVariable);
+		return vMaxLag[_expVariable];
+	}
+
+
+	void setMaxLag(int _maxLag, int _expVariable = - 1)
+	{
+		if(_expVariable == -1)
+			_expVariable = getTargetFile();
+
+		assert((int)vMaxLag.size()>=_expVariable);
+
+		vMaxLag.at(_expVariable) = _maxLag;
+	}
+
+	int getMaxUpperLag(int _expVariable)
+	{
+		assert((int)vMaxUpperLag.size()>=_expVariable);
+		return vMaxUpperLag.at(_expVariable);
+	}
+
+	void setMaxUpperLag(int _maxLagUpperBound, int _expVariable = -1)
+	{
+		if(_expVariable == -1)
+			_expVariable = getTargetFile();
+		assert((int)vMaxUpperLag.size()>=_expVariable);
+		vMaxUpperLag.at(_expVariable) = _maxLagUpperBound;
+	}
+
+
+	bool getRoundingToInteger(int _expVariable)
+	{
+		return fOptions.round[_expVariable];
+	}
+
+	bool getRoundingNegative(int _expVariable)
+	{
+		return fOptions.roundNegative[_expVariable];
+	}
+
+	void setBinary(bool desiredRounding,int _expVariable)
+	{
+		fOptions.binary[_expVariable] = desiredRounding;
+	}
+
+	bool getForceSampleLearningWithEndogenous(int _expVariable)
+	{
+		assert(_expVariable != getTargetFile());
+		assert((int) fOptions.forceSampleLearningWithEndogenous.size()>=_expVariable);
+		return fOptions.forceSampleLearningWithEndogenous[_expVariable];
+	}
+
+	bool getBinary(int _expVariable)
+	{
+		assert((int) fOptions.binary.size()>=_expVariable);
+		return fOptions.binary[_expVariable];
+	}
+
+	void setRounding(bool desiredRounding,int _expVariable)
+	{
+		assert((int) fOptions.round.size()>=_expVariable);
+		fOptions.round[_expVariable] = desiredRounding;
+	}
+
+	void setRoundingNegative(bool desiredRounding,int _expVariable)
+	{
+		assert((int) fOptions.roundNegative.size()>=_expVariable);
+		fOptions.roundNegative[_expVariable] = desiredRounding;
+	}
+
+	void setStepsAhead(int _stepsAhead)
+	{
+		stepsAhead = _stepsAhead;
+	}
+
+	void setInstancePath(string _instancePath)
+	{
+		instancePath = _instancePath;
+	}
+
+	void setValidationPath(string _validationPath)
+	{
+		validationPath = _validationPath;
+	}
+
+	string getInstancePath()
+	{
+		return instancePath;
+	}
+
+	string getValidationPath()
+	{
+		return validationPath;
+	}
+
+//	vector<pair<int, int> > getOForesSP()
+//	{
+//		return oForesSP;
+//	}
+//
+//	vector<pair<int, vector<int> > > getOForesMP()
+//	{
+//		return oForesMP;
+//	}
+//
+//	vector<pair<int, vector<int> > > getOForesDP()
+//	{
+//		return oForesDP;
+//	}
+	//TODO DEPRECATED
 	void readFile(string parametersFile)
 	{
 		vNotUsedForTests.clear();
@@ -224,7 +363,7 @@ public:
 
 		}
 
-		maxLag = oldestStep;
+		vMaxLag[0] = oldestStep;
 		//cout << "nFiles =" << nFiles << endl;
 		//cout << "notUsedForTest = " << notUsedForTest << endl;
 		vNotUsedForTests.resize(nFiles);
@@ -256,113 +395,9 @@ public:
 		}
 	}
 
-	virtual ~ProblemParameters()
-	{
-	}
-
-	int getStepsAhead()
-	{
-		return stepsAhead;
-	}
-
-	int getMaxLag()
-	{
-		return maxLag;
-	}
-
-	void setMaxLag(int _maxLag)
-	{
-		maxLag = _maxLag;
-	}
-
-	void setMaxUpperLag(int _maxLag)
-	{
-		maxUpperLag = _maxLag;
-	}
-
-	bool getRoundingToInteger()
-	{
-		return fOptions.round;
-	}
-
-	bool getRoundingNegative()
-	{
-		return fOptions.roundNegative;
-	}
-
-	bool getForceSampleLearningWithEndogenous()
-	{
-		return fOptions.forceSampleLearningWithEndogenous;
-	}
-
-	bool getBinary()
-	{
-		return fOptions.binary;
-	}
-
-	void setRounding(bool desiredRounding)
-	{
-		fOptions.round = desiredRounding;
-	}
-
-	void setRoundingNegative(bool desiredRounding)
-	{
-		fOptions.roundNegative = desiredRounding;
-	}
-
-	void setBinary(bool desiredRounding)
-	{
-		fOptions.binary = desiredRounding;
-	}
-
-	int getMaxUpperLag()
-	{
-		return maxUpperLag;
-	}
-
-	void setStepsAhead(int _stepsAhead)
-	{
-		stepsAhead = _stepsAhead;
-	}
-
-	void setInstancePath(string _instancePath)
-	{
-		instancePath = _instancePath;
-	}
-
-	void setValidationPath(string _validationPath)
-	{
-		validationPath = _validationPath;
-	}
-
-	string getInstancePath()
-	{
-		return instancePath;
-	}
-
-	string getValidationPath()
-	{
-		return validationPath;
-	}
-
-//	vector<pair<int, int> > getOForesSP()
-//	{
-//		return oForesSP;
-//	}
-//
-//	vector<pair<int, vector<int> > > getOForesMP()
-//	{
-//		return oForesMP;
-//	}
-//
-//	vector<pair<int, vector<int> > > getOForesDP()
-//	{
-//		return oForesDP;
-//	}
-
 };
 
 }
 
-#endif /*EFP_PROBLEMREADPARAMETERS_HPP_*/
+#endif /*HFM_PROBLEMPARAMETERS_HPP_*/
 

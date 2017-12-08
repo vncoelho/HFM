@@ -69,9 +69,9 @@ private:
 	vector<MoveNEIGHVAlpha*> moves;
 	int index;
 	const RepEFP& rep;
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 public:
-	NSIteratorNEIGHVAlpha(const RepEFP& _rep, ProblemInstance& _pEFP) :
+	NSIteratorNEIGHVAlpha(const RepEFP& _rep, HFMProblemInstance& _pEFP) :
 			rep(_rep), pEFP(_pEFP)
 	{
 		index = 0;
@@ -150,13 +150,13 @@ public:
 class NSSeqNEIGHVAlpha: public NSSeq<RepEFP>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	RandGen& rg;
 	int nIntervals;
 public:
 
 
-	NSSeqNEIGHVAlpha(ProblemInstance& _pEFP, RandGen& _rg, int _nIntervals) :
+	NSSeqNEIGHVAlpha(HFMProblemInstance& _pEFP, RandGen& _rg, int _nIntervals) :
 			pEFP(_pEFP), rg(_rg), nIntervals(_nIntervals)
 	{
 	}

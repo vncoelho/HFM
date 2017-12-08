@@ -87,11 +87,11 @@ private:
 	vector<MoveHFMChangeSingleInput*> moves;
 	int index;
 	const RepEFP& rep;
-	int maxLag, maxUpperLag;
+	vector<int> vMaxLag, vMaxUpperLag;
 
 public:
-	NSIteratorHFMChangeSingleInput(const RepEFP& _rep, int _maxLag, int _maxUpperLag) :
-			rep(_rep), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
+	NSIteratorHFMChangeSingleInput(const RepEFP& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag) :
+			rep(_rep), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag)
 	{
 		index = 0;
 		m = nullptr;
@@ -109,6 +109,9 @@ public:
 		for (int rule = 0; rule < (int) rep.singleIndex.size(); rule++)
 		{
 			bool sign = false;
+			int expVariable = rep.singleIndex[rule].first;
+			int maxLag = vMaxLag[expVariable];
+			int maxUpperLag = vMaxUpperLag[expVariable];
 			moves.push_back(new MoveHFMChangeSingleInput(rule, sign, maxLag, maxUpperLag, X));
 			moves.push_back(new MoveHFMChangeSingleInput(rule, !sign, maxLag, maxUpperLag, X));
 		}
@@ -150,14 +153,14 @@ public:
 class NSSeqHFMChangeSingleInput: public NSSeq<RepEFP>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	RandGen& rg;
-	int maxLag, maxUpperLag;
+	vector<int> vMaxLag, vMaxUpperLag;
 
 public:
 
-	NSSeqHFMChangeSingleInput(ProblemInstance& _pEFP, RandGen& _rg, int _maxLag, int _maxUpperLag) :
-			pEFP(_pEFP), rg(_rg), maxLag(_maxLag), maxUpperLag(_maxUpperLag)
+	NSSeqHFMChangeSingleInput(HFMProblemInstance& _pEFP, RandGen& _rg, vector<int> _vMaxLag, vector<int> _vMaxUpperLag) :
+			pEFP(_pEFP), rg(_rg), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag)
 	{
 	}
 
@@ -175,12 +178,16 @@ public:
 
 		int sign = rg.rand(2);
 
+		int expVariable = rep.singleIndex[rule].first;
+		int maxLag = vMaxLag[expVariable];
+		int maxUpperLag = vMaxUpperLag[expVariable];
+
 		return new MoveHFMChangeSingleInput(rule, sign, maxLag, maxUpperLag, X); // return a random move
 	}
 
 	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorHFMChangeSingleInput(rep, maxLag, maxUpperLag); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorHFMChangeSingleInput(rep, vMaxLag, vMaxUpperLag); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const

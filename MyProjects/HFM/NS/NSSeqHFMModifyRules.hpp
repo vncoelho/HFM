@@ -104,10 +104,10 @@ private:
 	vector<MoveHFMModifyRule*> moves;
 	int index;
 	const RepEFP& rep;
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	vector<double>& vUpdateValues;
 public:
-	NSIteratorHFMModifyRules(const RepEFP& _rep, ProblemInstance& _pEFP, vector<double>& _vUpdateValues) :
+	NSIteratorHFMModifyRules(const RepEFP& _rep, HFMProblemInstance& _pEFP, vector<double>& _vUpdateValues) :
 			rep(_rep), pEFP(_pEFP), vUpdateValues(_vUpdateValues)
 	{
 		index = 0;
@@ -192,13 +192,13 @@ public:
 class NSSeqHFMModifyRules: public NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	RandGen& rg;
 	vector<double> vUpdateValues;
 public:
 
 	//A vector of values to be used for changing rules and weights can be passed as parameter
-	NSSeqHFMModifyRules(ProblemInstance& _pEFP, RandGen& _rg, vector<double>* _vUpdateValues = nullptr) :
+	NSSeqHFMModifyRules(HFMProblemInstance& _pEFP, RandGen& _rg, vector<double>* _vUpdateValues = nullptr) :
 			pEFP(_pEFP), rg(_rg)
 	{
 		//TODO mean from the targetfile

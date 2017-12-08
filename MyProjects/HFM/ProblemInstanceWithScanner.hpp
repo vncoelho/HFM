@@ -11,7 +11,7 @@ using namespace scannerpp;
 namespace HFM
 {
 
-class ProblemInstance
+class HFMProblemInstance
 {
 private:
 	// Your private vars
@@ -148,7 +148,7 @@ public:
 		return forecastings[file][i];
 	}
 
-	virtual ~ProblemInstance()
+	virtual ~HFMProblemInstance()
 	{
 	}
 

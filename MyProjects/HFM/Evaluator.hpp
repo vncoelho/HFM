@@ -32,7 +32,7 @@ enum PerformanceIndicator
 class HFMEvaluator: public Evaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	ProblemInstance& pEFP;
+	HFMProblemInstance& pEFP;
 	ProblemParameters& problemParam;
 
 	//int optionsP;
@@ -50,7 +50,7 @@ private:
 	int targetFile;
 public:
 
-	HFMEvaluator(ProblemInstance& _pEFP, ProblemParameters& _problemParam, int _optMetric, int _aprox) : // If necessary, add more parameters
+	HFMEvaluator(HFMProblemInstance& _pEFP, ProblemParameters& _problemParam, int _optMetric, int _aprox) : // If necessary, add more parameters
 			pEFP(_pEFP), problemParam(_problemParam), optMetric(_optMetric), aprox(_aprox)
 	{
 		nForecastings = pEFP.getForecatingsSizeFile(0); //all files have the same size
@@ -98,8 +98,6 @@ public:
 		int sizeSP = rep.singleIndex.size();
 		int sizeAP = rep.averageIndex.size();
 		int sizeDP = rep.derivativeIndex.size();
-
-		int maxLag = problemParam.getMaxLag();
 
 		vector<double>* predicteds = new vector<double>(fh);
 
@@ -189,7 +187,7 @@ public:
 
 			//Approximations using time series backshift operators
 			if (aprox != 0)
-				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, *predicteds, maxLag);
+				approximationsEnayatifar(aprox, rep.alpha, rep.vAlpha, rep.vIndexAlphas, rep.vIndex, estimation, begin, pa, vForecastings, *predicteds);
 
 			//================================================
 			//Apply special operators, rounding, binary, on estimated value
@@ -202,52 +200,53 @@ public:
 		return predicteds;
 	}
 
-	double getKValue(const int K, const int file, const int begin, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
+	double getKValue(const int K, const int expVariable, const int begin, const int pa, const vector<vector<double> >& matrixWithSamples, const vector<double>& predicteds)
 	{
 		double value = 0;
 
 		if (((begin + pa - K) < 0))
 		{
 			cout << "BUG Evaluator (function getKValue): (i + pa - K) = " << begin + pa - K << endl;
-			cout << vForecastings.size() << endl;
-			cout << "vForecastings[" << file << "].size() = " << vForecastings[file].size() << endl;
+			cout << matrixWithSamples.size() << endl;
+			cout << "vForecastings[" << expVariable << "].size() = " << matrixWithSamples[expVariable].size() << endl;
 			assert( (begin + pa - K) < 0);
 		}
 
+		//Curent sample mode might be on
 		if ((K == 0))
 		{
-
-			if (!problemParam.getForceSampleLearningWithEndogenous())
+			if (!problemParam.getForceSampleLearningWithEndogenous(expVariable))
 			{
-				cout << "BUG Evaluator (function getKValue): K = " << K << endl;
-				getchar();
+				cout << "Wrong Lag request (function getKValue): K = " << K << endl;
+				cout<< "Current sample learning is not allowed for this Endogenous variable!"<<endl;
+				exit(1);
 			}
 			else
 			{
-				cout << "Go Ahead! Sample learning mode on! " << endl;
-				getchar(); //TODO
-				if (file == targetFile)
-				{
-					value = 0;
-				}
+				//This can never happen - Current Sample from targetFile can never be used
+				assert(expVariable != targetFile);
+
+				if((begin + pa) < (int) matrixWithSamples[expVariable].size())
+					value = matrixWithSamples[expVariable][begin + pa];
 				else
-				{
-					value = vForecastings[file][begin];
-				}
+					value = 0; //because we may not have samples at some specific parts of the historical data
+
+				cout << "Go Ahead! Sample learning mode on! Current sample value="<<value << endl;
+				getchar();
 
 				return value;
 			}
 
 		}
 
-		if ((pa >= K) && (file == targetFile) && (K > 0))
+		if ((pa >= K) && (expVariable == targetFile) && (K > 0))
 		{
 			value = predicteds[pa - K];
 		}
 		else
 		{
-			if ((begin + pa - K) < int(vForecastings[file].size()))
-				value = vForecastings[file][begin + pa - K];
+			if ((begin + pa - K) < int(matrixWithSamples[expVariable].size()))
+				value = matrixWithSamples[expVariable][begin + pa - K];
 			else
 				value = 0;
 		}
@@ -323,7 +322,7 @@ public:
 	}
 
 //Different approximations that can be used to approximate a forecasts with pre-defined rules (some can be consider optimized weights)
-	void approximationsEnayatifar(const int& aprox, const double& alpha, const vector<double>& vAlpha, const vector<double>& vIndexAlphas, const vector<int>& vIndex, double& estimation, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds, const int& maxLag)
+	void approximationsEnayatifar(const int& aprox, const double& alpha, const vector<double>& vAlpha, const vector<double>& vIndexAlphas, const vector<int>& vIndex, double& estimation, const int i, const int pa, const vector<vector<double> >& vForecastings, const vector<double>& predicteds)
 	{
 		if (aprox == 1)
 		{
@@ -400,6 +399,8 @@ public:
 					else
 						valueIndexK += vForecastings[targetFile][i + pa - indexK];
 
+
+					int maxLag = problemParam.getMaxLag(targetFile);
 					ajusts += vIndexAlphas[ind] * (estimation - valueIndexK);
 					assert(vIndex[ind] > 0);
 					assert(vIndex[ind] <= maxLag);
@@ -482,20 +483,20 @@ public:
 	void modifyEstimation(double& estimation)
 	{
 		//Block all negative predicted values
-		if (problemParam.getRoundingNegative())
+		if (problemParam.getRoundingNegative(targetFile))
 		{
 			if (estimation < 0)
 				estimation = 0;
 		}
 
 		//Do not allow real values, round all values to integer
-		if (problemParam.getRoundingToInteger())
+		if (problemParam.getRoundingToInteger(targetFile))
 		{
 			estimation = round(estimation);
 		}
 
 		//Rounding target to binary output
-		if (problemParam.getBinary())
+		if (problemParam.getBinary(targetFile))
 		{
 			estimation = round(estimation);
 			if (estimation < 0)
@@ -685,7 +686,7 @@ public:
 		vector<double>* allTargets = new vector<double>;
 
 		int nForTargetFile = vForecastings[targetFile].size();
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(targetFile);
 		int nSamples = nForTargetFile - maxLag;
 
 		int beginParallel;

@@ -24,10 +24,10 @@ class OptimalLinearRegression: public LocalSearch<RepEFP>
 {
 private:
 	HFMEvaluator& eval;
-	ProblemInstance& pEFP;
+	HFM_ProblemInstance& pEFP;
 
 public:
-	OptimalLinearRegression(HFMEvaluator& _eval, ProblemInstance& _pEFP) :
+	OptimalLinearRegression(HFMEvaluator& _eval, HFM_ProblemInstance& _pEFP) :
 			eval(_eval), pEFP(_pEFP)
 	{
 
