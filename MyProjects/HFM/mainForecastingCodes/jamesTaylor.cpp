@@ -162,7 +162,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 		int stepsAhead = problemParam.getStepsAhead();
 		//========SET PROBLEM MAXIMUM LAG ===============
 		problemParam.setMaxLag(672);
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		int nTrainningRounds = 100;
 		int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
@@ -175,7 +175,7 @@ int jamesTaylorEuropeanDataset(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 //		cout<<"Teste Linear Regression"<<endl;
 //		sol = forecastObject.runOLR();

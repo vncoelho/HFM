@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveNEIGHVAlpha: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveNEIGHVAlpha: public Move<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int index;
@@ -32,12 +32,12 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	bool canBeApplied(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return true;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
+	Move<RepHFM, OPTFRAME_DEFAULT_ADS>* apply(RepHFM& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		if (sign == 0)
 			rep.vAlpha[index] += applyValue;
@@ -47,7 +47,7 @@ public:
 		return new MoveNEIGHVAlpha(index, applyValue, !sign);
 	}
 
-	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
+	virtual bool operator==(const Move<RepHFM, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
 		const MoveNEIGHVAlpha& m = (const MoveNEIGHVAlpha&) _m;
 		return ((m.applyValue == applyValue) && (m.index == index) && (m.sign == sign));
@@ -62,16 +62,16 @@ public:
 }
 ;
 
-class NSIteratorNEIGHVAlpha: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorNEIGHVAlpha: public NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	MoveNEIGHVAlpha* m;
 	vector<MoveNEIGHVAlpha*> moves;
 	int index;
-	const RepEFP& rep;
+	const RepHFM& rep;
 	HFMProblemInstance& pEFP;
 public:
-	NSIteratorNEIGHVAlpha(const RepEFP& _rep, HFMProblemInstance& _pEFP) :
+	NSIteratorNEIGHVAlpha(const RepHFM& _rep, HFMProblemInstance& _pEFP) :
 			rep(_rep), pEFP(_pEFP)
 	{
 		index = 0;
@@ -132,7 +132,7 @@ public:
 		return m == nullptr;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -147,7 +147,7 @@ public:
 };
 
 //This NS is used for adapting weights of an approximation of the estimations
-class NSSeqNEIGHVAlpha: public NSSeq<RepEFP>
+class NSSeqNEIGHVAlpha: public NSSeq<RepHFM>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -165,7 +165,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* randomMove(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
 		int i = rg.rand(rep.vAlpha.size());
@@ -198,7 +198,7 @@ public:
 		return new MoveNEIGHVAlpha(i, applyValue, sign); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>& getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS&)
+	virtual NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>& getIterator(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS&)
 	{
 		return *new NSIteratorNEIGHVAlpha(rep, pEFP); // return an iterator to the neighbors of 'rep'
 	}

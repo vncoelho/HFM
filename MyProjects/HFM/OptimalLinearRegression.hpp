@@ -20,7 +20,7 @@ ILOSTLBEGIN
 namespace HFM
 {
 
-class OptimalLinearRegression: public LocalSearch<RepEFP>
+class OptimalLinearRegression: public LocalSearch<RepHFM>
 {
 private:
 	HFMEvaluator& eval;
@@ -38,7 +38,7 @@ public:
 
 	}
 
-	void exec(Solution<RepEFP>& s, double timelimit, double target_f)
+	void exec(Solution<RepHFM>& s, double timelimit, double target_f)
 	{
 		cout << "Exec Optimal Linear Regression" << endl;
 
@@ -166,7 +166,7 @@ public:
 	}
 
 	// 2
-	void exec(Solution<RepEFP>& s, Evaluation& e, double timelimit, double target_f)
+	void exec(Solution<RepHFM>& s, Evaluation& e, double timelimit, double target_f)
 	{
 		exec(s, timelimit, target_f);
 		Evaluation& e2 = eval.evaluate(s.getR());

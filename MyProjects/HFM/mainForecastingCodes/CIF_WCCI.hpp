@@ -157,7 +157,7 @@ int CIFWCCICalibration(int argc, char **argv)
 			iterationMaxLag = 1;
 
 		problemParam.setMaxLag(iterationMaxLag);
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -189,7 +189,7 @@ int CIFWCCICalibration(int argc, char **argv)
 
 //		forecastObject.runMultiObjSearch();
 //		getchar();
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 		sol = forecastObject.run(timeES, 0, 0);
 
 
@@ -397,7 +397,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 			iterationMaxLag = 1;
 
 		problemParam.setMaxLag(iterationMaxLag);
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -429,7 +429,7 @@ int CIFWCCIGeneratingForecasts(int argc, char **argv)
 
 //		forecastObject.runMultiObjSearch();
 //		getchar();
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 		sol = forecastObject.run(timeES, 0, 0);
 
 

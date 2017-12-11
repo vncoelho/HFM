@@ -172,7 +172,7 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 		int stepsAhead = problemParam.getStepsAhead();
 		//========SET PROBLEM MAXIMUM LAG ===============
 		problemParam.setMaxLag(672);
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -189,14 +189,14 @@ int microGridLiuAppliedEnergyOnline(int argc, char **argv)
 			cout << "BeginTrainninningSet: " << beginTrainingSet;
 			cout << "\t #SamplesTrainningSet: " << nTotalForecastingsTrainningSet << endl;
 			cout << "#sizeTrainingSet: " << rF.getForecastsSize(0) << endl;
-			cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
+			cout << "maxNotUsed: " << problemParam.getMaxLag(0) << endl;
 			cout << "#StepsAhead: " << stepsAhead << endl << endl;
 
 			vector<vector<double> > trainningSet; // trainningSetVector
 			trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet, nTotalForecastingsTrainningSet));
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>, Evaluation>* sol;
+			pair<Solution<RepHFM>, Evaluation>* sol;
 			sol = forecastObject.run(timeES, 0, 0);
 
 			vector<double> foIndicatorCalibration;

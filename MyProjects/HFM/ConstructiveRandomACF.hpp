@@ -22,7 +22,7 @@ using namespace std;
 namespace HFM
 {
 
-class ConstructiveACF: public Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>
+class ConstructiveACF: public Constructive<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -155,7 +155,7 @@ public:
 
 	}
 
-	Solution<RepEFP>* generateSolution(double timelimit)
+	Solution<RepHFM>* generateSolution(double timelimit)
 	{
 		return generateSolutionACF(0.0, timelimit);
 	}
@@ -194,7 +194,7 @@ public:
 
 		if (acfPoints[0].size() == 1)
 		{
-			cout << "exiting Forecasting! There are no points to use as input of the model";
+			cout << "ConstructiveACF: exiting Forecasting! There are no points to use as input of the model";
 			exit(1);
 		}
 
@@ -239,7 +239,7 @@ public:
 		return trivialLagsRLC;
 	}
 
-	Solution<RepEFP>* generateSolutionACF(float notUsed, double timelimit)
+	Solution<RepHFM>* generateSolutionACF(float notUsed, double timelimit)
 	{
 
 		//cout << "ACF generating solution.." << endl;
@@ -259,13 +259,14 @@ public:
 		vector<vector<pair<int, int> > > derivativeIndex;
 		vector<vector<double> > derivativeFuzzyRS;
 
-		for (int nEXV = 0; nEXV < numberExplanatoryVariables; nEXV++)
+		for (int expVar = 0; expVar < numberExplanatoryVariables; expVar++)
 		{
+			if(expVar != problemParam.getTargetFile() && problemParam.getForceSampleLearningWithEndogenous(expVar))
+				lagsRLC[expVar].push_back(make_pair(1.0,0)); //Add current sample with high ACF TODO
 
-
-			int nACFUsefullPoints = lagsRLC[nEXV].size();
-			double mean = pEFP.getMean(nEXV);
-			double stdDesv = pEFP.getStdDesv(nEXV);
+			int nACFUsefullPoints = lagsRLC[expVar].size();
+			double mean = pEFP.getMean(expVar);
+			double stdDesv = pEFP.getStdDesv(expVar);
 
 			double meanWeight = pEFP.getMean(0); //File 0 is the target file
 			double stdDesvWeight = pEFP.getStdDesv(0);
@@ -275,8 +276,8 @@ public:
 			for (int p = 0; p < pSP; p++)
 			{
 				int index = rg.rand(nACFUsefullPoints);
-				int K = lagsRLC[nEXV][index].second;
-				singleIndex.push_back(make_pair(nEXV, K));
+				int K = lagsRLC[expVar][index].second;
+				singleIndex.push_back(make_pair(expVar, K));
 
 				if (K > earliestInput)
 					earliestInput = K;
@@ -284,17 +285,17 @@ public:
 				double greater = rg.randG(mean, stdDesv);
 				double lower = rg.randG(mean, stdDesv);
 
-				pair<double, double> greaterMeanSTD = returnCorrelationMeanSTD(K, greater, nEXV, 0);
-				pair<double, double> lowerMeanSTD = returnCorrelationMeanSTD(K, lower, nEXV, 1);
+				pair<double, double> greaterMeanSTD = returnCorrelationMeanSTD(K, greater, expVar, 0);
+				pair<double, double> lowerMeanSTD = returnCorrelationMeanSTD(K, lower, expVar, 1);
 				double greaterWeight, lowerWeight;
 				greaterWeight = rg.randG(greaterMeanSTD.first, greaterMeanSTD.second);
 				lowerWeight = rg.randG(lowerMeanSTD.first, lowerMeanSTD.second);
 
 				//Forcing weights for only changing according to STD TODO
-//				greaterWeight = rg.randG(greaterMeanSTD.second, greaterMeanSTD.second);
-//				lowerWeight = rg.randG(lowerMeanSTD.second, lowerMeanSTD.second);
+				greaterWeight = rg.randG(greaterMeanSTD.second, greaterMeanSTD.second);
+				lowerWeight = rg.randG(lowerMeanSTD.second, lowerMeanSTD.second);
 
-				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+				int fuzzyFunction = rg.rand(N_Activation_Functions);
 
 				vector<double> fuzzyRules;
 				fuzzyRules.resize(NCOLUMNATRIBUTES);
@@ -322,8 +323,8 @@ public:
 				for (int aI = 0; aI < nAveragePoints; aI++)
 				{
 					int index = rg.rand(nACFUsefullPoints);
-					int K = lagsRLC[nEXV][index].second;
-					aInputs.push_back(make_pair(nEXV, K));
+					int K = lagsRLC[expVar][index].second;
+					aInputs.push_back(make_pair(expVar, K));
 					if (K > earliestInput)
 						earliestInput = K;
 				}
@@ -334,7 +335,7 @@ public:
 				double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
 				double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
 
-				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+				int fuzzyFunction = rg.rand(N_Activation_Functions);
 
 				vector<double> fuzzyRules;
 				fuzzyRules.resize(NCOLUMNATRIBUTES);
@@ -361,8 +362,8 @@ public:
 				for (int aI = 0; aI < nDerivativePoints; aI++)
 				{
 					int index = rg.rand(nACFUsefullPoints);
-					int K = lagsRLC[nEXV][index].second;
-					aInputs.push_back(make_pair(nEXV, K));
+					int K = lagsRLC[expVar][index].second;
+					aInputs.push_back(make_pair(expVar, K));
 					if (K > earliestInput)
 						earliestInput = K;
 				}
@@ -373,7 +374,7 @@ public:
 				double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
 				double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
 
-				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+				int fuzzyFunction = rg.rand(N_Activation_Functions);
 
 				vector<double> fuzzyRules;
 				fuzzyRules.resize(NCOLUMNATRIBUTES);
@@ -393,7 +394,7 @@ public:
 			//getchar();
 		}
 
-		RepEFP newRep;
+		RepHFM newRep;
 		newRep.singleIndex = singleIndex;
 		newRep.singleFuzzyRS = singleFuzzyRS;
 		newRep.averageIndex = averageIndex;
@@ -443,7 +444,7 @@ public:
 		 */
 		//cout << "End of ACF sol generation!" << endl;
 		//getchar();
-		return new Solution<RepEFP, OPTFRAME_DEFAULT_ADS>(newRep);
+		return new Solution<RepHFM, OPTFRAME_DEFAULT_ADS>(newRep);
 	}
 
 };

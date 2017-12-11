@@ -129,7 +129,7 @@ int mokokoWindSotavento(int argc, char **argv)
 
 		problemParam.setMaxLag(iterationMaxLag);
 		problemParam.setMaxLag(50); //fixed for a fair comparison
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -166,7 +166,7 @@ int mokokoWindSotavento(int argc, char **argv)
 
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>, Evaluation>* sol;
+			pair<Solution<RepHFM>, Evaluation>* sol;
 			int timeES = argvTimeES; // online training time
 			sol = forecastObject.run(timeES, 0, 0);
 

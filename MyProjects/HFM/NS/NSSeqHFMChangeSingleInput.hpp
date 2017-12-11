@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveHFMChangeSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveHFMChangeSingleInput: public Move<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int rule;
@@ -21,9 +21,7 @@ private:
 	int maxLag, maxUpperLag;
 	int X;
 
-
 public:
-
 
 	MoveHFMChangeSingleInput(int _rule, bool _sign, int _maxLag, int _maxUpperLag, int _X) :
 			rule(_rule), sign(_sign), maxLag(_maxLag), maxUpperLag(_maxUpperLag), X(_X)
@@ -35,7 +33,7 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	bool canBeApplied(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		bool minimumLag = false;
 		bool maxLagCheck = false;
@@ -44,15 +42,22 @@ public:
 		if ((rule >= 0) && (rule < (int) rep.singleIndex.size()))
 		{
 			maxLagCheck = ((rep.singleIndex[rule].second + X) <= maxLag);
-			minimumLag = ((rep.singleIndex[rule].second - X) > maxUpperLag);
-			notNull1 = ((rep.singleIndex[rule].second - X) != 0); //TODO -- strategy to allow moves when samples are being learning
-			notNull2 = ((rep.singleIndex[rule].second + X) != 0);
+			minimumLag = ((rep.singleIndex[rule].second - X) >= maxUpperLag);
+			if (rep.singleIndex[rule].first == 0)
+			{
+				notNull1 = ((rep.singleIndex[rule].second - X) != 0);
+				notNull2 = ((rep.singleIndex[rule].second + X) != 0);
+			}
+			else
+			{
+				notNull1 = notNull2 = true; //TODO - BIG PROBLEM, REMOVE THIS! Otherwise endogenous will always get sample
+			}
 		}
 
 		return minimumLag && maxLagCheck && notNull1 && notNull2;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
+	Move<RepHFM, OPTFRAME_DEFAULT_ADS>* apply(RepHFM& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 
 		if (!sign)
@@ -66,7 +71,7 @@ public:
 		return new MoveHFMChangeSingleInput(rule, !sign, maxLag, maxUpperLag, X);
 	}
 
-	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
+	virtual bool operator==(const Move<RepHFM, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
 		const MoveHFMChangeSingleInput& m = (const MoveHFMChangeSingleInput&) _m;
 		return ((m.rule == rule) && (m.sign == sign) && (m.maxLag == maxLag) && (m.maxUpperLag == maxUpperLag) && (m.X == X));
@@ -74,23 +79,23 @@ public:
 
 	void print() const
 	{
-		cout << "MoveNEIGHChangeSingleInput( vector:  rule " << rule << " <=>  sign " << sign << "\t X:" << X << "\t maxLag " << maxLag << "\t maxUpperLag " << maxUpperLag <<  " )";
+		cout << "MoveNEIGHChangeSingleInput( vector:  rule " << rule << " <=>  sign " << sign << "\t X:" << X << "\t maxLag " << maxLag << "\t maxUpperLag " << maxUpperLag << " )";
 		cout << endl;
 	}
 }
 ;
 
-class NSIteratorHFMChangeSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorHFMChangeSingleInput: public NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	MoveHFMChangeSingleInput* m;
 	vector<MoveHFMChangeSingleInput*> moves;
 	int index;
-	const RepEFP& rep;
+	const RepHFM& rep;
 	vector<int> vMaxLag, vMaxUpperLag;
 
 public:
-	NSIteratorHFMChangeSingleInput(const RepEFP& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag) :
+	NSIteratorHFMChangeSingleInput(const RepHFM& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag) :
 			rep(_rep), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag)
 	{
 		index = 0;
@@ -136,7 +141,7 @@ public:
 		return m == nullptr;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -150,7 +155,7 @@ public:
 
 };
 
-class NSSeqHFMChangeSingleInput: public NSSeq<RepEFP>
+class NSSeqHFMChangeSingleInput: public NSSeq<RepHFM>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -168,13 +173,15 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* randomMove(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		int MAXCHANGE = 5;
 		int X = rg.rand(MAXCHANGE) + 1;
 		int rule = -1;
 		if (rep.singleIndex.size() > 0)
 			rule = rg.rand(rep.singleIndex.size());
+		else
+			return new MoveHFMChangeSingleInput(-1, -1, -1, -1, -1);
 
 		int sign = rg.rand(2);
 
@@ -185,7 +192,7 @@ public:
 		return new MoveHFMChangeSingleInput(rule, sign, maxLag, maxUpperLag, X); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>* getIterator(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return new NSIteratorHFMChangeSingleInput(rep, vMaxLag, vMaxUpperLag); // return an iterator to the neighbors of 'rep'
 	}

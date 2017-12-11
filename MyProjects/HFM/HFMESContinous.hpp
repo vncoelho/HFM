@@ -23,7 +23,7 @@ struct esParameters
 	vector<double> vIndexAlphasParams;
 };
 
-class EFPESContinous: public ESContinous<RepEFP, OPTFRAME_DEFAULT_ADS, esParameters>
+class EFPESContinous: public ESContinous<RepHFM, OPTFRAME_DEFAULT_ADS, esParameters>
 {
 private:
 	RandGen& rg;
@@ -33,10 +33,10 @@ private:
 
 public:
 
-	using ESContinous<RepEFP, OPTFRAME_DEFAULT_ADS,esParameters>::search; // prevents name hiding
+	using ESContinous<RepHFM, OPTFRAME_DEFAULT_ADS,esParameters>::search; // prevents name hiding
 
-	EFPESContinous(HFMEvaluator& _eval, Constructive<RepEFP>& _constructive, vector<NSSeq<RepEFP>*> _vNS, LocalSearch<RepEFP>& _ls, int _mi, int _lambda, int _gMax, RandGen& _rg, double _initialDesv, double _mutationDesv) :
-			ESContinous<RepEFP, OPTFRAME_DEFAULT_ADS, esParameters>(_eval, _constructive, _vNS, _ls, _mi, _lambda, _gMax), rg(_rg), initialDesv(_initialDesv), mutationDesv(_mutationDesv)
+	EFPESContinous(HFMEvaluator& _eval, Constructive<RepHFM>& _constructive, vector<NSSeq<RepHFM>*> _vNS, LocalSearch<RepHFM>& _ls, int _mi, int _lambda, int _gMax, RandGen& _rg, double _initialDesv, double _mutationDesv) :
+			ESContinous<RepHFM, OPTFRAME_DEFAULT_ADS, esParameters>(_eval, _constructive, _vNS, _ls, _mi, _lambda, _gMax), rg(_rg), initialDesv(_initialDesv), mutationDesv(_mutationDesv)
 	{
 
 	}
@@ -86,7 +86,7 @@ public:
 
 	}
 
-	void applyParameters(Solution<RepEFP>* s, ESContinuousStructure<esParameters>* p)
+	void applyParameters(Solution<RepHFM>* s, ESContinuousStructure<esParameters>* p)
 	{
 		//cout<<p->desvs.singleParams<<endl;
 
@@ -153,7 +153,7 @@ public:
 
 	}
 
-	esParameters generateInitialESStructure(Solution<RepEFP>* s)
+	esParameters generateInitialESStructure(Solution<RepHFM>* s)
 	{
 		esParameters params;
 		int sizeSP = s->getR().singleFuzzyRS.size();

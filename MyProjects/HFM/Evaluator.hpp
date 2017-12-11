@@ -29,7 +29,7 @@ enum PerformanceIndicator
 	MAPE_INDEX, MAE_INDEX, MSE_INDEX, RMSE_INDEX, MAPE_INV_INDEX, SMAPE_INDEX, MMAPE_INDEX, WMAPE_INDEX, PINBALL_INDEX, PINBALL_ERROR_INDEX, EVALUTORS_NMETRICS_ENUM_COUNT, ALL_EVALUATIONS
 };
 
-class HFMEvaluator: public Evaluator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class HFMEvaluator: public Evaluator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -68,7 +68,7 @@ public:
 
 	}
 
-	EvaluationEFP evaluate(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	EvaluationEFP evaluate(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		//Fo vector with different metrics calculations
 		vector<double>* foIndicator = evaluateAll(rep, optMetric);
@@ -78,7 +78,7 @@ public:
 		return EvaluationEFP(fo);
 	}
 
-	vector<double>* evaluateAll(const RepEFP& rep, const int accIndicator, vector<vector<double> >* vForecastings = nullptr)
+	vector<double>* evaluateAll(const RepHFM& rep, const int accIndicator, vector<vector<double> >* vForecastings = nullptr)
 	{
 		if (vForecastings == nullptr)
 			vForecastings = &pEFP.getForecastingsVector();
@@ -93,7 +93,7 @@ public:
 		return foIndicator;
 	}
 
-	vector<double>* returnForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
+	vector<double>* returnForecasts(const RepHFM& rep, const vector<vector<double> >& vForecastings, const int begin, const int fh)
 	{
 		int sizeSP = rep.singleIndex.size();
 		int sizeAP = rep.averageIndex.size();
@@ -104,11 +104,8 @@ public:
 		//for (int pa = 0; ((pa < stepsAhead) && (pa + begin < nForTargetFile)); pa++) //auxiliar loop for steps ahead
 		for (int pa = 0; pa < fh; pa++)	 // passos a frente
 		{
-			//vector<double> fuzzyWeights;
-			//forecasting estimation
 			double estimation = 0;
-			double greaterAccepeted = 0;
-			double lowerAccepted = 0;
+			int accepted = 0;
 
 			for (int nSP = 0; nSP < sizeSP; nSP++)
 			{
@@ -124,7 +121,7 @@ public:
 				double ruleEpsilon = rep.singleFuzzyRS[nSP][EPSILON];
 				ActivationFunction repFuzzyPertinenceFunc = ActivationFunction(rep.singleFuzzyRS[nSP][PERTINENCEFUNC]);
 
-				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, greaterAccepeted, lowerAccepted);
+				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, singleValue, estimation, accepted);
 			}
 
 			for (int nMP = 0; nMP < sizeAP; nMP++)
@@ -149,7 +146,7 @@ public:
 				double ruleEpsilon = rep.averageFuzzyRS[nMP][EPSILON];
 				ActivationFunction repFuzzyPertinenceFunc = ActivationFunction(rep.averageFuzzyRS[nMP][PERTINENCEFUNC]);
 
-				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, greaterAccepeted, lowerAccepted);
+				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, mean, estimation, accepted);
 			}
 
 			for (int nDP = 0; nDP < sizeDP; nDP++)
@@ -177,11 +174,10 @@ public:
 				double ruleEpsilon = rep.derivativeFuzzyRS[nDP][EPSILON];
 				ActivationFunction repFuzzyPertinenceFunc = ActivationFunction(rep.derivativeFuzzyRS[nDP][PERTINENCEFUNC]);
 
-				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, greaterAccepeted, lowerAccepted);
+				defuzzification(ruleGreater, greaterWeight, ruleLower, lowerWeight, ruleEpsilon, repFuzzyPertinenceFunc, d, estimation, accepted);
 			}
 
 			//Applying rules weights
-			double accepted = greaterAccepeted + lowerAccepted;
 			if (accepted > 0)
 				estimation /= accepted;
 
@@ -203,50 +199,49 @@ public:
 	double getKValue(const int K, const int expVariable, const int begin, const int pa, const vector<vector<double> >& matrixWithSamples, const vector<double>& predicteds)
 	{
 		double value = 0;
+		int nSamplesVar = matrixWithSamples.at(expVariable).size();
 
 		if (((begin + pa - K) < 0))
 		{
 			cout << "BUG Evaluator (function getKValue): (i + pa - K) = " << begin + pa - K << endl;
 			cout << matrixWithSamples.size() << endl;
-			cout << "vForecastings[" << expVariable << "].size() = " << matrixWithSamples[expVariable].size() << endl;
-			assert( (begin + pa - K) < 0);
+			cout << "vForecastings[" << expVariable << "].size() = " << nSamplesVar << endl;
+			assert((begin + pa - K) < 0);
 		}
 
 		//Curent sample mode might be on
 		if ((K == 0))
 		{
+			//This can never happen - Current Sample from targetFile can never be used
+			assert(expVariable != targetFile);
+
 			if (!problemParam.getForceSampleLearningWithEndogenous(expVariable))
 			{
-				cout << "Wrong Lag request (function getKValue): K = " << K << endl;
-				cout<< "Current sample learning is not allowed for this Endogenous variable!"<<endl;
+				cout << "Wrong Lag request (function getKValue): K = " << K << " expVar = " << expVariable << endl;
+				cout << "Current sample learning is not allowed for this Endogenous variable!" << endl;
 				exit(1);
 			}
 			else
 			{
-				//This can never happen - Current Sample from targetFile can never be used
-				assert(expVariable != targetFile);
-
-				if((begin + pa) < (int) matrixWithSamples[expVariable].size())
-					value = matrixWithSamples[expVariable][begin + pa];
+				if ((begin + pa) < nSamplesVar)
+					value = matrixWithSamples.at(expVariable).at(begin + pa - K);
 				else
 					value = 0; //because we may not have samples at some specific parts of the historical data
 
-				cout << "Go Ahead! Sample learning mode on! Current sample value="<<value << endl;
-				getchar();
-
+//				cout << "Go Ahead! Sample learning mode on! Current sample value = " << value<< "\texpVar = " << expVariable << endl;
+//				getchar();
 				return value;
 			}
-
 		}
 
 		if ((pa >= K) && (expVariable == targetFile) && (K > 0))
 		{
-			value = predicteds[pa - K];
+			value = predicteds.at(pa - K);
 		}
 		else
 		{
-			if ((begin + pa - K) < int(matrixWithSamples[expVariable].size()))
-				value = matrixWithSamples[expVariable][begin + pa - K];
+			if ((begin + pa - K) < nSamplesVar)
+				value = matrixWithSamples.at(expVariable).at(begin + pa - K);
 			else
 				value = 0;
 		}
@@ -255,21 +250,21 @@ public:
 	}
 
 //defuzzification process -- Converter a node input into useful estimation values
-	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const ActivationFunction fuzzyFunc, const double value, double& estimation, double& greaterAccepeted, double& lowerAccepted)
+	void defuzzification(const double ruleGreater, const double greaterWeight, const double ruleLower, const double lowerWeight, double ruleEpsilon, const ActivationFunction fuzzyFunc, const double value, double& estimation, int& accepted)
 	{
 
 		if (fuzzyFunc == Heaviside)
 		{
-			if (value > ruleGreater)
+			if (value >= ruleGreater)
 			{
 				estimation += (greaterWeight + value);
-				greaterAccepeted += 1;
+				accepted++;
 			}
 
-			if (value < ruleLower)
+			if (value <= ruleLower)
 			{
 				estimation += (lowerWeight + value);
-				lowerAccepted += 1;
+				accepted++;
 			}
 
 		}
@@ -292,7 +287,7 @@ public:
 			}
 
 			estimation += (greaterWeight * mu) + value;
-			greaterAccepeted += mu;
+			accepted++;
 		}
 
 		if (fuzzyFunc == Trapezoid)
@@ -316,7 +311,7 @@ public:
 			}
 
 			estimation += (lowerWeight * mu) + value;
-			lowerAccepted += mu;
+			accepted++;
 		}
 
 	}
@@ -398,7 +393,6 @@ public:
 						valueIndexK += predicteds[pa - indexK];
 					else
 						valueIndexK += vForecastings[targetFile][i + pa - indexK];
-
 
 					int maxLag = problemParam.getMaxLag(targetFile);
 					ajusts += vIndexAlphas[ind] * (estimation - valueIndexK);
@@ -483,20 +477,20 @@ public:
 	void modifyEstimation(double& estimation)
 	{
 		//Block all negative predicted values
-		if (problemParam.getRoundingNegative(targetFile))
+		if (problemParam.getNonNegativeForecastsStatus())
 		{
 			if (estimation < 0)
 				estimation = 0;
 		}
 
 		//Do not allow real values, round all values to integer
-		if (problemParam.getRoundingToInteger(targetFile))
+		if (problemParam.getRoundedForecastsStatus())
 		{
 			estimation = round(estimation);
 		}
 
 		//Rounding target to binary output
-		if (problemParam.getBinary(targetFile))
+		if (problemParam.getBinaryForecastsStatus())
 		{
 			estimation = round(estimation);
 			if (estimation < 0)
@@ -680,7 +674,7 @@ public:
 
 //return a pair -- first vector contain the real values while the second has the forecasted ones - StepsSize=slidingWindowStepSize
 	//Sliding Window Multi Round Forecasts with stepSize
-	pair<vector<double>*, vector<double>*>* generateSWMultiRoundForecasts(const RepEFP& rep, const vector<vector<double> >& vForecastings, const int slidingWindowStep)
+	pair<vector<double>*, vector<double>*>* generateSWMultiRoundForecasts(const RepHFM& rep, const vector<vector<double> >& vForecastings, const int slidingWindowStep)
 	{
 		vector<double>* allForecasts = new vector<double>;
 		vector<double>* allTargets = new vector<double>;

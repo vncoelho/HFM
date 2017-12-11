@@ -139,7 +139,7 @@ int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 		if (construtive == 2) //ACF construtive
 			problemParam.setMaxLag(500);
 
-		int maxNotUsedForTest = problemParam.getMaxLag();
+		int maxNotUsedForTest = problemParam.getMaxLag(0);
 
 		cout << "maxNotUsedForTest: " << maxNotUsedForTest << endl;
 
@@ -162,11 +162,11 @@ int mokokoProbabilisticForecastWindPower(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 		sol = forecastObject.run(timeES, 0, 0);
 
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 		//validation set for calibration
 		vector<vector<double> > validationSet;
 		validationSet.push_back(rF.getLastForecasts(0, maxLag + stepsAhead));

@@ -90,7 +90,7 @@ int priceCompetitionBlind(int argc, char **argv)
 	{
 		// ============ FORCES ======================
 		int randomPrecision = 30; //best precision
-		int randomParametersFiles = 1; //best parameters config Price_1Column_7Points
+//		int randomParametersFiles = 1; //best parameters config Price_1Column_7Points
 		int evalFOMinimizer = PINBALL_INDEX;
 		int evalAprox = 5;
 		int nTrainningRounds = 5;
@@ -122,7 +122,8 @@ int priceCompetitionBlind(int argc, char **argv)
 		// ==========================================
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+//		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]); //DEPRECATED
+		ProblemParameters problemParam;
 		stepsAhead = problemParam.getStepsAhead();
 		// =========================================== CONSTRUTIVE 0 AND 1
 		//========ADAPTATION FOR CONSTRUTIVE 2 ===============
@@ -137,7 +138,7 @@ int priceCompetitionBlind(int argc, char **argv)
 
 		trainningSet.clear();
 		//validationBlindForecastings.clear();
-		int maxNotUsedForTest = problemParam.getMaxLag();
+		int maxNotUsedForTest = problemParam.getMaxLag(problemParam.getTargetFile());
 		int nTotalForecastingsTrainningSet = maxNotUsedForTest + nTrainningRounds * stepsAhead;
 
 		int beginTrainingSet = 0; // best begin trainning set
@@ -155,7 +156,7 @@ int priceCompetitionBlind(int argc, char **argv)
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 		int optMethod = rg.rand(2);
 		optMethod = 0;
@@ -165,7 +166,7 @@ int priceCompetitionBlind(int argc, char **argv)
 			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 
 		vector<vector<double> > validationBlindForecastings; //Validation Blind for the Competition
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		validationBlindForecastings.push_back(rF.getPartsForecastsEndToBegin(0, 0, maxLag));
 		//validationBlindForecastings.push_back(rF.getLastForecasts(1, problemParam.getNotUsedForTest() + stepsAhead));
@@ -361,7 +362,8 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 		// ==========================================
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+//		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]); //DEPRECATED
+		ProblemParameters problemParam;
 		stepsAhead = problemParam.getStepsAhead();
 		// =========================================== CONSTRUTIVE 0 AND 1
 		//========ADAPTATION FOR CONSTRUTIVE 2 ===============
@@ -369,7 +371,7 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 			problemParam.setMaxLag(300);
 		//=================================================
 
-		int maxNotUsedForTest = problemParam.getMaxLag();
+		int maxNotUsedForTest = problemParam.getMaxLag(0);
 		int nTrainningRounds = rg.rand(maxTrainningRounds) + 1;
 		int nTotalForecastingsTrainningSet = maxNotUsedForTest + nTrainningRounds * stepsAhead;
 		int beginTrainingSet = rg.rand(rF.getForecastsDataSize());
@@ -414,7 +416,7 @@ int priceCompetitionCalibrationMode(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 		sol = forecastObject.run(timeES, timeVND, timeILS);
 

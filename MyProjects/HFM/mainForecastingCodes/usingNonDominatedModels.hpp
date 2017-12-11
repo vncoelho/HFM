@@ -107,7 +107,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 		iterationMaxLag = 1;
 
 	problemParam.setMaxLag(iterationMaxLag);
-	int maxLag = problemParam.getMaxLag();
+	int maxLag = problemParam.getMaxLag(0);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);
@@ -132,7 +132,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 //		forecastObject.runMultiObjSearch();
 //		getchar();
 
-	Pareto<RepEFP>* pf = new Pareto<RepEFP>();
+	Pareto<RepHFM>* pf = new Pareto<RepHFM>();
 
 	ForecastClass* forecastObject;
 	int timeES = 10;
@@ -142,9 +142,9 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+		pair<Solution<RepHFM>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
-		Pareto<RepEFP>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
+		Pareto<RepHFM>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
 		delete &sol->first;
@@ -155,7 +155,7 @@ int usingNonDominatedHFMModels(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 
 	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
-	vector<Solution<RepEFP>*> vSolPF = pf->getParetoSet();
+	vector<Solution<RepHFM>*> vSolPF = pf->getParetoSet();
 	int nObtainedParetoSol = vEvalPF.size();
 
 	int targetFile = problemParam.getTargetFile();

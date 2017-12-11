@@ -97,7 +97,7 @@ int loadCompetitionBlind(int argc, char **argv)
 	int evalFOMinimizer = PINBALL_INDEX;
 	int evalAprox = 2;
 	int randomPrecision = 20;
-	int randomParametersFiles = 0;
+//	int randomParametersFiles = 0;
 	mu = 10;
 	int lambda = mu * 6;
 	double initialDesv = 1;
@@ -125,7 +125,8 @@ int loadCompetitionBlind(int argc, char **argv)
 	// ==========================================
 
 	// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-	ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+//	ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+	ProblemParameters problemParam;
 	stepsAhead = problemParam.getStepsAhead();
 	// =========================================== CONSTRUTIVE 0 AND 1
 	//========ADAPTATION FOR CONSTRUTIVE 2 ===============
@@ -134,7 +135,7 @@ int loadCompetitionBlind(int argc, char **argv)
 	//=================================================
 
 	int nTrainningRounds = 3;
-	int nTotalForecastings = (problemParam.getMaxLag() + nTrainningRounds * stepsAhead) * 7; //because of the weeks
+	int nTotalForecastings = (problemParam.getMaxLag(0) + nTrainningRounds * stepsAhead) * 7; //because of the weeks
 	int samplesToBeForecasted = 720;
 	int nBatches = 1;
 	int timeES = 60;
@@ -167,10 +168,10 @@ int loadCompetitionBlind(int argc, char **argv)
 
 			ForecastClass pFC(tForecastings, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>, Evaluation>* sol;
+			pair<Solution<RepHFM>, Evaluation>* sol;
 			sol = pFC.run(timeES, timeVND, timeILS);
 			vector<double> dayBlindForecasts;
-			int maxLag = problemParam.getMaxLag();
+			int maxLag = problemParam.getMaxLag(0);
 			vector<double> dayValidation = rF.getPartsForecastsEndToBegin(tForecastDayByDay[d], 0, maxLag);
 			vector<vector<double> > validationBlindForecastings;
 			validationBlindForecastings.push_back(dayValidation);
@@ -352,8 +353,9 @@ int loadCompetitionCalibrationMode(int argc, char **argv)
 	{
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		int randomParametersFiles = rg.rand(vParametersFiles.size());
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+//		int randomParametersFiles = rg.rand(vParametersFiles.size());
+//		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]); //DEPRECATED
+		ProblemParameters problemParam;
 		stepsAhead = problemParam.getStepsAhead();
 		// =========================================== CONSTRUTIVE 0 AND 1
 		//========ADAPTATION FOR CONSTRUTIVE 2 ===============
@@ -362,7 +364,7 @@ int loadCompetitionCalibrationMode(int argc, char **argv)
 		//=================================================
 
 		int nTrainningRounds = rg.rand(maxTrainningRounds) + 1;
-		int nTotalForecastingsTrainningSet = (problemParam.getMaxLag() + nTrainningRounds * stepsAhead) * 7; //because of the weeks
+		int nTotalForecastingsTrainningSet = (problemParam.getMaxLag(0) + nTrainningRounds * stepsAhead) * 7; //because of the weeks
 		int beginTrainingSet = rg.rand(rF.getForecastsDataSize());
 
 		while ((beginTrainingSet + nTotalForecastingsTrainningSet > rF.getForecastsDataSize()) && (beginTrainingSet + 7 * stepsAhead < rF.getForecastsDataSize()))
@@ -392,14 +394,14 @@ int loadCompetitionCalibrationMode(int argc, char **argv)
 			trainningSetDay.push_back(trainningSetDayByDay[d]);
 
 			vector<vector<double> > validationBlindForecastingsDay;
-			vector<double> validationDay = rF.getPartsForecastsEndToBegin(trainningSetDayByDay[d], 0, problemParam.getMaxLag());
+			vector<double> validationDay = rF.getPartsForecastsEndToBegin(trainningSetDayByDay[d], 0, problemParam.getMaxLag(0));
 			validationBlindForecastingsDay.push_back(validationDay);
 			//validationBlindForecastings.push_back(rF.getLastForecasts(0, problemParam.getNotUsedForTest()));
 
 			ForecastClass pFC(trainningSetDay, problemParam, rg, methodParam);
 			//dayBlindForecasts = priceForecastMainLoopCompetition(tForecastings, validationBlindForecastings, problemParam, rg, mu, lambda, initialDesv, mutationDesv);
 
-			pair<Solution<RepEFP>, Evaluation>* sol;
+			pair<Solution<RepHFM>, Evaluation>* sol;
 			sol = pFC.run(timeES, timeVND, timeILS);
 			vector<double> dayBlindForecasts;
 			dayBlindForecasts = *pFC.returnBlind(sol->first.getR(), validationBlindForecastingsDay);

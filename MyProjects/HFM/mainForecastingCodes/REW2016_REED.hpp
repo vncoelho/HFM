@@ -136,7 +136,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 		//========SET PROBLEM MAXIMUM LAG ===============
 		//		problemParam.setMaxLag(pointsPerHour*24*3); // with maxLag equals to 2 you only lag K-1 as option
 		problemParam.setMaxLag(pointsPerHour * 24 * 3); // with maxLag equals to 2 you only lag K-1 as option
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -155,7 +155,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 		cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
 		cout << "\t #nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
 		cout << "#sizeTrainingSet: " << totalNumberOfSamplesTarget << endl;
-		cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
+		cout << "maxNotUsed: " << problemParam.getMaxLag(0) << endl;
 		cout << "#StepsAhead: " << stepsAhead << endl;
 		cout << "#forecastingHorizonteMinutes: " << forecastingHorizonteMinutes << endl;
 		cout << "#granularityMin: " << granularityMin << endl << endl;
@@ -173,7 +173,7 @@ int APEN_SI_DemandForecasting(int argc, char **argv)
 
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>, Evaluation>* sol;
+			pair<Solution<RepHFM>, Evaluation>* sol;
 			sol = forecastObject.run(timeES, 0, 0);
 
 			vector<vector<double> > validationSet; //validation set for calibration
@@ -339,7 +339,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 		//========SET PROBLEM MAXIMUM LAG ===============
 //		problemParam.setMaxLag(pointsPerHour*24*3); // with maxLag equals to 2 you only lag K-1 as option
 		problemParam.setMaxLag(4000); // with maxLag equals to 2 you only lag K-1 as option
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -355,7 +355,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 		cout << "BeginTrainninningSet: " << beginTrainingSet << endl;
 		cout << "\t #nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
 		cout << "#sizeTrainingSet: " << totalNumberOfSamplesTarget << endl;
-		cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
+		cout << "maxNotUsed: " << problemParam.getMaxLag(0) << endl;
 		cout << "#StepsAhead: " << stepsAhead << endl;
 		cout << "#granularityMin(NotUSED): " << granularityMin << endl << endl;
 
@@ -381,7 +381,7 @@ int APEN_SI_SpeedUp_DemandForecasting(int argc, char **argv)
 
 			ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-			pair<Solution<RepEFP>, Evaluation>* sol;
+			pair<Solution<RepHFM>, Evaluation>* sol;
 			sol = forecastObject.run(timeES, 0, 0);
 
 			vector<vector<double> > validationSet; //validation set for calibration

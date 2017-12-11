@@ -49,31 +49,31 @@ private:
 
 	HFMProblemInstance* p;
 	HFMEvaluator* eval;
-	Constructive<RepEFP, OPTFRAME_DEFAULT_ADS>* c;
-	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNS;
+	Constructive<RepHFM, OPTFRAME_DEFAULT_ADS>* c;
+	vector<NSSeq<RepHFM, OPTFRAME_DEFAULT_ADS>*> vNS;
 
-	EmptyLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS> emptyLS;
-	vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*>* vNSeq;
+	EmptyLocalSearch<RepHFM, OPTFRAME_DEFAULT_ADS> emptyLS;
+	vector<NSSeq<RepHFM, OPTFRAME_DEFAULT_ADS>*>* vNSeq;
 
 //	EFPESContinous* EsCOpt;
-	NGES<RepEFP, OPTFRAME_DEFAULT_ADS>* es;
+	NGES<RepHFM, OPTFRAME_DEFAULT_ADS>* es;
 	NGESParams* ngesParams;
 
-	vector<LocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vLS;
+	vector<LocalSearch<RepHFM, OPTFRAME_DEFAULT_ADS>*> vLS;
 
-	VariableNeighborhoodDescent<RepEFP, OPTFRAME_DEFAULT_ADS>* vnd;
-	IteratedLocalSearchLevels<RepEFP, OPTFRAME_DEFAULT_ADS>* ils;
+	VariableNeighborhoodDescent<RepHFM, OPTFRAME_DEFAULT_ADS>* vnd;
+	IteratedLocalSearchLevels<RepHFM, OPTFRAME_DEFAULT_ADS>* ils;
 
 	vector<vector<double> > vBlindResults;
-	vector<pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>*> vFinalSol;
+	vector<pair<Solution<RepHFM, OPTFRAME_DEFAULT_ADS>, Evaluation>*> vFinalSol;
 
-	ILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>* ilsPert;
-	MOILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>* moILSPert;
-	BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>* basicMOILSPert;
+	ILSLPerturbationLPlus2<RepHFM, OPTFRAME_DEFAULT_ADS>* ilsPert;
+	MOILSLPerturbationLPlus2<RepHFM, OPTFRAME_DEFAULT_ADS>* moILSPert;
+	BasicMOILSPerturbation<RepHFM, OPTFRAME_DEFAULT_ADS>* basicMOILSPert;
 	//OptimalLinearRegression* olr;
 //	MultiEvaluator<RepEFP, OPTFRAME_DEFAULT_ADS>* mev;
 	HFMMultiEvaluator* mev;
-	CheckCommand<RepEFP, OPTFRAME_DEFAULT_ADS> checkModule;
+	CheckCommand<RepHFM, OPTFRAME_DEFAULT_ADS> checkModule;
 
 public:
 
@@ -108,10 +108,10 @@ public:
 		if (cMethod == 2)
 			c = new ConstructiveACF(*p, problemParam, rg, cPre, methodParam.getConstrutiveLimitAlphaACF());
 
-		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiModifyFuzzyRules = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules);
-		FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>* fiChangeSingleInput = new FirstImprovement<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsChangeSingleInput);
-		RandomDescentMethod<RepEFP>* rdmRemove = new RandomDescentMethod<RepEFP>(*eval, *nsRemoveSingleInput, 500); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
-		RandomDescentMethod<RepEFP>* rdmAdd = new RandomDescentMethod<RepEFP>(*eval, *nsAddSingleInput, 500); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+		FirstImprovement<RepHFM, OPTFRAME_DEFAULT_ADS>* fiModifyFuzzyRules = new FirstImprovement<RepHFM, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules);
+		FirstImprovement<RepHFM, OPTFRAME_DEFAULT_ADS>* fiChangeSingleInput = new FirstImprovement<RepHFM, OPTFRAME_DEFAULT_ADS>(*eval, *nsChangeSingleInput);
+		RandomDescentMethod<RepHFM>* rdmRemove = new RandomDescentMethod<RepHFM>(*eval, *nsRemoveSingleInput, 500); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
+		RandomDescentMethod<RepHFM>* rdmAdd = new RandomDescentMethod<RepHFM>(*eval, *nsAddSingleInput, 500); //		FirstImprovement<RepEFP>* fiVAlpha = new FirstImprovement<RepEFP>(*eval, *nsVAlpha);
 //		int maxRDM = 100;
 //
 //		//rdm->setMessageLevel(3);
@@ -120,14 +120,14 @@ public:
 		vLS.push_back(rdmAdd);
 //		vLS.push_back(fiModifyFuzzyRules);
 //		vLS.push_back(fiChangeSingleInput);
-		vnd = new VariableNeighborhoodDescent<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, vLS);
+		vnd = new VariableNeighborhoodDescent<RepHFM, OPTFRAME_DEFAULT_ADS>(*eval, vLS);
 //		vnd->setVerbose();
 
 //		ilsPert = new ILSLPerturbationLPlus2<RepEFP,OPTFRAME_DEFAULT_ADS>(*eval, 50, *nsModifyFuzzyRules, rg); //TODO check why 50 was removed
-		ilsPert = new ILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules, rg);
+		ilsPert = new ILSLPerturbationLPlus2<RepHFM, OPTFRAME_DEFAULT_ADS>(*eval, *nsModifyFuzzyRules, rg);
 //		ilsPert->add_ns(*nsChangeSingleInput);
 //		nsVAlpha
-		ils = new IteratedLocalSearchLevels<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *c, *vnd, *ilsPert, 100, 10);
+		ils = new IteratedLocalSearchLevels<RepHFM, OPTFRAME_DEFAULT_ADS>(*eval, *c, *vnd, *ilsPert, 100, 10);
 
 		int mu = methodParam.getESMU();
 		int lambda = methodParam.getESLambda();
@@ -142,7 +142,7 @@ public:
 //		EsCOpt = new EFPESContinous(*eval, *c, vNSeq, emptyLS, mu, lambda, esMaxG, rg, initialDesv, mutationDesv);
 
 //olr = new OptimalLinearRegression(*eval, *p);
-		vNSeq = new vector<NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>*>;
+		vNSeq = new vector<NSSeq<RepHFM, OPTFRAME_DEFAULT_ADS>*>;
 		vNSeq->push_back(nsModifyFuzzyRules);
 		vNSeq->push_back(nsChangeSingleInput);
 		vNSeq->push_back(nsRemoveSingleInput);
@@ -163,7 +163,7 @@ public:
 		vector<int> vNSeqMax(vNSeq->size(), 1000);
 		double mutationRate = 0.1;
 		int selectionType = 1;
-		vector<NS<RepEFP, OPTFRAME_DEFAULT_ADS>*> vNSSeqForNGES;
+		vector<NS<RepHFM, OPTFRAME_DEFAULT_ADS>*> vNSSeqForNGES;
 		vNSSeqForNGES.push_back(nsModifyFuzzyRules);
 		vNSSeqForNGES.push_back(nsChangeSingleInput);
 		vNSSeqForNGES.push_back(nsRemoveSingleInput);
@@ -171,7 +171,7 @@ public:
 
 		string outputFile = "LogPopFOPlus";
 		ngesParams = new NGESParams(vNSeqMax, selectionType, mutationRate, mu, lambda, esGMaxWithoutImp, outputFile, 0);
-		es = new NGES<RepEFP, OPTFRAME_DEFAULT_ADS>(*eval, *c, vNSSeqForNGES, emptyLS, rg, *ngesParams);
+		es = new NGES<RepHFM, OPTFRAME_DEFAULT_ADS>(*eval, *c, vNSSeqForNGES, emptyLS, rg, *ngesParams);
 		es->setMessageLevel(3);
 
 		//MO -- HFM MULTI IS ABLE TO ONLY "EVALUATE" once
@@ -184,10 +184,10 @@ public:
 ////		v_e.push_back(new EFPEvaluator(*p, problemParam, MMAPE_INDEX, 0));
 //		mev = new MultiEvaluator<RepEFP>(v_e);
 		mev = new HFMMultiEvaluator(*eval);
-		moILSPert = new MOILSLPerturbationLPlus2<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, *nsModifyFuzzyRules, rg);
+		moILSPert = new MOILSLPerturbationLPlus2<RepHFM, OPTFRAME_DEFAULT_ADS>(*mev, *nsModifyFuzzyRules, rg);
 //		moILSPert->add_ns(*nsChangeSingleInput);
 
-		basicMOILSPert = new BasicMOILSPerturbation<RepEFP, OPTFRAME_DEFAULT_ADS>(*mev, 2, 10, *nsModifyFuzzyRules, rg);
+		basicMOILSPert = new BasicMOILSPerturbation<RepHFM, OPTFRAME_DEFAULT_ADS>(*mev, 2, 10, *nsModifyFuzzyRules, rg);
 //		basicMOILSPert->add_ns(*nsChangeSingleInput);
 
 //Trying to checkmodule
@@ -240,22 +240,22 @@ public:
 //	}
 
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS)
+	void addSolToParetoWithParetoManager(Pareto<RepHFM, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepHFM, OPTFRAME_DEFAULT_ADS>& candidateS)
 	{
-		paretoManager<RepEFP, OPTFRAME_DEFAULT_ADS> paretoMan(*mev);
+		paretoManager<RepHFM, OPTFRAME_DEFAULT_ADS> paretoMan(*mev);
 		paretoMan.addSolution(pf, candidateS);
 	}
 
 	//add solution to pareto front evaluating with forecasting class evaluators
-	void addSolWithMevToParetoWithParetoManager(Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepEFP, OPTFRAME_DEFAULT_ADS>& candidateS, const MultiEvaluation& candidateMev)
+	void addSolWithMevToParetoWithParetoManager(Pareto<RepHFM, OPTFRAME_DEFAULT_ADS>& pf, const Solution<RepHFM, OPTFRAME_DEFAULT_ADS>& candidateS, const MultiEvaluation& candidateMev)
 	{
-		paretoManager<RepEFP> paretoMan(*mev);
+		paretoManager<RepHFM> paretoMan(*mev);
 		paretoMan.addSolutionWithMEV(pf, candidateS, candidateMev);
 	}
 
-	Pareto<RepEFP>* runMultiObjSearch(double timeGPLS, Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* _pf = nullptr)
+	Pareto<RepHFM>* runMultiObjSearch(double timeGPLS, Pareto<RepHFM, OPTFRAME_DEFAULT_ADS>* _pf = nullptr)
 	{
-		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pf = new Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>();
+		Pareto<RepHFM, OPTFRAME_DEFAULT_ADS>* pf = new Pareto<RepHFM, OPTFRAME_DEFAULT_ADS>();
 
 //		if (vS != nullptr)
 //		{
@@ -277,25 +277,25 @@ public:
 //		GRInitialPopulation<RepEFP,OPTFRAME_DEFAULT_ADS> bip(*c, rg, 1);
 //		MOVNSLevels<RepEFP> multiobjectvns(v_e, bip, initial_population_size, vNSeq, rg, 10, 10);
 //		GRInitialPareto<RepEFP,OPTFRAME_DEFAULT_ADS> grIP(*c, rg, 1, *mev);
-		BasicInitialPareto<RepEFP, OPTFRAME_DEFAULT_ADS> grIP(*c, *mev);
+		BasicInitialPareto<RepHFM, OPTFRAME_DEFAULT_ADS> grIP(*c, *mev);
 		int maxTriesRI = 100;
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriMFR(*mev, *vNSeq->at(0), maxTriesRI);
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriCSI(*mev, *vNSeq->at(1), maxTriesRI);
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriRSI(*mev, *vNSeq->at(2), maxTriesRI);
-		MORandomImprovement<RepEFP, OPTFRAME_DEFAULT_ADS> moriASI(*mev, *vNSeq->at(3), maxTriesRI);
+		MORandomImprovement<RepHFM, OPTFRAME_DEFAULT_ADS> moriMFR(*mev, *vNSeq->at(0), maxTriesRI);
+		MORandomImprovement<RepHFM, OPTFRAME_DEFAULT_ADS> moriCSI(*mev, *vNSeq->at(1), maxTriesRI);
+		MORandomImprovement<RepHFM, OPTFRAME_DEFAULT_ADS> moriRSI(*mev, *vNSeq->at(2), maxTriesRI);
+		MORandomImprovement<RepHFM, OPTFRAME_DEFAULT_ADS> moriASI(*mev, *vNSeq->at(3), maxTriesRI);
 
-		vector<MOLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS>*> vMOLS;
+		vector<MOLocalSearch<RepHFM, OPTFRAME_DEFAULT_ADS>*> vMOLS;
 		vMOLS.push_back(&moriMFR);
 		vMOLS.push_back(&moriRSI);
 		vMOLS.push_back(&moriASI);
 		vMOLS.push_back(&moriCSI);
 
-		GeneralParetoLocalSearch<RepEFP, OPTFRAME_DEFAULT_ADS> generalPLS(*mev, grIP, initial_population_size, vMOLS);
+		GeneralParetoLocalSearch<RepHFM, OPTFRAME_DEFAULT_ADS> generalPLS(*mev, grIP, initial_population_size, vMOLS);
 
-		BasicMOILS<RepEFP, OPTFRAME_DEFAULT_ADS> basicMOILS(*mev, grIP, initial_population_size, &moriASI, rg, *basicMOILSPert, 100);
+		BasicMOILS<RepHFM, OPTFRAME_DEFAULT_ADS> basicMOILS(*mev, grIP, initial_population_size, &moriASI, rg, *basicMOILSPert, 100);
 		int moIlslevelMax = 10;
 		int moIlsIterMax = 100;
-		MOILSLevels<RepEFP, OPTFRAME_DEFAULT_ADS> moILSLevels(*mev, grIP, initial_population_size, &moriASI, rg, *moILSPert, moIlsIterMax, moIlslevelMax);
+		MOILSLevels<RepHFM, OPTFRAME_DEFAULT_ADS> moILSLevels(*mev, grIP, initial_population_size, &moriASI, rg, *moILSPert, moIlsIterMax, moIlslevelMax);
 //		moILSLevels.setMessageLevel(3);
 
 		MOSC moStopCriteriaGPLS;
@@ -330,10 +330,10 @@ public:
 		return pf;
 	}
 
-	pair<Solution<RepEFP>, Evaluation>* runGRASP(int timeGRASP, int nSol)
+	pair<Solution<RepHFM>, Evaluation>* runGRASP(int timeGRASP, int nSol)
 	{
 		SOSC* stopCriteria = new SOSC(timeGRASP);
-		pair<Solution<RepEFP>, Evaluation>* finalSol = nullptr;
+		pair<Solution<RepHFM>, Evaluation>* finalSol = nullptr;
 		delete stopCriteria;
 //		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, nSol);
 //		g.setMessageLevel(3);
@@ -342,12 +342,12 @@ public:
 		return finalSol;
 	}
 
-	pair<Solution<RepEFP>, Evaluation>* run(int timeES, int timeVND, int timeILS)
+	pair<Solution<RepHFM>, Evaluation>* run(int timeES, int timeVND, int timeILS)
 	{
 		if (timeES == 0)
 			timeES = 1;
 
-		pair<Solution<RepEFP>, Evaluation>* finalSol;
+		pair<Solution<RepHFM>, Evaluation>* finalSol;
 
 		double targetValue = 3.879748973;
 		targetValue = 0;
@@ -370,12 +370,12 @@ public:
 		return finalSol;
 	}
 
-	pair<Solution<RepEFP>, Evaluation>* runGILS(int timeGRASP, int timeILS)
+	pair<Solution<RepHFM>, Evaluation>* runGILS(int timeGRASP, int timeILS)
 	{
 
 //		BasicGRASP<RepEFP> g(*eval, *c, emptyLS, 0.1, 100000);
 //		g.setMessageLevel(3);
-		pair<Solution<RepEFP>, Evaluation>* finalSol;
+		pair<Solution<RepHFM>, Evaluation>* finalSol;
 
 //		stopCriteria.timelimit=timeGRASP;
 //		finalSol = g.search(stopCriteria);
@@ -404,12 +404,12 @@ public:
 
 	//return blind forecasts for the required steps ahead of problemParam class
 	//this function feed a trainedModel with the last samples from the vector of TimeSeries
-	vector<double>* returnBlind(const RepEFP& trainedModel, vector<vector<double> >& vTimeSeries)
+	vector<double>* returnBlind(const RepHFM& trainedModel, vector<vector<double> >& vTimeSeries)
 	{
 		return eval->returnForecasts(trainedModel, vTimeSeries, vTimeSeries[problemParam.getTargetFile()].size(), problemParam.getStepsAhead());
 	}
 
-	vector<double>* returnErrors(const RepEFP& rep, vector<vector<double> >& vForecastingsValidation)
+	vector<double>* returnErrors(const RepHFM& rep, vector<vector<double> >& vForecastingsValidation)
 	{
 		return eval->evaluateAll(rep, ALL_EVALUATIONS, &vForecastingsValidation);
 
@@ -447,7 +447,7 @@ public:
 
 	/*Target and forecasts
 	 Return forecasts with pre-defined sliding window strategy with FH*/
-	pair<vector<double>*, vector<double>*>* returnForecastsAndTargets(const RepEFP& rep, const vector<vector<double> > vForecastingsValidation)
+	pair<vector<double>*, vector<double>*>* returnForecastsAndTargets(const RepHFM& rep, const vector<vector<double> > vForecastingsValidation)
 	{
 		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());
 	}

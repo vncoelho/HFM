@@ -173,7 +173,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 		int stepsAhead = problemParam.getStepsAhead();
 		//========SET PROBLEM MAXIMUM LAG ===============
 		problemParam.setMaxLag(672);
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		//If maxUpperLag is greater than 0 model uses predicted data
 		problemParam.setMaxUpperLag(0);
@@ -190,7 +190,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 		cout << "BeginTrainninningSet: " << beginTrainingSet;
 		cout << "\t #SamplesTrainningSet: " << nTotalForecastingsTrainningSet << endl;
 		cout << "#sizeTrainingSet: " << rF.getForecastsSize(0) << endl;
-		cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
+		cout << "maxNotUsed: " << problemParam.getMaxLag(0) << endl;
 		cout << "#StepsAhead: " << stepsAhead << endl << endl;
 
 		//else
@@ -209,7 +209,7 @@ int microGridLiuAppliedEnergy(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 		int timeES = argvTimeES;
 		int timeVND = 0;

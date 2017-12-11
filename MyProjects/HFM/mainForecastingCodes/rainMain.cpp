@@ -165,7 +165,8 @@ int rainMain(int argc, char **argv)
 		// ==========================================
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+//		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]); //DEPRECATED
+		ProblemParameters problemParam;
 		problemParam.setStepsAhead(stepsAheadR);
 		stepsAhead = problemParam.getStepsAhead();
 		//stepsAhead = 1;
@@ -176,7 +177,7 @@ int rainMain(int argc, char **argv)
 		if (construtive == 2) //ACF construtive
 			problemParam.setMaxLag(maxNotUsedR);
 
-		int maxNotUsedForTest = problemParam.getMaxLag();
+		int maxNotUsedForTest = problemParam.getMaxLag(0);
 
 		cout << "maxNotUsedForTest: " << maxNotUsedForTest << endl;
 
@@ -202,7 +203,7 @@ int rainMain(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 		int optMethod = rg.rand(2);
 		optMethod = 0;
@@ -212,7 +213,7 @@ int rainMain(int argc, char **argv)
 			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 
 		//int needInputs = sol->first.getR().earliestInput;
-		int needInputs = problemParam.getMaxLag();
+		int needInputs = problemParam.getMaxLag(0);
 
 		vector<vector<double> > validationSet; //validation set for calibration
 		validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, needInputs + stepsAhead));

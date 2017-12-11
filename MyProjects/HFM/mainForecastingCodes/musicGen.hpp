@@ -111,8 +111,8 @@ int musicGen(int argc, char **argv)
 
 	problemParam.setStepsAhead(fh);
 	problemParam.setMaxLag(maxLag);
-	problemParam.setRounding(true,0);
-	problemParam.setRoundingNegative(false,0);
+	problemParam.setToRoundedForecasts(true);
+	problemParam.setToNonNegativeForecasts(false);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);
@@ -141,7 +141,7 @@ int musicGen(int argc, char **argv)
 	ForecastClass* forecastObject;
 
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+	pair<Solution<RepHFM>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
 	pair<vector<double>*, vector<double>* >* forecastsAndTargets = nullptr;
 	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)
@@ -260,8 +260,8 @@ int musicGenMidiCSV(int argc, char **argv)
 
 	problemParam.setStepsAhead(fh);
 	problemParam.setMaxLag(maxLag);
-	problemParam.setRounding(true,0);
-	problemParam.setRoundingNegative(true,0);
+	problemParam.setToRoundedForecasts(true);
+	problemParam.setToBinaryForecasts(true);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(0);
@@ -287,7 +287,7 @@ int musicGenMidiCSV(int argc, char **argv)
 	ForecastClass* forecastObject;
 
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-	pair<Solution<RepEFP>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+	pair<Solution<RepHFM>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 
 	pair<vector<double>*, vector<double>* >* forecastsAndTargets = nullptr;
 	for (int m = 0; m < (int) timeSeriesToBeForecasted.size(); m++)

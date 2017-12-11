@@ -44,11 +44,8 @@ int stockMarketForecasting(int argc, char **argv)
 //	const char* caminhoOutput = argv[1];
 //	string nomeOutput = caminhoOutput;
 
-	string nomeOutput = "./HFM/Instance/dadosBovespa/bovespa";
-
 	//===================================
 	cout << "Parametros:" << endl;
-	cout << "nomeOutput=" << nomeOutput << endl;
 
 	//Numero de passos a frente - Horizonte de previsao
 	int fh = 1;
@@ -57,16 +54,24 @@ int stockMarketForecasting(int argc, char **argv)
 
 	vector<string> explanatoryVariables;
 
-	explanatoryVariables.push_back(nomeOutput);
-//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/emprestimoAigorTR");
+//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/bovespa");
+//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/test");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/emprestimoAigor");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/emprestimoAigorExp1");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/emprestimoAigorExp2");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/emprestimoAigorExp3");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/emprestimoAigorExp4");
+
+	cout << "Variables and explanation:" << explanatoryVariables << endl;
 
 	treatForecasts rF(explanatoryVariables);
 
 	//Parametros do metodo
-	int mu = 10;
+	int mu = 100;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
 	int contructiveNumberOfColumns = 100;
+	cout<<"contructiveNumberOfColumns:"<<contructiveNumberOfColumns<<endl;
 	int evalAprox = 0;
 	double alphaACF = -1;
 	int construtive = 2;
@@ -83,7 +88,7 @@ int stockMarketForecasting(int argc, char **argv)
 	methodParam.setConstrutiveMethod(construtive);
 	methodParam.setConstrutivePrecision(contructiveNumberOfColumns);
 	vector<double> vAlphaACFlimits;
-	for (int nExp = 0; nExp < (int) explanatoryVariables.size(); nExp++)
+	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
 		vAlphaACFlimits.push_back(alphaACF);
 	methodParam.setConstrutiveLimitAlphaACF(vAlphaACFlimits);
 
@@ -93,7 +98,7 @@ int stockMarketForecasting(int argc, char **argv)
 	// ==========================================
 
 	// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-	ProblemParameters problemParam;
+	ProblemParameters problemParam(explanatoryVariables.size());
 	//ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
 
 	problemParam.setStepsAhead(fh);
@@ -103,24 +108,36 @@ int stockMarketForecasting(int argc, char **argv)
 	//========SET PROBLEM MAXIMUM LAG ===============
 	cout << "argvMaxLagRate = " << argvMaxLagRate << endl;
 
-	int iterationMaxLag = ((nTotalForecastingsTrainningSet - fh) * argvMaxLagRate) / 100.0;
-	iterationMaxLag = ceil(iterationMaxLag);
-	if (iterationMaxLag > (nTotalForecastingsTrainningSet - fh))
-		iterationMaxLag--;
-	if (iterationMaxLag <= 0)
-		iterationMaxLag = 1;
+	int maxLargAccordingToRate = ((nTotalForecastingsTrainningSet - fh) * argvMaxLagRate) / 100.0;
+	maxLargAccordingToRate = ceil(maxLargAccordingToRate);
+	if (maxLargAccordingToRate > (nTotalForecastingsTrainningSet - fh))
+		maxLargAccordingToRate--;
+	if (maxLargAccordingToRate <= 0)
+		maxLargAccordingToRate = 1;
 
-	problemParam.setMaxLag(iterationMaxLag);
-	int maxLag = problemParam.getMaxLag();
+	cout << "maxLargAccordingToRate:" << maxLargAccordingToRate << endl;
+	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
+		problemParam.setMaxLag(maxLargAccordingToRate, expVar);
 
 	//If maxUpperLag is greater than 0 model uses predicted data: ( t - (-K) ) => (t + K) | K !=0
-	problemParam.setMaxUpperLag(0);
+	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
+		problemParam.setMaxUpperLag(expVar, expVar);
+
+//	problemParam.setForceSampleLearningWithEndogenous(true, 1);
+//	problemParam.setForceSampleLearningWithEndogenous(true, 2);
+//	problemParam.setForceSampleLearningWithEndogenous(true, 3);
+	problemParam.setForceSampleLearningWithEndogenous(true);
+
+//	problemParam.setForceSampleLearningWithEndogenous(true, 4);
+
+	int maxLag = problemParam.getMaxLag(0);
+
 	//int maxUpperLag = problemParam.getMaxUpperLag();
 	//=================================================
 
-//	problemParam.setRounding(true);
-//	problemParam.setRoundingNegative(true);
-//	problemParam.setBinary(true);
+	problemParam.setToRoundedForecasts(true);
+//	problemParam.setToNonNegativeForecasts(true);
+//	problemParam.setToBinaryForecasts(true);
 
 	vector<double> foIndicators;
 	int beginTrainingSet = 0;
@@ -135,30 +152,27 @@ int stockMarketForecasting(int argc, char **argv)
 	cout << "#StepsAhead: " << fh << endl << endl;
 
 	vector<vector<double> > trainningSet; // trainningSetVector
-	trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, fh, nTotalForecastingsTrainningSet));
-//	trainningSet.push_back(rF.getPartsForecastsEndToBegin(1, fh, nTotalForecastingsTrainningSet));
+	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
+		trainningSet.push_back(rF.getPartsForecastsEndToBegin(expVar, fh, nTotalForecastingsTrainningSet));
 
-//		forecastObject.runMultiObjSearch();
-//		getchar();
-
-	Pareto < RepEFP > *pf = new Pareto<RepEFP>();
+	Pareto < RepHFM > *pf = new Pareto<RepHFM>();
 
 	ForecastClass* forecastObject;
-	int timeES = 300;
-	int timeGPLS = 120;
-	int nBatches = 1;
+	int timeES = 60;
+	int timeGPLS = 60;
+	int nBatches = 2;
 	for (int b = 0; b < nBatches; b++)
 	{
 		if (b == 1)
 			methodParam.setEvalFOMinimizer(MAPE_INV_INDEX);
 		forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
-		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
+		pair<Solution<RepHFM, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->run(timeES, 0, 0);
 //		pair<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>, Evaluation>* sol = forecastObject->runGILS(0, timeES);
 //		cout << "Bye bye..see u soon." << endl;
 //		exit(1);
 
 		forecastObject->addSolToParetoWithParetoManager(*pf, sol->first);
-		Pareto<RepEFP, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
+		Pareto<RepHFM, OPTFRAME_DEFAULT_ADS>* pfNew = forecastObject->runMultiObjSearch(timeGPLS, pf);
 		delete pf;
 		pf = pfNew;
 		delete forecastObject;
@@ -169,17 +183,21 @@ int stockMarketForecasting(int argc, char **argv)
 	forecastObject = new ForecastClass(trainningSet, problemParam, rg, methodParam);
 
 	vector<MultiEvaluation*> vEvalPF = pf->getParetoFront();
-	vector<Solution<RepEFP, OPTFRAME_DEFAULT_ADS>*> vSolPF = pf->getParetoSet();
+	vector<Solution<RepHFM>*> vSolPF = pf->getParetoSet();
 	int nObtainedParetoSol = vEvalPF.size();
 
-	int targetFile = problemParam.getTargetFile();
 	vector<vector<double> > dataForFeedingValidationTest;
-	dataForFeedingValidationTest.push_back(rF.getPartsForecastsEndToBegin(0, fh, maxLag));
-	vector<vector<double> > targetValidationSet;
-	targetValidationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh));
-	//Using Multi Round forescasting for obtaining validation and tests
+	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
+		dataForFeedingValidationTest.push_back(rF.getPartsForecastsEndToBegin(expVar, fh, maxLag));
+
+	int targetFile = problemParam.getTargetFile();
+	vector<double> targetValidationSet;
+	targetValidationSet = rF.getPartsForecastsEndToBegin(targetFile, 0, fh);
+
+	//Using Multi Round forecasting for obtaining validation and tests
 //	vector<vector<double> > validationSet;
-//	validationSet.push_back(rF.getPartsForecastsEndToBegin(0, 0, fh + maxLag));
+//	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
+//		validationSet.push_back(rF.getPartsForecastsEndToBegin(expVar, 0, fh + maxLag));
 
 	vector<vector<double>*> ensembleBlindForecasts;
 	cout << "\nPrinting obtained sets of predicted values..." << endl;
@@ -188,7 +206,7 @@ int stockMarketForecasting(int argc, char **argv)
 		cout << setprecision(2);
 		vector<double>* blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
 		for (int f = 0; f < (int) blindForecasts->size(); f++)
-			cout << blindForecasts->at(f) << "/" << targetValidationSet[targetFile][f] << "/" << (targetValidationSet[targetFile][f] - blindForecasts->at(f)) << "\t";
+			cout << blindForecasts->at(f) << "/" << targetValidationSet.at(f) << "/" << (targetValidationSet.at(f) - blindForecasts->at(f)) << "\t";
 
 		cout << endl;
 

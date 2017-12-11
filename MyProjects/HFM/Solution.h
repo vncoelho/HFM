@@ -8,7 +8,7 @@ using namespace optframe;
 
 namespace HFM
 {
-typedef Solution<RepEFP,OPTFRAME_DEFAULT_ADS> SolutionEFP;
+typedef Solution<RepHFM,OPTFRAME_DEFAULT_ADS> SolutionEFP;
 }
 
 #endif /*EFP_SOLUTION_H_*/

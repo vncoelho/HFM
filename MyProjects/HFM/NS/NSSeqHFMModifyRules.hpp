@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveHFMModifyRule: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveHFMModifyRule: public Move<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int r, o;
@@ -32,12 +32,12 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	bool canBeApplied(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return true;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
+	Move<RepHFM, OPTFRAME_DEFAULT_ADS>* apply(RepHFM& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		if (r == -1)
 			return new MoveHFMModifyRule(-1, -1, -1, -1, -1);
@@ -82,7 +82,7 @@ public:
 		return new MoveHFMModifyRule(r, o, applyValue, !sign, vectorType);
 	}
 
-	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
+	virtual bool operator==(const Move<RepHFM, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
 		const MoveHFMModifyRule& m = (const MoveHFMModifyRule&) _m;
 		return ((m.r == r) && (m.o == o) && (m.sign == sign));
@@ -97,17 +97,17 @@ public:
 }
 ;
 
-class NSIteratorHFMModifyRules: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorHFMModifyRules: public NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	MoveHFMModifyRule* m;
 	vector<MoveHFMModifyRule*> moves;
 	int index;
-	const RepEFP& rep;
+	const RepHFM& rep;
 	HFMProblemInstance& pEFP;
 	vector<double>& vUpdateValues;
 public:
-	NSIteratorHFMModifyRules(const RepEFP& _rep, HFMProblemInstance& _pEFP, vector<double>& _vUpdateValues) :
+	NSIteratorHFMModifyRules(const RepHFM& _rep, HFMProblemInstance& _pEFP, vector<double>& _vUpdateValues) :
 			rep(_rep), pEFP(_pEFP), vUpdateValues(_vUpdateValues)
 	{
 		index = 0;
@@ -175,7 +175,7 @@ public:
 		return m == nullptr;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -189,7 +189,7 @@ public:
 
 };
 
-class NSSeqHFMModifyRules: public NSSeq<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSSeqHFMModifyRules: public NSSeq<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -230,7 +230,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* randomMove(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
 		int vectorType = rg.rand(N_Inputs_Types);
@@ -269,6 +269,7 @@ public:
 					r = rg.rand(NCOLUMNATRIBUTES);
 				}
 			}
+			tries++;
 		}
 
 		if (tries == maxTries)
@@ -281,7 +282,7 @@ public:
 		return new MoveHFMModifyRule(r, o, applyValue, sign, vectorType); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>* getIterator(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return new NSIteratorHFMModifyRules(rep, pEFP, vUpdateValues); // return an iterator to the neighbors of 'rep'
 	}

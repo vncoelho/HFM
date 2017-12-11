@@ -98,7 +98,7 @@ int smartStorage(int argc, char **argv)
 	for (int n = 0; n < nBatches; n++)
 	{
 		int randomPrecision = rg.rand(maxPrecision) + 10;
-		int randomParametersFiles = rg.rand(vParametersFiles.size());
+//		int randomParametersFiles = rg.rand(vParametersFiles.size());
 		int evalFOMinimizer = MAE_INDEX;
 		int evalAprox = rg.rand(2); //Enayatifar aproximation using previous values
 		int construtive = rg.rand(2);
@@ -117,7 +117,7 @@ int smartStorage(int argc, char **argv)
 		initialDesv = 10;
 		mutationDesv = 20;
 		//randomPrecision = 100;
-		randomParametersFiles = 0;
+//		randomParametersFiles = 0;
 		evalFOMinimizer = MAPE_INDEX;
 		evalAprox = 2;
 		construtive = 2;
@@ -145,7 +145,8 @@ int smartStorage(int argc, char **argv)
 		// ==========================================
 
 		// ================== READ FILE ============== CONSTRUTIVE 0 AND 1
-		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]);
+//		ProblemParameters problemParam(vParametersFiles[randomParametersFiles]); //DEPRECATED
+		ProblemParameters problemParam;
 
 		problemParam.setStepsAhead(stepsAheadR);
 		int stepsAhead = problemParam.getStepsAhead();
@@ -155,7 +156,7 @@ int smartStorage(int argc, char **argv)
 		if (construtive == 2) //ACF construtive
 			problemParam.setMaxLag(500);
 
-		int maxNotUsedForTest = problemParam.getMaxLag();
+		int maxNotUsedForTest = problemParam.getMaxLag(0);
 
 		cout << "maxNotUsedForTest: " << maxNotUsedForTest << endl;
 
@@ -178,7 +179,7 @@ int smartStorage(int argc, char **argv)
 
 		ForecastClass forecastObject(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 
 		int optMethod = rg.rand(2);
 		optMethod = 0;
@@ -188,7 +189,7 @@ int smartStorage(int argc, char **argv)
 			sol = forecastObject.runGILS(timeGRASP, timeILS); // GRASP + ILS
 
 		//int needInputs = sol->first.getR().earliestInput + stepsAhead;
-		int needInputs = problemParam.getMaxLag();
+		int needInputs = problemParam.getMaxLag(0);
 
 		validationSet.clear();
 		validationSet.push_back(rF.getPartsForecastsEndToBegin(0, beginTrainingSet-stepsAhead, needInputs));

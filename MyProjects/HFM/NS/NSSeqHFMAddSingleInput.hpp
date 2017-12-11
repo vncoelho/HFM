@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveNEIGHAddSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveNEIGHAddSingleInput: public Move<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int file, K;
@@ -32,12 +32,13 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	bool canBeApplied(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return true;
+		bool currentSampleFromTarget = ( (file == 0) && (K == 0) );
+		return !currentSampleFromTarget;
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
+	Move<RepHFM, OPTFRAME_DEFAULT_ADS>* apply(RepHFM& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		if (!reverse)
 		{
@@ -64,7 +65,7 @@ public:
 		return new MoveNEIGHAddSingleInput(file, K, rulesAndWeights, !reverse);
 	}
 
-	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
+	virtual bool operator==(const Move<RepHFM, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
 		const MoveNEIGHAddSingleInput& m = (const MoveNEIGHAddSingleInput&) _m;
 		return ((m.file == file) && (m.K == K) && (m.rulesAndWeights == rulesAndWeights));
@@ -79,10 +80,10 @@ public:
 }
 ;
 
-class NSIteratorNEIGHAddSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorNEIGHAddSingleInput: public NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	const RepEFP& rep;
+	const RepHFM& rep;
 	vector<int> vMaxLag, vMaxUpperLag;
 	HFMProblemInstance& pEFP;
 	RandGen& rg;
@@ -92,7 +93,7 @@ private:
 	int index;
 
 public:
-	NSIteratorNEIGHAddSingleInput(const RepEFP& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag, HFMProblemInstance& _pEFP, RandGen& _rg) :
+	NSIteratorNEIGHAddSingleInput(const RepHFM& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag, HFMProblemInstance& _pEFP, RandGen& _rg) :
 			rep(_rep), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag), pEFP(_pEFP), rg(_rg)
 	{
 		index = 0;
@@ -123,7 +124,7 @@ public:
 			double lower = rg.randG(mean, stdDesv);
 			double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
 			double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
-			double fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+			double fuzzyFunction = rg.rand(N_Activation_Functions);
 			double epsilon = 1; //forcing to 1, trapezoid functions - TODO
 
 			vector<double> rulesAndWeights =
@@ -156,7 +157,7 @@ public:
 		return m == nullptr;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -170,7 +171,7 @@ public:
 
 };
 
-class NSSeqNEIGHAddSingleInput: public NSSeq<RepEFP>
+class NSSeqNEIGHAddSingleInput: public NSSeq<RepHFM>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -189,13 +190,15 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* randomMove(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		//TODO - Check the possibility of add negative K values
 		int nEXV = rg.rand(pEFP.getNumberExplanatoryVariables());
 		int maxLag = vMaxLag[nEXV];
 
-		int K = rg.rand(maxLag) + 1; // because the values 0 can not be an input
+//		cout<<"nEXV:"<<nEXV<<endl;
+
+		int K = rg.rand(maxLag);
 
 		int mean = pEFP.getMean(nEXV);
 		int stdDesv = pEFP.getStdDesv(nEXV);
@@ -204,9 +207,11 @@ public:
 
 		double greater = rg.randG(mean, stdDesv);
 		double lower = rg.randG(mean, stdDesv);
-		double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
-		double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
-		double fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+//		double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
+//		double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
+		double greaterWeight = rg.randG(stdDesvWeight, stdDesvWeight);
+		double lowerWeight = rg.randG(stdDesvWeight, stdDesvWeight);
+		double fuzzyFunction = rg.rand(N_Activation_Functions);
 		double epsilon = 1; //forcing to 1, trapezoid functions - TODO
 
 		vector<double> rulesAndWeights =
@@ -214,7 +219,7 @@ public:
 		return new MoveNEIGHAddSingleInput(nEXV, K, rulesAndWeights, false); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>* getIterator(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return new NSIteratorNEIGHAddSingleInput(rep, vMaxLag, vMaxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
 	}

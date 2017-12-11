@@ -13,7 +13,7 @@ using namespace std;
 namespace HFM
 {
 
-class MoveHFMRemoveSingleInput: public Move<RepEFP, OPTFRAME_DEFAULT_ADS>
+class MoveHFMRemoveSingleInput: public Move<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	int rule;
@@ -34,12 +34,12 @@ public:
 	{
 	}
 
-	bool canBeApplied(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	bool canBeApplied(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return ((rule >= 0) && (rule < (int) rep.singleIndex.size()) && ((int) rep.singleIndex.size() > 1));
 	}
 
-	Move<RepEFP, OPTFRAME_DEFAULT_ADS>* apply(RepEFP& rep, OPTFRAME_DEFAULT_ADS*)
+	Move<RepHFM, OPTFRAME_DEFAULT_ADS>* apply(RepHFM& rep, OPTFRAME_DEFAULT_ADS*)
 	{
 		pair<int, int> tempSingleIndexOld;
 		vector<double> tempSingleFuzzyRSOld;
@@ -67,7 +67,7 @@ public:
 
 	}
 
-	virtual bool operator==(const Move<RepEFP, OPTFRAME_DEFAULT_ADS>& _m) const
+	virtual bool operator==(const Move<RepHFM, OPTFRAME_DEFAULT_ADS>& _m) const
 	{
 		const MoveHFMRemoveSingleInput& m = (const MoveHFMRemoveSingleInput&) _m;
 		return ((m.rule == rule) && (m.reverse == reverse));
@@ -81,16 +81,16 @@ public:
 }
 ;
 
-class NSIteratorHFMRemoveSingleInput: public NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>
+class NSIteratorHFMRemoveSingleInput: public NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
 	MoveHFMRemoveSingleInput* m;
 	vector<MoveHFMRemoveSingleInput*> moves;
 	int index;
-	const RepEFP& rep;
+	const RepHFM& rep;
 
 public:
-	NSIteratorHFMRemoveSingleInput(const RepEFP& _rep) :
+	NSIteratorHFMRemoveSingleInput(const RepHFM& _rep) :
 			rep(_rep)
 	{
 		index = 0;
@@ -137,7 +137,7 @@ public:
 		return m == nullptr;
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* current()
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* current()
 	{
 		if (isDone())
 		{
@@ -151,7 +151,7 @@ public:
 
 };
 
-class NSSeqHFMRemoveSingleInput: public NSSeq<RepEFP>
+class NSSeqHFMRemoveSingleInput: public NSSeq<RepHFM>
 {
 private:
 	RandGen& rg;
@@ -168,7 +168,7 @@ public:
 	{
 	}
 
-	virtual Move<RepEFP, OPTFRAME_DEFAULT_ADS>* randomMove(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual Move<RepHFM, OPTFRAME_DEFAULT_ADS>* randomMove(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 
 		int rule = -1;
@@ -181,7 +181,7 @@ public:
 		return new MoveHFMRemoveSingleInput(rule, false, tempSingleIndexOld, tempSingleFuzzyRSOld); // return a random move
 	}
 
-	virtual NSIterator<RepEFP, OPTFRAME_DEFAULT_ADS>* getIterator(const RepEFP& rep, const OPTFRAME_DEFAULT_ADS*)
+	virtual NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>* getIterator(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
 		return new NSIteratorHFMRemoveSingleInput(rep); // return an iterator to the neighbors of 'rep'
 	}

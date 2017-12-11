@@ -17,13 +17,13 @@ using namespace HFM;
 
 struct HFMModelAndParam
 {
-	pair<Solution<RepEFP>, Evaluation>* HFMModel;
+	pair<Solution<RepHFM>, Evaluation>* HFMModel;
 	vector<double> forecastingErrors;
 	int fH;
 	int v; //volunteer which was used to train the data
 	int channel; //volunteer channel which was used to train the data
 
-	HFMModelAndParam(pair<Solution<RepEFP>, Evaluation>* _HFMModel, vector<double> _forecastingErrors, int _fH, int _v, int _channel) :
+	HFMModelAndParam(pair<Solution<RepHFM>, Evaluation>* _HFMModel, vector<double> _forecastingErrors, int _fH, int _v, int _channel) :
 			HFMModel(_HFMModel), forecastingErrors(_forecastingErrors), fH(_fH), v(_v), channel(_channel)
 	{
 	}
@@ -290,7 +290,7 @@ vector<pair<double, int> > findBestPairsValuesByMetric(Matrix<double> results, b
 	return bestPairs;
 }
 
-pair<Solution<RepEFP>, Evaluation>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int fh)
+pair<Solution<RepHFM>, Evaluation>* learnModel(treatForecasts& tFTraining, int argvMaxLagRate, int argvTimeES, long seed, RandGen& rg, int evalFO, int fh)
 {
 
 	int evalFOMinimizer = evalFO;
@@ -346,7 +346,7 @@ pair<Solution<RepEFP>, Evaluation>* learnModel(treatForecasts& tFTraining, int a
 		iterationMaxLag = 1;
 
 	problemParam.setMaxLag(iterationMaxLag);
-	int maxLag = problemParam.getMaxLag();
+	int maxLag = problemParam.getMaxLag(0);
 
 	//If maxUpperLag is greater than 0 model uses predicted data
 	problemParam.setMaxUpperLag(-maxLag);
@@ -382,12 +382,12 @@ pair<Solution<RepEFP>, Evaluation>* learnModel(treatForecasts& tFTraining, int a
 
 	//		forecastObject.runMultiObjSearch();
 	//		getchar();
-	pair<Solution<RepEFP>, Evaluation>* sol;
+	pair<Solution<RepHFM>, Evaluation>* sol;
 	sol = forecastObject.run(timeES, 0, 0);
 	return sol;
 }
 
-vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<RepEFP>, Evaluation>* sol, RandGen& rg, int fh)
+vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<RepHFM>, Evaluation>* sol, RandGen& rg, int fh)
 {
 
 	int mu = 100;
@@ -432,7 +432,7 @@ vector<double> checkLearningAbility(treatForecasts& tFValidation, pair<Solution<
 
 	//========SET PROBLEM MAXIMUM LAG ===============
 	problemParam.setMaxLag(sol->first.getR().earliestInput);
-	int maxLag = problemParam.getMaxLag();
+	int maxLag = problemParam.getMaxLag(0);
 
 	if (nTotalForecastingsTrainningSet < (maxLag + fh))
 	{
@@ -617,7 +617,7 @@ int EEGBiometricSystem(int argc, char **argv)
 			treatForecasts tFTraining(explanatoryVariables);
 			tFTraining.setTSFile(tFTraining.getPercentageFromBeginToEnd(0, 0, trainingSetPercentage), 0);
 
-			pair<Solution<RepEFP>, Evaluation>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, fH);
+			pair<Solution<RepHFM>, Evaluation>* HFMmodel = learnModel(tFTraining, argvMaxLagRate, trainingTime, seed, rg, evalFO, fH);
 //			cout << "sol->first.getR().earliestInput: " << HFMmodel->first.getR().earliestInput << endl;
 //			cout<<HFMmodel->first.getR()<<endl;
 //			getchar();
@@ -667,7 +667,7 @@ int EEGBiometricSystem(int argc, char **argv)
 
 		for (int nM = 0; nM <  (int) setOfHFMLearningModels.size(); nM++)
 		{
-			pair<Solution<RepEFP>, Evaluation>* HFMmodel = setOfHFMLearningModels[nM]->HFMModel;
+			pair<Solution<RepHFM>, Evaluation>* HFMmodel = setOfHFMLearningModels[nM]->HFMModel;
 			vector<double> modelStandardErrors = setOfHFMLearningModels[nM]->forecastingErrors;
 			int modelFH = setOfHFMLearningModels[nM]->fH;
 			int variableChannelV = setOfHFMLearningModels[nM]->channel;

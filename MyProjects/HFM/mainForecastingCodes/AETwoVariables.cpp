@@ -136,11 +136,11 @@ int AETwoVariables(int argc, char **argv)
 			problemParam.setMaxLag(500);
 		//=================================================
 
-		int maxLag = problemParam.getMaxLag();
+		int maxLag = problemParam.getMaxLag(0);
 
 		int nTotalForecastingsTrainningSet = maxLag + nTrainningRounds * stepsAhead;
 		cout << "nTotalForecastingsTrainningSet: " << nTotalForecastingsTrainningSet << endl;
-		cout << "maxNotUsed: " << problemParam.getMaxLag() << endl;
+		cout << "maxNotUsed: " << maxLag << endl;
 
 		vector<vector<double> > trainningSet; // trainningSetVector
 		trainningSet.push_back(rF.getPartsForecastsEndToBegin(0, stepsAhead, nTotalForecastingsTrainningSet));
@@ -151,7 +151,7 @@ int AETwoVariables(int argc, char **argv)
 
 		ForecastClass pFC(trainningSet, problemParam, rg, methodParam);
 
-		pair<Solution<RepEFP>, Evaluation>* sol;
+		pair<Solution<RepHFM>, Evaluation>* sol;
 		sol = pFC.run(timeES, timeVND, timeILS);
 
 		vector<double> foIndicatorCalibration;

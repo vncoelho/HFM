@@ -1,7 +1,8 @@
-#ifndef EFP_REPRESENTATION_H_
-#define EFP_REPRESENTATION_H_
+#ifndef HFM_REPRESENTATION_H_
+#define HFM_REPRESENTATION_H_
 
 #include <vector>
+#include <assert.h>
 #include "../../OptFrame/Util/printable.h"
 #include "../../OptFrame/Util/Matrix.hpp"
 
@@ -15,8 +16,6 @@ const int NCOLUMNATRIBUTES = 6; // Solution Atributes
 
 const int NAJUSTS = 6; // FOR THE APROX 2
 
-const int NFUZZYFUNCTIONS = 2;
-
 using namespace std;
 
 enum InputTypes
@@ -29,7 +28,7 @@ enum InputTypes
 
 enum ActivationFunction
 {
-	Heaviside, Trapezoid
+	Heaviside, Trapezoid, N_Activation_Functions
 };
 
 
@@ -37,7 +36,7 @@ enum ActivationFunction
 
 
 
-struct RepEFP
+struct RepHFM
 {
 	//single index [ (file,K - x) ,...] ex:  [ (file = 0,K - 10),(file = 0,K - 2), ...]
 	vector<pair<int, int> > singleIndex;
@@ -76,14 +75,15 @@ struct RepEFP
 
 //#include <ostream>
 
-ostream & operator<<(ostream & s, const RepEFP rep)
+ostream & operator<<(ostream & s, const RepHFM rep)
 {
-//	s << "NRules:" <<rep.singleIndex.size() << endl;
+	assert(rep.singleIndex.size() == rep.singleFuzzyRS.size());
+	s << "NRules:" <<rep.singleIndex.size() << "/"<<rep.averageIndex.size() <<"/"<< rep.derivativeIndex.size() << endl;
 
-
+/*
 	s << " ======================== \n Solution printing \n" << endl;
 	s << "Single Inputs" << endl;
-	vector<int> nFuzzyFunction(NFUZZYFUNCTIONS, 0);
+	vector<int> nFuzzyFunction(N_Activation_Functions, 0);
 	double counter = 0;
 
 	for (int i = 0; i < (int) rep.singleIndex.size(); i++)
@@ -154,7 +154,7 @@ ostream & operator<<(ostream & s, const RepEFP rep)
 	}
 
 	s << " Solution printed \n ======================== \n";
-
+*/
 	return s;
 }
 
@@ -200,5 +200,5 @@ ostream & operator<<(ostream & s, const RepEFP rep)
  }
  */
 
-#endif /*EFP_REPRESENTATION_H_*/
+#endif /*HFM_REPRESENTATION_H_*/
 

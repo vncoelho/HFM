@@ -22,7 +22,7 @@ using namespace std;
 namespace HFM
 {
 
-class ConstructiveRandom: public Constructive<RepEFP,OPTFRAME_DEFAULT_ADS>
+class ConstructiveRandom: public Constructive<RepHFM,OPTFRAME_DEFAULT_ADS>
 {
 private:
 	HFMProblemInstance& pEFP;
@@ -58,12 +58,12 @@ public:
 	{
 	}
 
-	Solution<RepEFP>* generateSolution(double timelimit)
+	Solution<RepHFM>* generateSolution(double timelimit)
 	{
 		return generateSolutionAlpha(0.0, timelimit);
 	}
 
-	Solution<RepEFP>* generateSolutionAlpha(float notUsed, double timelimit)
+	Solution<RepHFM>* generateSolutionAlpha(float notUsed, double timelimit)
 	{
 
 		//cout << "ACF generating solution.." << endl;
@@ -115,7 +115,7 @@ public:
 				double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
 				double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
 
-				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+				int fuzzyFunction = rg.rand(N_Activation_Functions);
 
 				vector<double> fuzzyRules;
 				fuzzyRules.resize(NCOLUMNATRIBUTES);
@@ -159,7 +159,7 @@ public:
 				double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
 				double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
 
-				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+				int fuzzyFunction = rg.rand(N_Activation_Functions);
 
 				vector<double> fuzzyRules;
 				fuzzyRules.resize(NCOLUMNATRIBUTES);
@@ -208,7 +208,7 @@ public:
 				double greaterWeight = rg.randG(meanWeight, stdDesvWeight);
 				double lowerWeight = rg.randG(meanWeight, stdDesvWeight);
 
-				int fuzzyFunction = rg.rand(NFUZZYFUNCTIONS);
+				int fuzzyFunction = rg.rand(N_Activation_Functions);
 
 				vector<double> fuzzyRules;
 				fuzzyRules.resize(NCOLUMNATRIBUTES);
@@ -228,7 +228,7 @@ public:
 			//getchar();
 		}
 
-		RepEFP newRep;
+		RepHFM newRep;
 		newRep.singleIndex = singleIndex;
 		newRep.singleFuzzyRS = singleFuzzyRS;
 		newRep.averageIndex = averageIndex;
@@ -268,7 +268,7 @@ public:
 
 //		cout << "End of Random Hybrid Fuzzy Model Sol generation!" << endl;
 //		getchar();
-		return new Solution<RepEFP>(newRep);
+		return new Solution<RepHFM>(newRep);
 	}
 
 };
