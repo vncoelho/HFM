@@ -21,7 +21,7 @@ int GAPSO_SKU(int argc, char **argv)
 	RandGenMersenneTwister rg;
 	//long  1412730737
 	long seed = time(nullptr); //CalibrationMode
-	seed = 111212101990;
+	seed = 1;
 	cout << "Seed = " << seed << endl;
 	srand(seed);
 	rg.setSeed(seed);

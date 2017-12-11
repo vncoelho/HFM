@@ -83,7 +83,6 @@ public:
 class NSIteratorNEIGHAddSingleInput: public NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>
 {
 private:
-	const RepHFM& rep;
 	vector<int> vMaxLag, vMaxUpperLag;
 	HFMProblemInstance& pEFP;
 	RandGen& rg;
@@ -93,8 +92,8 @@ private:
 	int index;
 
 public:
-	NSIteratorNEIGHAddSingleInput(const RepHFM& _rep, vector<int> _vMaxLag, vector<int> _vMaxUpperLag, HFMProblemInstance& _pEFP, RandGen& _rg) :
-			rep(_rep), vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag), pEFP(_pEFP), rg(_rg)
+	NSIteratorNEIGHAddSingleInput(vector<int> _vMaxLag, vector<int> _vMaxUpperLag, HFMProblemInstance& _pEFP, RandGen& _rg) :
+			vMaxLag(_vMaxLag), vMaxUpperLag(_vMaxUpperLag), pEFP(_pEFP), rg(_rg)
 	{
 		index = 0;
 		m = nullptr;
@@ -221,7 +220,7 @@ public:
 
 	virtual NSIterator<RepHFM, OPTFRAME_DEFAULT_ADS>* getIterator(const RepHFM& rep, const OPTFRAME_DEFAULT_ADS*)
 	{
-		return new NSIteratorNEIGHAddSingleInput(rep, vMaxLag, vMaxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
+		return new NSIteratorNEIGHAddSingleInput(vMaxLag, vMaxUpperLag, pEFP, rg); // return an iterator to the neighbors of 'rep'
 	}
 
 	virtual string toString() const

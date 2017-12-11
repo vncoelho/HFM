@@ -387,8 +387,8 @@ public:
 		stopCriteria.timelimit = timeILS;
 		stopCriteria.target_f = 0;
 		ils->setMessageLevel(3);
-		if (timeILS > 0)
-			finalSol = ils->search(stopCriteria);
+
+		finalSol = ils->search(stopCriteria);
 //		finalSol = ils->search(stopCriteria, &solGRASP, &evaluationGrasp);
 
 		return finalSol;

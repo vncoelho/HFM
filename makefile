@@ -1,4 +1,4 @@
-all: HFM_EMCC #HFM_EMCC #HFM #clean TP 
+all: HFM #HFM_EMCC #HFM #clean TP 
 	@echo "BUILT SUCCESSFULLY!"
 
 

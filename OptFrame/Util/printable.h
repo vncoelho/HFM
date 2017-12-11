@@ -18,8 +18,8 @@
 // Software Foundation, 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
 // USA.
 
-#ifndef PRINTABLE_H_
-#define PRINTABLE_H_
+#ifndef OPTFRAME_PRINTABLE_H_
+#define OPTFRAME_PRINTABLE_H_
 
 #include <iostream>
 #include <ostream>
@@ -34,39 +34,6 @@ namespace optframe
 template<class T1, class T2>
 ostream& operator<<(ostream &os, const pair<T1, T2> &obj);
 
-// Variaveis estaticas com nomes grandes para evitar conflitos externos!
-//static bool string_aspas_25072009 = false;
-//static bool string_aspas_25072009_ctrl = true;
-
-// ===================================================
-// Reescreve a impressao de strings, para
-// que dentro de vectors e pares as strings
-// aparecam entre aspas duplas.
-// Fora desta classe nenhuma outra string e afetada.
-// ===================================================
-// DEPRECATED!!
-/*
- ostream& operator<< (ostream &os, const string &obj)
- {
- if(string_aspas_25072009 && string_aspas_25072009_ctrl)
- {
- string_aspas_25072009_ctrl = false;
-
- os << "\"" << obj << "\"";
- }
- else
- {
- string_aspas_25072009_ctrl = true;
-
- for(unsigned int i=0;i<obj.length();i++)
- if ( (obj[i] == '\"') || (obj[i] == '\\'))
- os << '\\' << obj[i];
- else
- os << obj[i];
- }
- return os;
- }
- */
 
 // ===================================================
 //     Impressao de vectors
@@ -288,4 +255,4 @@ ostream& operator<<(ostream &os, map<Key, T> &obj)
 
 }
 
-#endif /*PRINTABLE_H_*/
+#endif /*OPTFRAME_PRINTABLE_H_*/
