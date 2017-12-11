@@ -8,6 +8,7 @@
 #ifndef HFM_FORECASTCLASS_HPP_
 #define HFM_FORECASTCLASS_HPP_
 
+#include "Representation.h"
 #include "Evaluator.hpp"
 #include "MultiEvaluatorHFM.hpp"
 #include "Evaluation.h"

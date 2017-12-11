@@ -16,7 +16,7 @@
 #include <cstdint>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sndfile.h>
+//#include <sndfile.h>
 
 using namespace std;
 using namespace optframe;

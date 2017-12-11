@@ -1,4 +1,4 @@
-all: HFM #clean TP 
+all: HFM_EMCC #HFM_EMCC #HFM #clean TP 
 	@echo "BUILT SUCCESSFULLY!"
 
 
@@ -17,18 +17,24 @@ RESTSDK_FGLAS = #-lboost_system -lcrypto -lssl -lcpprest
 LLIBSMP3 = -lsndfile 
 
 #OpenMP Multi-Core Multi-Thread flags
-OPENMP_FLAGS = -fopenmp -lpthread
+OPENMP_FLAGS = #-fopenmp -lpthread
 
 #Raspberry WiringPi Flags (Package GPIO, Copyright (c) 2012-2017 Gordon Henderson, is required)
 LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
-GCC_FLAGS = -g -Ofast -Wall --std=c++11  
+GCC_FLAGS = -g -Ofast -Wall --std=c++11
+EMCC_FLAGS = -g -O3 -Wall -s DISABLE_EXCEPTION_CATCHING=0 --std=c++11    
 
 SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 
 HFM:
 	g++ $(GCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
+
+
+	
+HFM_EMCC:
+	~/Downloads/emscriptenNew/emscripten/em++ $(EMCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM.js
 	
 TP:
 	make -f makeTP.mk

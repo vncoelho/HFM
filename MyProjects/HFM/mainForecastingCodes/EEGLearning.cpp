@@ -779,7 +779,7 @@ int EEGBiometricSystem(int argc, char **argv)
 		for (int vPM = 0; vPM < nClassificationRules; vPM++)
 		{
 			cout << "\nM" << vPM << "-- Model from volunteer: " << volunteerRankPerMetric[vPM][0].first << " is the most suitable for ts: " << hiddenV << endl;
-			cout << volunteerRankPerMetric[vPM] << endl;
+			cout << volunteerRankPerMetric[vPM] << endl; //TODO - Maybe create printable pair
 
 			//Checking true positives
 			if (volunteerRankPerMetric[vPM][0].first == hiddenV)

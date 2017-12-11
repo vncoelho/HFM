@@ -3,32 +3,37 @@
 // Project EFP
 // ===================================
 
+#include "../OptFrame/Util/printable.h"
+
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
 
 #include "HFM.h"
-#include "./HFM/mainForecastingCodes/priceMain.cpp"
-#include "./HFM/mainForecastingCodes/loadMain.cpp"
-#include "./HFM/mainForecastingCodes/microGrid.cpp"
-#include "./HFM/mainForecastingCodes/microGridOnline.cpp"
-#include "./HFM/mainForecastingCodes/selfUseMode.cpp"
-#include "./HFM/mainForecastingCodes/jamesTaylor.cpp"
-#include "./HFM/mainForecastingCodes/rainMain.cpp"
-#include "./HFM/mainForecastingCodes/mokoko.cpp"
-#include "./HFM/mainForecastingCodes/AETwoVariables.cpp"
-#include "./HFM/mainForecastingCodes/smartStorage.cpp"
-#include "./HFM/mainForecastingCodes/HFModel.cpp"
-#include "./HFM/mainForecastingCodes/CIF_WCCI.hpp"
-#include "./HFM/mainForecastingCodes/GAPSO.hpp"
-#include "./HFM/mainForecastingCodes/EEGLearning.hpp"
-#include "./HFM/mainForecastingCodes/hosseinData.hpp"
-#include "./HFM/mainForecastingCodes/MokokoWind.hpp"
-#include "./HFM/mainForecastingCodes/REW2016_REED.hpp"
-#include "HFM/mainForecastingCodes/stockMarket.hpp"
+#include "HFM/mainForecastingCodes/priceMain.cpp"
+#include "HFM/mainForecastingCodes/loadMain.cpp"
+#include "HFM/mainForecastingCodes/microGrid.cpp"
+#include "HFM/mainForecastingCodes/microGridOnline.cpp"
+#include "HFM/mainForecastingCodes/selfUseMode.cpp"
+#include "HFM/mainForecastingCodes/jamesTaylor.cpp"
+#include "HFM/mainForecastingCodes/rainMain.cpp"
+#include "HFM/mainForecastingCodes/mokoko.cpp"
+#include "HFM/mainForecastingCodes/AETwoVariables.cpp"
+#include "HFM/mainForecastingCodes/smartStorage.cpp"
+#include "HFM/mainForecastingCodes/HFModel.cpp"
+#include "HFM/mainForecastingCodes/CIF_WCCI.cpp"
+#include "HFM/mainForecastingCodes/EEGLearning.cpp"
+#include "HFM/mainForecastingCodes/GAPSO.cpp"
+#include "HFM/mainForecastingCodes/hosseinData.cpp"
+#include "HFM/mainForecastingCodes/musicGen.cpp"
 #include "HFM/mainForecastingCodes/readMP3.hpp"
-#include "HFM/mainForecastingCodes/usingNonDominatedModels.hpp"
-#include "HFM/mainForecastingCodes/musicGen.hpp"
+#include "HFM/mainForecastingCodes/MokokoWind.cpp"
+#include "HFM/mainForecastingCodes/REW2016_REED.cpp"
+#include "HFM/mainForecastingCodes/stockMarket.cpp"
+#include "HFM/mainForecastingCodes/usingNonDominatedModels.cpp"
+
+
+
 
 using namespace std;
 using namespace optframe;
