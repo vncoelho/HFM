@@ -59,7 +59,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 //	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp4");
 //
 
-	explanatoryVariables.push_back("./HFM/Instance/testREDD");
+	explanatoryVariables.push_back("./HFM/Instance/testREDD"); //5000 samples from C5 H1
 
 
 //	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp2"); //Amort should not be considered
