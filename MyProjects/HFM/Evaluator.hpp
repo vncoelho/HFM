@@ -632,7 +632,7 @@ public:
 		{
 			foIndicator->at(MSE_INDEX) /= nSamples;
 
-			if (accIndicator == RMSE_INDEX || accIndicator == -1)
+			if (accIndicator == RMSE_INDEX || accIndicator == ALL_EVALUATIONS)
 				foIndicator->at(RMSE_INDEX) = sqrt(foIndicator->at(MSE_INDEX));
 		}
 

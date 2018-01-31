@@ -11,14 +11,17 @@
 namespace HFM
 {
 
-
-
 class treatForecasts
 {
 private:
 	vector<vector<double> > forecastings;
 
 public:
+
+	treatForecasts()
+	{
+
+	}
 
 	treatForecasts(vector<vector<double> > _forecastings)
 	{
@@ -161,7 +164,7 @@ public:
 
 	vector<double> getPartsForecastsEndToBegin(int file, int e, int nPoints)
 	{
-		if (file >= (int)  forecastings.size())
+		if (file >= (int) forecastings.size())
 		{
 			cout << "Error on getPartsForecastsEndToBegin!" << endl;
 			exit(1);
@@ -223,7 +226,7 @@ public:
 	}
 	vector<double> getFirstForecasts(int file, int nPoints)
 	{
-		if (file >= (int)  forecastings.size())
+		if (file >= (int) forecastings.size())
 		{
 			cout << "Error on getFirstForecasts!" << endl;
 			exit(1);

@@ -36,8 +36,6 @@
 //#include <gsl/gsl_randist.h>
 //#include "../../NSSeq.hpp"
 
-
-
 // NGES - Neighborhood Guided Evolution Strategies
 
 namespace optframe
@@ -241,7 +239,6 @@ public:
 //						getchar();
 					}
 
-
 					delete mov_tmp;
 				}
 		}
@@ -275,7 +272,6 @@ public:
 			fo_pop += pop[i]->e.evaluation();
 		}
 
-
 		for (int i = 0; i < ngesParams.lambda; i++)
 			delete offsprings[i + ngesParams.mi];
 
@@ -300,8 +296,9 @@ public:
 				}
 				cout << "]\t";
 				cout << pop[0]->vNSInd << endl;
-//				cout<<sStar.getR()<<endl;
-//				getchar();
+
+				if (Component::debug)
+					cout << sStar.getR() << endl;
 			}
 
 			if (Component::debug)
@@ -396,7 +393,7 @@ public:
 		iterWithoutImprovement = 0;
 		while ((iterWithoutImprovement < ngesParams.gMaxWithoutImprovement) && ((tnow.now()) < stopCriteria.timelimit) && eval.betterThan(stopCriteria.target_f, (double) eStar->evaluation()))
 		{
-			NGESPopulation popOffsprings(ngesParams.lambda,nullptr);
+			NGESPopulation popOffsprings(ngesParams.lambda, nullptr);
 			double fo_filhos = 0;
 
 			//GERA OS OFFSPRINGS
@@ -434,7 +431,6 @@ public:
 			//aplicaBuscaLocalBests(pop_filhos, 2);
 			//cout<<"Applying local Search ..."<<endl;
 
-
 			// =====================Selection ==================
 			// MI,LAMBDA or MI + LAMBDA
 			switch (ngesParams.selectionMethod)
@@ -445,7 +441,7 @@ public:
 			case 1:
 				competition(pop, popOffsprings, *sStar, *eStar, iterWithoutImprovement, gCurrent, 1);
 				break;
-		    //TODO create other selection strategies
+				//TODO create other selection strategies
 
 			default:
 				cout << "Error! Selection not performed!" << endl;

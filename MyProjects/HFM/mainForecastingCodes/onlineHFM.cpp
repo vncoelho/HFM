@@ -17,10 +17,10 @@ using namespace optframe;
 using namespace HFM;
 extern int nThreads;
 
-int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* forecastings = nullptr)
+string onlineHFM(int argc, char **argv, vector<vector<double>>* forecastings = nullptr)
 {
 	nThreads = 1;
-	cout << "Welcome to stock market forecasting!" << endl;
+	cout << "Welcome to our online HFM!" << endl;
 	cout << "Let's optimize with " << nThreads << " nThreads\n" << endl;
 
 	RandGenMersenneTwister rg;
@@ -45,7 +45,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 	cout << "Parametros:" << endl;
 
 	//Numero de passos a frente - Horizonte de previsao
-	int fh = 60;
+	int fh = 5;
 	//O valor mais antigo que pode ser utilizado como entrada do modelo de previsao [100]
 	double argvMaxLagRate = 10;
 
@@ -53,15 +53,10 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 
 //	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/bovespa");
 //	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/test.txt");
-//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctionTarget");
-//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp1");
-//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp3");
-//	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp4");
-//
-
-	explanatoryVariables.push_back("./HFM/Instance/testREDD");
-
-
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctionTarget");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp1");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp3");
+	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp4");
 //	explanatoryVariables.push_back("./HFM/Instance/dadosBovespa/loanFunctiontExp2"); //Amort should not be considered
 
 	cout << "Variables and explanation:" << explanatoryVariables << endl;
@@ -76,7 +71,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 //	vector<vector<double>> forcedTS;
 //	forcedTS.push_back(forcingVector);
 		rF = treatForecasts(*forecastings);
-		cout<<"loaded forecasts:"<<*forecastings<<endl;
+		cout << "loaded forecasts:" << *forecastings << endl;
 		explanatoryVariables.resize(forecastings->size());
 	}
 	else
@@ -88,7 +83,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 	int mu = 100;
 	int lambda = mu * 6;
 	int evalFOMinimizer = MAPE_INDEX;
-	int contructiveNumberOfColumns = 30;
+	int contructiveNumberOfColumns = 10;
 	cout << "contructiveNumberOfColumns:" << contructiveNumberOfColumns << endl;
 	int evalAprox = 0;
 	double alphaACF = -1;
@@ -153,7 +148,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 	//int maxUpperLag = problemParam.getMaxUpperLag();
 	//=================================================
 
-	problemParam.setToRoundedForecasts(true);
+//	problemParam.setToRoundedForecasts(true);
 //	problemParam.setToNonNegativeForecasts(true);
 //	problemParam.setToBinaryForecasts(true);
 
@@ -176,9 +171,9 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 	Pareto < RepHFM > *pf = new Pareto<RepHFM>();
 
 	ForecastClass* forecastObject;
-	int timeES = 60;
-	int timeGPLS = 60;
-	int nBatches = 2;
+	int timeES = 10;
+	int timeGPLS = 10;
+	int nBatches = 1;
 	for (int b = 0; b < nBatches; b++)
 	{
 		if (b == 1)
@@ -217,33 +212,49 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 //	for (int expVar = 0; expVar < (int) explanatoryVariables.size(); expVar++)
 //		validationSet.push_back(rF.getPartsForecastsEndToBegin(expVar, 0, fh + maxLag));
 
+	string obtainedForecastsString;
 	vector<vector<double>*> ensembleBlindForecasts;
 	cout << "\nPrinting obtained sets of predicted values..." << endl;
+	stringstream ss;
+
 	for (int i = 0; i < nObtainedParetoSol; i++)
 	{
-		//for printing for WCCI
-		for (int e = 0; e < (int) vEvalPF[i]->size(); e++)
-			cout << vEvalPF[i]->at(e).getObjFunction() << "\t\t";
-
-		cout << setprecision(2);
 		vector<double>* blindForecasts = forecastObject->returnBlind(vSolPF[i]->getR(), dataForFeedingValidationTest);
+		cout << setprecision(2);
+		//Print CSV labels in the first iter
+		if (i == 0)
+		{
+			ss << "Non-dominated HFM,";
+			for (int f = 0; f < (int) blindForecasts->size(); f++)
+			{
+				ss << "K(" << f << ")";
+//				if (f < ((int) blindForecasts->size() - 1))
+				ss << ",";
+			}
+
+			for (int e = 0; e < (int) vEvalPF[i]->size(); e++)
+				ss << "Eval(" << e << "),";
+
+			ss << "\n";
+		}
+		ss << i << ",";
 		for (int f = 0; f < (int) blindForecasts->size(); f++)
+		{
 			cout << blindForecasts->at(f) << "/" << targetValidationSet.at(f) << "/" << (targetValidationSet.at(f) - blindForecasts->at(f)) << "\t";
+			ss << "[" << blindForecasts->at(f) << "/" << targetValidationSet.at(f) << "/" << (targetValidationSet.at(f) - blindForecasts->at(f)) << "]";
+//			if (f < ((int) blindForecasts->size() - 1))
+			ss << ",";
+		}
 
-		pair<vector<double>*, vector<double>*>* vForecastsTarget = forecastObject->returnForecastsAndTargets(vSolPF[i]->getR(), trainningSet);
-
-		stringstream outputForecastsTarget;
-		outputForecastsTarget <<  i<<"./Outputs/pf/forecastsOfHFM-";
-		cout<<"outputForecastsTarget: " <<outputForecastsTarget.str()<<endl;
-		forecastObject->exportPairOfVector(outputForecastsTarget.str(), "w",*vForecastsTarget);
-
-		cout << endl;
-
+		for (int e = 0; e < (int) vEvalPF[i]->size(); e++)
+			ss << vEvalPF[i]->at(e).getObjFunction() << ",";
+		ss << "\n";
 //		cout << forecastObject->returnForecastsAndTargets(vSolPF[i]->getR(), validationSet) << endl;
 //		getchar();
 		ensembleBlindForecasts.push_back(blindForecasts);
 //getchar();
 	}
+	obtainedForecastsString = ss.str();
 
 	cout << "\nPrinting pareto front forecast accuracy measures..." << endl;
 	for (int i = 0; i < nObtainedParetoSol; i++)
@@ -254,7 +265,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 		cout << endl;
 	}
 
-	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt", "w");
+//	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt", "w");
 
 	delete pf;
 	delete forecastObject;
@@ -262,14 +273,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 	for (int i = 0; i < nObtainedParetoSol; i++)
 		delete ensembleBlindForecasts[i];
 
-	cout << "MO Stock Market forecasting finished!" << endl;
+	cout << "ONLINE forecasting finished!" << endl;
 
-	//	===========================================
-	//	TIME FOR BRINCANDO COM A BOLSA DE VALORES (BBV)
-//	BBVTools bbvTools;
-
-	return 0;
+	return obtainedForecastsString;
 }
-
-
-

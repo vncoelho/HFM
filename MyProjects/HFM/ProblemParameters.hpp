@@ -153,7 +153,6 @@ public:
 
 	bool getForceSampleLearningWithEndogenous(int _expVariable)
 	{
-		assert(_expVariable != getTargetFile());
 		assert((int) forceSampleLearningWithEndogenous.size() >= _expVariable);
 		return forceSampleLearningWithEndogenous[_expVariable];
 	}

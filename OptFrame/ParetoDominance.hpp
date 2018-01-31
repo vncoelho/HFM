@@ -92,10 +92,6 @@ public:
 
 		bool r = dominates(mev1, mev2);
 
-		delete &mev1;
-		delete &mev2;
-
-
 		return r;
 	}
 

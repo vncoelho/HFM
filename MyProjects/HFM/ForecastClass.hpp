@@ -453,6 +453,20 @@ public:
 		return eval->generateSWMultiRoundForecasts(rep, vForecastingsValidation, problemParam.getStepsAhead());
 	}
 
+	void exportPairOfVector(string output, const char* exportType, pair<vector<double>*, vector<double>*>& vFAndTargets)
+	{
+		FILE* fPF = fopen(output.c_str(), exportType);
+		assert(fPF);
+		for (int i = 0; i < (int) vFAndTargets.first->size(); i++)
+		{
+			fprintf(fPF, "%.7f\t", double(vFAndTargets.first->at(i)));
+			fprintf(fPF, "%.7f\t", double(vFAndTargets.second->at(i)));
+			fprintf(fPF, "\n");
+		}
+
+		fclose(fPF);
+	}
+
 	vector<double>* returnErrorsPersistance(vector<double> targetValues, int fH)
 	{
 

@@ -192,34 +192,30 @@ public:
 
 		vector<vector<pair<double, int> > > acfGreedy(numberExplanatoryVariables);
 
-		if (acfPoints[0].size() == 1)
-		{
-			cout << "ConstructiveACF: exiting Forecasting! There are no points to use as input of the model";
-			exit(1);
-		}
+		for (int expVar = 0; expVar < numberExplanatoryVariables; expVar++)
+			if (acfPoints[expVar].size() == 1)
+			{
+				cout << "ConstructiveACF: exiting Forecasting! There are no points to use as input of the model for variables:" << expVar << endl;
+				exit(1);
+			}
 
-		for (int nEXV = 0; nEXV < numberExplanatoryVariables; nEXV++)
-		{
-			while (acfGreedy[nEXV].size() == 0)
+		for (int expVar = 0; expVar < numberExplanatoryVariables; expVar++)
+			while (acfGreedy[expVar].size() == 0)
 			{
 				vector<pair<double, int> > acfGreedyPoints;
-				for (int k = 0; k < (int) acfPoints[nEXV].size(); k++)
-				{
-					if ((acfPoints[nEXV][k] >= alphaACF[nEXV]) && (acfPoints[nEXV][k] != 1))
-					{
-						acfGreedyPoints.push_back(make_pair(acfPoints[nEXV][k], k));
-					}
-				}
-				acfGreedy[nEXV] = acfGreedyPoints;
-				if ((acfGreedy[nEXV].size() == 0))
-					alphaACF[nEXV] -= 0.01;
-			}
-		}
+				for (int k = 0; k < (int) acfPoints[expVar].size(); k++)
+					if ((acfPoints[expVar][k] >= alphaACF[expVar]) && !(acfPoints[expVar][k] == 1 && !problemParam.getForceSampleLearningWithEndogenous(expVar)))
+						acfGreedyPoints.push_back(make_pair(acfPoints[expVar][k], k));
 
-//		 cout << alphaACF << endl;
-//		 cout << acfPoints << endl;
-//		 cout << acfGreedy << endl;
-//		 getchar();
+				acfGreedy[expVar] = acfGreedyPoints;
+				if ((acfGreedy[expVar].size() == 0))
+					alphaACF[expVar] -= 0.01;
+			}
+
+//		cout << alphaACF << endl;
+//		cout << acfPoints << endl;
+//		cout << acfGreedy << endl;
+//		getchar();
 
 		return acfGreedy;
 	}
@@ -261,9 +257,6 @@ public:
 
 		for (int expVar = 0; expVar < numberExplanatoryVariables; expVar++)
 		{
-			if(expVar != problemParam.getTargetFile() && problemParam.getForceSampleLearningWithEndogenous(expVar))
-				lagsRLC[expVar].push_back(make_pair(1.0,0)); //Add current sample with high ACF TODO
-
 			int nACFUsefullPoints = lagsRLC[expVar].size();
 			double mean = pEFP.getMean(expVar);
 			double stdDesv = pEFP.getStdDesv(expVar);
