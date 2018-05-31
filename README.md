@@ -1,5 +1,5 @@
 Hybrid Forecasting Model - A forecasting framework built upon metaheuristics
-2012-2017
+2012-2018
 
 This framework is constructed inside the scope of the OptFrame - Optimization Framework
 
