@@ -1,4 +1,4 @@
-all: HFM #HFM_EMCC #HFM #HFM_EMCC #HFM_EMCC #HFM #clean TP 
+all: HFM_EMCC #HFM  #clean #TP 
 	@echo "BUILT SUCCESSFULLY!"
 
 
@@ -24,7 +24,8 @@ LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
 GCC_FLAGS = -g -Ofast -Wall --std=c++1z
-EMCC_FLAGS = -g -O3 -Wall --std=c++1z    
+EMCC_FLAGS = -g -O3 -Wall -s DISABLE_EXCEPTION_CATCHING=0 -s ALLOW_MEMORY_GROWTH=1 --std=c++11 
+
 #-s DISABLE_EXCEPTION_CATCHING=0 
 # -s ALLOW_MEMORY_GROWTH=1
 EMCC_EXPORTED_FUNCTIONS = -s EXPORTED_FUNCTIONS="['_loadTS','_callTSForecasting','_getNTimeSeries','_getTimeSeriesSize']"
@@ -34,12 +35,11 @@ SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 HFM:
 	g++ $(GCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM
 
-
 	
 HFM_EMCC:
-	~/Downloads/emscriptenNew/emscripten/em++ $(EMCC_EXPORTED_FUNCTIONS) $(EMCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/app_HFM.js 
-	 cp ./MyProjects/app_HFM.js /home/vitor/Downloads/html-fileapi-master/
-	 cp ./MyProjects/app_HFM.js.mem /home/vitor/Downloads/html-fileapi-master/
+	 em++ $(EMCC_EXPORTED_FUNCTIONS) $(EMCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/hfm-converted.js
+#	 cp ./MyProjects/app_HFM.js /website/js/hfm-converted.js
+#	 cp ./MyProjects/app_HFM.js.mem /website/js/hfm-converted.js.mem
 	 
 TP:
 	make -f makeTP.mk

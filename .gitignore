@@ -24,11 +24,7 @@ output*
 Output*
 forecasts*
 midi*
-Outros
-*(copy*
 ./*.sh
 Scripts
 *.o
 app*
-
-
