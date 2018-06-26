@@ -24,11 +24,11 @@ LDFLAGS	= -L/usr/local/lib
 LDLIBS  = -lwiringPi -lwiringPiDev -lpthread -lm -lcrypt -lrt
 
 GCC_FLAGS = -g -Ofast -Wall --std=c++1z
-EMCC_FLAGS = -g -O3 -Wall -s DISABLE_EXCEPTION_CATCHING=0 -s ALLOW_MEMORY_GROWTH=1 --std=c++11 
-
+EMCC_FLAGS = -g -O3 -Wall -s DISABLE_EXCEPTION_CATCHING=0 -s ALLOW_MEMORY_GROWTH=1 --std=c++1z 
 #-s DISABLE_EXCEPTION_CATCHING=0 
 # -s ALLOW_MEMORY_GROWTH=1
 EMCC_EXPORTED_FUNCTIONS = -s EXPORTED_FUNCTIONS="['_loadTS','_callTSForecasting','_getNTimeSeries','_getTimeSeriesSize']"
+PATH_EMCC = "/media/vitor/DadosEXT4/emscripten/em++"
 
 SCANNERFLAGS = ./OptFrame/Scanner++/Scanner.cpp
 
@@ -37,7 +37,7 @@ HFM:
 
 	
 HFM_EMCC:
-	 em++ $(EMCC_EXPORTED_FUNCTIONS) $(EMCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/hfm-converted.js
+	 /media/vitor/DadosEXT4/emscripten/em++ $(EMCC_EXPORTED_FUNCTIONS) $(EMCC_FLAGS) $(RESTSDK_FGLAS) $(OPENMP_FLAGS) $(SCANNERFLAGS) ./MyProjects/mainHFM.cpp -o ./MyProjects/hfm-converted.js
 #	 cp ./MyProjects/app_HFM.js /website/js/hfm-converted.js
 #	 cp ./MyProjects/app_HFM.js.mem /website/js/hfm-converted.js.mem
 	 

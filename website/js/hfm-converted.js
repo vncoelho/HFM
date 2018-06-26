@@ -1420,7 +1420,7 @@ STATICTOP = STATIC_BASE + 38544;
 /* global initializers */  __ATINIT__.push({ func: function() { __GLOBAL__I_000101() } }, { func: function() { __GLOBAL__sub_I_mainHFM_cpp() } }, { func: function() { __GLOBAL__sub_I_iostream_cpp() } });
 
 
-memoryInitializer = "website/js/app_HFM.js.mem";
+memoryInitializer = "website/js/hfm-converted.js.mem";
 
 
 
