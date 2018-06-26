@@ -232,10 +232,10 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 
 		pair<vector<double>*, vector<double>*>* vForecastsTarget = forecastObject->returnForecastsAndTargets(vSolPF[i]->getR(), trainningSet);
 
-		stringstream outputForecastsTarget;
-		outputForecastsTarget <<  i<<"./Outputs/pf/forecastsOfHFM-";
-		cout<<"outputForecastsTarget: " <<outputForecastsTarget.str()<<endl;
-		forecastObject->exportPairOfVector(outputForecastsTarget.str(), "w",*vForecastsTarget);
+//		stringstream outputForecastsTarget;
+//		outputForecastsTarget <<  i<< "./Outputs/pf/forecastsOfHFMReduced180";
+//		cout<<"outputForecastsTarget: " <<outputForecastsTarget.str()<<endl;
+//		forecastObject->exportPairOfVector(outputForecastsTarget.str(), "w",*vForecastsTarget);
 
 		cout << endl;
 
@@ -254,7 +254,7 @@ int stockMarketForecasting(int argc, char **argv, vector<vector<double>>* foreca
 		cout << endl;
 	}
 
-	pf->exportParetoFront("./Outputs/paretoFrontGPLS.txt", "w");
+	pf->exportParetoFront("./Outputs/paretoFrontGPLSReducedInvertedOptOrder.txt", "w");
 
 	delete pf;
 	delete forecastObject;
